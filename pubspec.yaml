@@ -38,6 +38,8 @@ dependencies:
   loading_animation_widget: ^1.2.1
   flutter_riverpod: ^2.5.1
   flutter_tts: ^4.0.2
+  firebase_core:
+  firebase_auth:
 
 dev_dependencies:
   flutter_test:

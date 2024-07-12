@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "823994313736",
+    "project_id": "speakbright-55025",
+    "storage_bucket": "speakbright-55025.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823994313736:android:7774c3c2e6be540578f5bd",
+        "android_client_info": {
+          "package_name": "com.example.s"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb7rEb9lqz9P_e-beTfVUxGaejt9fJxN0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
