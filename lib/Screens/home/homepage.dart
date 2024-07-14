@@ -3,6 +3,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
+  static const String route = '/home';
+  static const String path = "/home";
+  static const String name = "Dashboard";
 
   @override
   _DashBoardState createState() => _DashBoardState();
