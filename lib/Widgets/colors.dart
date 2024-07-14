@@ -14,6 +14,14 @@ const kbordercolor =
     Color(0xFFD9D0E3); // used for controller border for seperation
 const kgrey = Color(0xFFF6F5F5); // used for continer background
 
+const kDarkPruple = Color(0xFF2B045C);
+const kLightPruple = Color.fromARGB(255, 197, 164, 237);
+const mainpurple = Color.fromARGB(255, 121, 3, 119);
+const dullpurple = Color.fromARGB(255, 167, 110, 166);
+
+
+
+
 // Self Explanatory Color uses
 const kwhite = Colors.white;
 const kblack = Colors.black;

@@ -5,6 +5,7 @@ import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 
 import "../Screens/auth/auth_controller.dart";
+import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
 import "../Screens/auth/register_screen.dart";
 import "../Screens/home/homepage.dart";
