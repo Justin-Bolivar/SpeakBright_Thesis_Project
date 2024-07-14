@@ -7,7 +7,6 @@ import '../../Widgets/colors.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'auth_controller.dart';
 import 'register_screen.dart';
-import 'dart:ui' show Image;
 
 class LoginScreen extends StatefulWidget {
   static const String route = "/auth";

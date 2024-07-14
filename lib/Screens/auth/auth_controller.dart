@@ -5,6 +5,8 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
+import 'enum/enum.dart';
+
 class AuthController with ChangeNotifier {
   // Static method to initialize the singleton in GetIt
   static void initialize() {
@@ -67,7 +69,3 @@ class AuthController with ChangeNotifier {
 }
 
 
-enum AuthState {
-  authenticated,
-  unauthenticated
-}
