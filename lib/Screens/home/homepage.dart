@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'dart:math';
@@ -71,7 +72,7 @@ class _DashBoardState extends State<DashBoard> {
       Colors.purple,
     ];
 
-    List<double> containerHeights = List.generate(7, (index) => index*50 * 0.5 + 1);
+    // List<double> containerHeights = List.generate(7, (index) => index*50 * 0.5 + 1);
 
     return Scaffold(
         // appBar: AppBar(
@@ -80,6 +81,84 @@ class _DashBoardState extends State<DashBoard> {
         backgroundColor: kwhite,
         body: SafeArea(
           child: Column(children: [
+            Expanded(
+              // flex: 1,
+              child: Stack(
+                children: [
+                  Container(
+                    height: 115,
+                    decoration: BoxDecoration(
+                      color: boxcolors[6],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 115,
+                    decoration: BoxDecoration(
+                      color: boxcolors[6],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: boxcolors[5],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 105,
+                    decoration: BoxDecoration(
+                      color: boxcolors[4],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: boxcolors[3],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 95,
+                    decoration: BoxDecoration(
+                      color: boxcolors[2],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: boxcolors[1],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 85,
+                    decoration: BoxDecoration(
+                      color: boxcolors[0],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                  Container(
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: kwhite,
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      
+                    ),
+                  ),
+                ]),
+            ),
             // Expanded(
             //   flex: 1,
             //   child: Container(
@@ -89,31 +168,31 @@ class _DashBoardState extends State<DashBoard> {
             //             BorderRadius.only(bottomLeft: Radius.circular(60))),
             //   ),
             // ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                decoration: const BoxDecoration(
-                    color: Colors.white, // Initial container is white
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60))),
-              ),
-            ),
-            ...List.generate(6, (index) { // Generate the rainbow containers
-              double height = containerHeights[index + 1]; // Skip the first index for the initial white container
-              Color color = boxcolors[index]; // Cycle through colors starting from red
-              return Container(
-                height: height,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
-                ),
-              );
-            }),
+            // Expanded(
+            //   flex: 1,
+            //   child: Container(
+            //     decoration: const BoxDecoration(
+            //         color: Colors.white, // Initial container is white
+            //         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60))),
+            //   ),
+            // ),
+            // ...List.generate(6, (index) { // Generate the rainbow containers
+            //   double height = containerHeights[index + 1]; // Skip the first index for the initial white container
+            //   Color color = boxcolors[index]; // Cycle through colors starting from red
+            //   return Container(
+            //     height: height,
+            //     decoration: BoxDecoration(
+            //       color: color,
+            //       borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
+            //     ),
+            //   );
+            // }),
             const SizedBox(
               height: 10,
             ),
             //cards area
             Expanded(
-              flex: 5,
+              flex: 3,
               child: GridView.builder(
                 
                 
