@@ -6,10 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../Routing/router.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -153,13 +156,14 @@ class _DashBoardState extends State<DashBoard> {
                     Reference referenceImageToUpload =
                         referenceDirImages.child('name');
 
+                    print(file.path);
                     try {
-                      //Store the file
+                      
                       await referenceImageToUpload.putFile(File(file!.path));
-                      //Success: get the download URL
+                      
                       imageUrl = await referenceImageToUpload.getDownloadURL();
                     } catch (error) {
-                      //Some error occurred
+                      print('Error uploading image: $error');
                     }
                   },
                   icon: const Icon(Icons.camera_alt_rounded))
@@ -215,7 +219,13 @@ class _DashBoardState extends State<DashBoard> {
     return Scaffold(
       backgroundColor: kwhite,
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddCardDialog,
+        onPressed: () {
+                        // GlobalRouter.I.router.go(AddCardPage.route);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AddCardPage()),
+                        );
+                      },
         child: const Icon(Icons.add),
       ),
       body: SafeArea(
