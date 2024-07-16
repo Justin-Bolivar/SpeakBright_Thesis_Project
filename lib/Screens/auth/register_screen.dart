@@ -8,7 +8,10 @@ import '../../Widgets/waiting_dialog.dart';
 import '../../routing/router.dart';
 import 'auth_controller.dart';
 import 'login_screen.dart';
+import 'package:date_field/date_field.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
@@ -23,6 +26,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late GlobalKey<FormState> formKey;
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
+  DateTime? selectedDate;
 
   bool obfuscate = true;
 
@@ -65,10 +69,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(1900), // Adjust as needed
+      firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != DateTime(0)) {
+    if (picked != null && picked != DateTime.now()) {
       setState(() {
         birthday.text = DateFormat('yyyy-MM-dd').format(picked);
       });
@@ -178,19 +182,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Flexible(
-                  child: GestureDetector(
-                    onTap: () => _selectDate(context),
-                    child: TextFormField(
-                      decoration: decoration.copyWith(
-                          labelText: "Birthday",
-                          prefixIcon: const Icon(Icons.calendar_today)),
-                      readOnly: true, // Make the TextFormField read-only
-                      controller: birthday,
-                      validator: MultiValidator([
-                        RequiredValidator(errorText: 'Please enter your birthday'),
-                      ]).call,
-                    ),
-                  ),
+                  child: DateTimeFormField(
+                  decoration: const InputDecoration(labelText: 'Birthday'),
+                  mode: DateTimeFieldPickerMode.date,
+                  // pickerPlatform: dateTimePickerPlatform,
+                  onChanged: (DateTime? value) {
+                    print(value);
+                  },
+                ),
                 ),
                 const SizedBox(
                   height: 8,
