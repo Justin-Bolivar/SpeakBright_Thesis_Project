@@ -9,7 +9,7 @@ import 'auth_controller.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  static const String route = "/auth";
+  static const String route = "/login";
   static const String name = "Login Screen";
   const LoginScreen({super.key});
 

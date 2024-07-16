@@ -83,6 +83,10 @@ class GlobalRouter {
                     }),
                 
               ],
+              builder: (context, state, child) {
+                return const  DashBoard(
+                );
+              }
           ) 
               ]
         );
