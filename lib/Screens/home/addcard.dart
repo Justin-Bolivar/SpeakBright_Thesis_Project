@@ -81,7 +81,7 @@ class _AddCardPageState extends State<AddCardPage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         FirebaseFirestore.instance.collection('cards').add({
-          'Title': newCardTitle,
+          'title': newCardTitle,
           'userId': user.uid,
           'imageUrl': imageUrl,
         }).then((_) {
