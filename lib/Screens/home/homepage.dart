@@ -18,7 +18,7 @@ class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
   List<dynamic> voices = [];
   String selectedVoice = "";
-  List<String> words = [];
+  List<QueryDocumentSnapshot> cards = [];
 
   @override
   void initState() {
@@ -51,12 +51,33 @@ class _DashBoardState extends State<DashBoard> {
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('cards').get();
       setState(() {
-        words =
-            querySnapshot.docs.map((doc) => doc['Title'] as String).toList();
+        cards = querySnapshot.docs;
       });
     } catch (e) {
       // ignore: avoid_print
       print('Error fetching cards: $e');
+    }
+  }
+
+  Future<void> _addCard(String title) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('cards')
+          .add({'Title': title});
+      await _fetchCards();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error adding card: $e');
+    }
+  }
+
+  Future<void> _deleteCard(String docId) async {
+    try {
+      await FirebaseFirestore.instance.collection('cards').doc(docId).delete();
+      await _fetchCards();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error deleting card: $e');
     }
   }
 
@@ -65,6 +86,41 @@ class _DashBoardState extends State<DashBoard> {
     await flutterTts.setVoice({"name": selectedVoice, "locale": "en-US"});
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(text);
+  }
+
+  void _showAddCardDialog() {
+    String newCardTitle = '';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add New Card'),
+          content: TextField(
+            onChanged: (value) {
+              newCardTitle = value;
+            },
+            decoration: const InputDecoration(hintText: "Enter card title"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () {
+                if (newCardTitle.isNotEmpty) {
+                  _addCard(newCardTitle);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -86,185 +142,143 @@ class _DashBoardState extends State<DashBoard> {
     ];
 
     return Scaffold(
-        backgroundColor: kwhite,
-        body: SafeArea(
-          child: Column(children: [
-            Expanded(
-              child: Stack(children: [
-                Container(
-                  height: 115,
-                  decoration: BoxDecoration(
-                    color: boxcolors[0],
-                    borderRadius: const BorderRadius.only(
+      backgroundColor: kwhite,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddCardDialog,
+        child: const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        child: Column(children: [
+          Expanded(
+            child: Stack(children: [
+              // ... (keep all the existing Container widgets in the stack)
+              Container(
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    color: kwhite,
+                    borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(100),
                         bottomRight: Radius.circular(100)),
                   ),
-                ),
-                Container(
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: boxcolors[1],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                  height: 105,
-                  decoration: BoxDecoration(
-                    color: boxcolors[2],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: boxcolors[3],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                  height: 95,
-                  decoration: BoxDecoration(
-                    color: boxcolors[4],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: boxcolors[5],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                  height: 85,
-                  decoration: BoxDecoration(
-                    color: boxcolors[6],
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(100),
-                        bottomRight: Radius.circular(100)),
-                  ),
-                ),
-                Container(
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      color: kwhite,
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(100),
-                          bottomRight: Radius.circular(100)),
+                  child: const Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "HI DONNA!",
+                        )
+                      ],
                     ),
-                    child: const Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "HI DONNA!",
-                          )
-                        ],
-                      ),
-                    )),
-              ]),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Expanded(
-              flex: 3,
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16.0),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 25.0,
-                  mainAxisSpacing: 25.0,
-                ),
-                itemCount: words.length,
-                itemBuilder: (context, index) {
-                  int colorIndex = index % boxcolors.length;
-                  return GestureDetector(
-                    onTap: () {
-                      _speak(words[index]);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: kwhite,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 1,
-                            offset: const Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: const BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(100),
+                  )),
+            ]),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            flex: 3,
+            child: GridView.builder(
+              padding: const EdgeInsets.all(16.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 25.0,
+                mainAxisSpacing: 25.0,
+              ),
+              itemCount: cards.length,
+              itemBuilder: (context, index) {
+                int colorIndex = index % boxcolors.length;
+                String title = cards[index]['Title'];
+                return GestureDetector(
+                  onTap: () {
+                    _speak(title);
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: kwhite,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 1,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      bottomRight: Radius.circular(100),
+                                    ),
                                   ),
-                                ),
-                                child: Icon(
-                                  Icons.music_note,
+                                  child: Icon(
+                                    Icons.music_note,
+                                    color: boxcolors[colorIndex],
+                                    size: 40,
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            Center(
+                              child: Text(
+                                title,
+                                style: TextStyle(
                                   color: boxcolors[colorIndex],
-                                  size: 40,
+                                  fontSize: 20,
                                 ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Center(
-                            child: Text(
-                              words[index],
-                              style: TextStyle(
-                                color: boxcolors[colorIndex],
-                                fontSize: 20,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            _deleteCard(cards[index].id);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: DropdownButton<String>(
-                value: selectedVoice,
-                items: voices.map<DropdownMenuItem<String>>((dynamic voice) {
-                  return DropdownMenuItem<String>(
-                    value: voice["name"],
-                    child: Text(voice["name"]),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedVoice = newValue!;
-                  });
-                },
-                isExpanded: true,
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: DropdownButton<String>(
+              value: selectedVoice,
+              items: voices.map<DropdownMenuItem<String>>((dynamic voice) {
+                return DropdownMenuItem<String>(
+                  value: voice["name"],
+                  child: Text(voice["name"]),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedVoice = newValue!;
+                });
+              },
+              isExpanded: true,
             ),
-          ]),
-        ));
+          ),
+        ]),
+      ),
+    );
   }
 }
