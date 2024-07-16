@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print, unrelated_type_equality_checks
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +29,7 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
   List<QueryDocumentSnapshot> cards = [];
-
+  late StreamController<List<QueryDocumentSnapshot>> cardStreamController;
   String imageUrl = '';
 
   @override
@@ -36,6 +37,24 @@ class _DashBoardState extends State<DashBoard> {
     super.initState();
     _setupTTS();
     _fetchCards();
+    _initializeStreamController();
+  }
+
+  void _initializeStreamController() {
+    cardStreamController =
+        StreamController<List<QueryDocumentSnapshot>>(sync: false);
+    _fetchCardsAsStream();
+  }
+
+  Future<void> _fetchCardsAsStream() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      cardStreamController.addStream(FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots()
+          .map((snapshot) => snapshot.docs));
+    }
   }
 
   Future<void> _setupTTS() async {
@@ -76,23 +95,6 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> _addCard(String title) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('cards').add({
-          'Title': title,
-          'userId': user.uid,
-          'image': imageUrl
-          //add image here??
-        });
-        await _fetchCards();
-      }
-    } catch (e) {
-      print('Error adding card: $e');
-    }
-  }
-
   Future<void> _deleteCard(String docId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -119,85 +121,6 @@ class _DashBoardState extends State<DashBoard> {
     await flutterTts.speak(text);
   }
 
-  void _showAddCardDialog() {
-    String newCardTitle = '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add New Card'),
-          content: Column(
-            children: [
-              TextField(
-                onChanged: (value) {
-                  newCardTitle = value;
-                },
-                decoration: const InputDecoration(hintText: "Enter card title"),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              IconButton.filled(
-                  onPressed: () async {
-                    ImagePicker imagePicker = ImagePicker();
-                    XFile? file =
-                        await imagePicker.pickImage(source: ImageSource.camera);
-                    print('${file?.path}');
-
-                    if (file == null) return;
-                    //Import dart:core
-                    String uniqueFileName =
-                        DateTime.now().millisecondsSinceEpoch.toString();
-
-                    Reference referenceRoot = FirebaseStorage.instance.ref();
-                    Reference referenceDirImages =
-                        referenceRoot.child('images');
-
-                    Reference referenceImageToUpload =
-                        referenceDirImages.child('name');
-
-                    print(file.path);
-                    try {
-                      
-                      await referenceImageToUpload.putFile(File(file!.path));
-                      
-                      imageUrl = await referenceImageToUpload.getDownloadURL();
-                    } catch (error) {
-                      print('Error uploading image: $error');
-                    }
-                  },
-                  icon: const Icon(Icons.camera_alt_rounded))
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () {
-                if (imageUrl.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please upload an image')));
-
-                  return;
-                }
-
-                if (newCardTitle.isNotEmpty) {
-                  _addCard(newCardTitle);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void dispose() {
     flutterTts.stop();
@@ -220,12 +143,12 @@ class _DashBoardState extends State<DashBoard> {
       backgroundColor: kwhite,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-                        // GlobalRouter.I.router.go(AddCardPage.route);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AddCardPage()),
-                        );
-                      },
+          // GlobalRouter.I.router.go(AddCardPage.route);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddCardPage()),
+          );
+        },
         child: const Icon(Icons.add),
       ),
       body: SafeArea(
@@ -328,96 +251,103 @@ class _DashBoardState extends State<DashBoard> {
           ),
           Expanded(
             flex: 3,
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 25.0,
-                mainAxisSpacing: 25.0,
-              ),
-              itemCount: cards.length,
-              itemBuilder: (context, index) {
-                int colorIndex = index % boxcolors.length;
-                String title = cards[index]['Title'];
-                String imageUrl = cards[index]['image'];
-                
-                return GestureDetector(
-                  onTap: () {
-                    _speak(title);
-                  },
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: kwhite,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 1,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
+            child: StreamBuilder<List<QueryDocumentSnapshot>>(
+                stream: cardStreamController.stream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  List<QueryDocumentSnapshot> cards = snapshot.data!;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 25.0,
+                      mainAxisSpacing: 25.0,
+                    ),
+                    itemCount: cards.length,
+                    itemBuilder: (context, index) {
+                      int colorIndex = index % boxcolors.length;
+                      String title = cards[index]['title'];
+                      String imageUrl = cards[index]['imageUrl'];
+
+                      return GestureDetector(
+                        onTap: () {
+                          _speak(title);
+                        },
+                        child: Stack(
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      bottomRight: Radius.circular(100),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: kwhite,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 1,
+                                    offset: const Offset(2, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(100),
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.music_note,
+                                          color: boxcolors[colorIndex],
+                                          size: 40,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 30,
+                                  ),
+                                  Container(
+                                      height: 30,
+                                      child: Image.network(imageUrl)),
+                                  Center(
+                                    child: Text(
+                                      title,
+                                      style: TextStyle(
+                                        color: boxcolors[colorIndex],
+                                        fontSize: 20,
+                                      ),
                                     ),
                                   ),
-                                  child: Icon(
-                                    Icons.music_note,
-                                    color: boxcolors[colorIndex],
-                                    size: 40,
-                                  ),
-                                )
-                              ],
+                                ],
+                              ),
                             ),
-                            const SizedBox(
-                              height: 30,
-                            ),
-
-                            Container(
-                              height: 30,
-                              child: Image.network('${cards[index]['imageUrl']}')
-                            ),
-
-                            Center(
-                              child: Text(
-                                title,
-                                style: TextStyle(
-                                  color: boxcolors[colorIndex],
-                                  fontSize: 20,
-                                ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon:
+                                    const Icon(Icons.close, color: Colors.red),
+                                onPressed: () {
+                                  _deleteCard(cards[index].id);
+                                },
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.red),
-                          onPressed: () {
-                            _deleteCard(cards[index].id);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      );
+                    },
+                  );
+                }),
           ),
         ]),
       ),
