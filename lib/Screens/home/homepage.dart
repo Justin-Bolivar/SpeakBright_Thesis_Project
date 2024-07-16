@@ -1,10 +1,8 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -13,45 +11,115 @@ class DashBoard extends StatefulWidget {
   static const String name = "Dashboard";
 
   @override
+  // ignore: library_private_types_in_public_api
   _DashBoardState createState() => _DashBoardState();
 }
 
 class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
-  List<dynamic> voices = [];
-  String selectedVoice = "";
+  List<QueryDocumentSnapshot> cards = [];
 
   @override
   void initState() {
     super.initState();
-    _getVoices();
+    _setupTTS();
+    _fetchCards();
   }
 
-  Future<void> _getVoices() async {
-    voices = await flutterTts.getVoices;
-    if (voices.isNotEmpty) {
-      // Filter voices to only include natural voices from the United States
-      voices = voices.where((voice) {
-        String locale = voice['locale'] ?? '';
-        String name = voice['name'] ?? '';
-        return locale.toLowerCase().contains('us') &&
-            !name.toLowerCase().contains('network') &&
-            !name.toLowerCase().contains('neural');
-      }).toList();
+  Future<void> _setupTTS() async {
+    await flutterTts.setLanguage("en-US");
+    await _setDefaultVoice();
+  }
 
-      setState(() {
-        if (voices.isNotEmpty) {
-          selectedVoice = voices[0]["name"];
-        }
+  Future<void> _setDefaultVoice() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.none) {
+      await flutterTts.setVoice({
+        "name": "Microsoft Aria Online (Natural) - English (United States)",
+        "locale": "en-US"
       });
+    } else {
+      await flutterTts.setVoice({
+        "name": "Microsoft Zira - English (United States)",
+        "locale": "en-US"
+      });
+    }
+    await flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _fetchCards() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('cards').get();
+      setState(() {
+        cards = querySnapshot.docs;
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching cards: $e');
+    }
+  }
+
+  Future<void> _addCard(String title) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('cards')
+          .add({'Title': title});
+      await _fetchCards();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error adding card: $e');
+    }
+  }
+
+  Future<void> _deleteCard(String docId) async {
+    try {
+      await FirebaseFirestore.instance.collection('cards').doc(docId).delete();
+      await _fetchCards();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error deleting card: $e');
     }
   }
 
   Future<void> _speak(String text) async {
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.setVoice({"name": selectedVoice, "locale": "en-US"});
-    await flutterTts.setPitch(1.0);
+    await _setDefaultVoice();
     await flutterTts.speak(text);
+  }
+
+  void _showAddCardDialog() {
+    String newCardTitle = '';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add New Card'),
+          content: TextField(
+            onChanged: (value) {
+              newCardTitle = value;
+            },
+            decoration: const InputDecoration(hintText: "Enter card title"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () {
+                if (newCardTitle.isNotEmpty) {
+                  _addCard(newCardTitle);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -62,9 +130,7 @@ class _DashBoardState extends State<DashBoard> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> words = ["Charger", "Pencil", "Table", "Dice"];
-     
-      List<Color> boxcolors = [
+    List<Color> boxcolors = [
       Colors.red,
       Colors.orange,
       const Color.fromARGB(255, 237, 195, 7),
@@ -74,218 +140,197 @@ class _DashBoardState extends State<DashBoard> {
       Colors.purple,
     ];
 
-    // List<double> containerHeights = List.generate(7, (index) => index*50 * 0.5 + 1);
-
     return Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('Dashboard'),
-        // ),
-        backgroundColor: kwhite,
-        body: SafeArea(
-          child: Column(children: [
-            Expanded(
-              // flex: 1,
-              child: Stack(
-                children: [
-                  
-                  Container(
-                    height: 115,
-                    decoration: BoxDecoration(
-                      color: boxcolors[0],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: boxcolors[1],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 105,
-                    decoration: BoxDecoration(
-                      color: boxcolors[2],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: boxcolors[3],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 95,
-                    decoration: BoxDecoration(
-                      color: boxcolors[4],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: boxcolors[5],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 85,
-                    decoration: BoxDecoration(
-                      color: boxcolors[6],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      color: kwhite,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
-                    child:
-                    
-                    const Center(
-                      child: Column(children: [
-                         Text("HI DONNA!",
-                        // style: TextStyle(),
-                        )
-                      ],),)
-                  ),
-                ]),
-            ),
-            // Expanded(
-            //   flex: 1,
-            //   child: Container(
-            //     decoration: const BoxDecoration(
-            //         color: mainpurple,
-            //         borderRadius:
-            //             BorderRadius.only(bottomLeft: Radius.circular(60))),
-            //   ),
-            // ),
-            // Expanded(
-            //   flex: 1,
-            //   child: Container(
-            //     decoration: const BoxDecoration(
-            //         color: Colors.white, // Initial container is white
-            //         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60))),
-            //   ),
-            // ),
-            // ...List.generate(6, (index) { // Generate the rainbow containers
-            //   double height = containerHeights[index + 1]; // Skip the first index for the initial white container
-            //   Color color = boxcolors[index]; // Cycle through colors starting from red
-            //   return Container(
-            //     height: height,
-            //     decoration: BoxDecoration(
-            //       color: color,
-            //       borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
-            //     ),
-            //   );
-            // }),
-            const SizedBox(
-              height: 10,
-            ),
-            //cards area
-            Expanded(
-              flex: 3,
-              child: GridView.builder(
-                
-                
-                padding: const EdgeInsets.all(16.0),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 25.0,
-                  mainAxisSpacing: 25.0,
+      backgroundColor: kwhite,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddCardDialog,
+        child: const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        child: Column(children: [
+          Expanded(
+            child: Stack(children: [
+              Container(
+                height: 115,
+                decoration: BoxDecoration(
+                  color: boxcolors[0],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
                 ),
-                itemCount: words.length,
-                itemBuilder: (context, index) {
-                  int colorIndex = index % boxcolors.length;
-                  return GestureDetector(
-                    onTap: () {
-                      _speak(words[index]);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: kwhite,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 1,
-                            offset: const Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: const BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(100),
+              ),
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  color: boxcolors[1],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 105,
+                decoration: BoxDecoration(
+                  color: boxcolors[2],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: boxcolors[3],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 95,
+                decoration: BoxDecoration(
+                  color: boxcolors[4],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 90,
+                decoration: BoxDecoration(
+                  color: boxcolors[5],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 85,
+                decoration: BoxDecoration(
+                  color: boxcolors[6],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 80,
+                decoration: const BoxDecoration(
+                  color: kwhite,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    color: kwhite,
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
+                  ),
+                  child: const Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "HI DONNA!",
+                        )
+                      ],
+                    ),
+                  )),
+            ]),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            flex: 3,
+            child: GridView.builder(
+              padding: const EdgeInsets.all(16.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 25.0,
+                mainAxisSpacing: 25.0,
+              ),
+              itemCount: cards.length,
+              itemBuilder: (context, index) {
+                int colorIndex = index % boxcolors.length;
+                String title = cards[index]['Title'];
+                return GestureDetector(
+                  onTap: () {
+                    _speak(title);
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: kwhite,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 1,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      bottomRight: Radius.circular(100),
+                                    ),
                                   ),
-                                ),
-                                child: Icon(
-                                  Icons.music_note,
+                                  child: Icon(
+                                    Icons.music_note,
+                                    color: boxcolors[colorIndex],
+                                    size: 40,
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            Center(
+                              child: Text(
+                                title,
+                                style: TextStyle(
                                   color: boxcolors[colorIndex],
-                                  size: 40,
+                                  fontSize: 20,
                                 ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Center(
-                            child: Text(
-                              words[index],
-                              style: TextStyle(
-                                color:boxcolors[colorIndex],
-                                fontSize: 20,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            _deleteCard(cards[index].id);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: DropdownButton<String>(
-                value: selectedVoice,
-                items: voices.map<DropdownMenuItem<String>>((dynamic voice) {
-                  return DropdownMenuItem<String>(
-                    value: voice["name"],
-                    child: Text(voice["name"]),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedVoice = newValue!;
-                  });
-                },
-                isExpanded: true,
-              ),
-            ),
-          ]),
-        ));
+          ),
+        ]),
+      ),
+    );
   }
 }
