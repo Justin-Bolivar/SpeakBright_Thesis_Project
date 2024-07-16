@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -9,6 +8,7 @@ import '../../Widgets/waiting_dialog.dart';
 import '../../routing/router.dart';
 import 'auth_controller.dart';
 import 'login_screen.dart';
+import 'package:intl/intl.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
@@ -21,8 +21,8 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   late GlobalKey<FormState> formKey;
-  late TextEditingController username, password, password2;
-  late FocusNode usernameFn, passwordFn, password2Fn;
+  late TextEditingController username, password, password2, name, birthday;
+  late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
 
   bool obfuscate = true;
 
@@ -36,6 +36,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     passwordFn = FocusNode();
     password2 = TextEditingController();
     password2Fn = FocusNode();
+
+    name = TextEditingController(); 
+    nameFn = FocusNode(); 
+    birthday = TextEditingController(); 
+    birthdayFn = FocusNode(); 
   }
 
   @override
@@ -47,9 +52,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     passwordFn.dispose();
     password2.dispose();
     password2Fn.dispose();
+
+    name.dispose();
+    nameFn.dispose();
+    birthday.dispose();
+    birthdayFn.dispose();
   }
 
   bool _isHovering = false;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900), // Adjust as needed
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != DateTime(0)) {
+      setState(() {
+        birthday.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +117,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       child: Text(
                         "Already have an account? Login here",
                         style: TextStyle(
-                            color: _isHovering
-                                ? mainpurple
-                                : dullpurple),
+                            color: _isHovering ? mainpurple : dullpurple),
                       ),
                     ),
                   ),
@@ -114,30 +136,65 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.max,
               children: [
-                Image.asset('assets/SpeakBright_P.png', width: 300, height: 180),
-
+                Image.asset('assets/SpeakBright_P.png',
+                    width: 300, height: 180),
                 Center(
                   child: Row(
                     children: [
-                      Image.asset('assets/v_line.png', width: 150, ),
-                      const SizedBox(width: 21,),
+                      Image.asset(
+                        'assets/v_line.png',
+                        width: 100,
+                      ),
+                      const SizedBox(
+                        width: 21,
+                      ),
                       const Text(
                         "Registration", // Title
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
-                          color:
-                             dullpurple, 
+                          color: dullpurple,
                         ),
                       ),
-                      const SizedBox(width: 21,),
-
-
-                      Image.asset('assets/v_line.png', width: 150),
+                      const SizedBox(
+                        width: 21,
+                      ),
+                      Image.asset('assets/v_line.png', width: 100),
                     ],
                   ),
                 ),
                 const SizedBox(height: 30),
+                Flexible(
+                  child: TextFormField(
+                    decoration: decoration.copyWith(
+                        labelText: "Name",
+                        prefixIcon: const Icon(Icons.person)),
+                    focusNode: nameFn,
+                    controller: name,
+                    validator: MultiValidator([
+                      RequiredValidator(errorText: 'Please enter your name'),
+                    ]).call,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => _selectDate(context),
+                    child: TextFormField(
+                      decoration: decoration.copyWith(
+                          labelText: "Birthday",
+                          prefixIcon: const Icon(Icons.calendar_today)),
+                      readOnly: true, // Make the TextFormField read-only
+                      controller: birthday,
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Please enter your birthday'),
+                      ]).call,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
                 Flexible(
                   child: TextFormField(
                     decoration: decoration.copyWith(
@@ -278,8 +335,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         borderSide: const BorderSide(color: kLightPruple, width: 1),
       ),
       focusedBorder: _baseBorder.copyWith(
-        borderSide: const BorderSide(
-            color: mainpurple, width: 1),
+        borderSide: const BorderSide(color: mainpurple, width: 1),
       ),
       errorBorder: _baseBorder.copyWith(
         borderSide:
