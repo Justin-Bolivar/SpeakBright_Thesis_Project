@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print, unrelated_type_equality_checks
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
@@ -49,35 +52,53 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> _fetchCards() async {
     try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('cards').get();
-      setState(() {
-        cards = querySnapshot.docs;
-      });
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('cards')
+            .where('userId', isEqualTo: user.uid)
+            .get();
+        setState(() {
+          cards = querySnapshot.docs;
+        });
+      }
     } catch (e) {
-      // ignore: avoid_print
       print('Error fetching cards: $e');
     }
   }
 
   Future<void> _addCard(String title) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('cards')
-          .add({'Title': title});
-      await _fetchCards();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('cards').add({
+          'Title': title,
+          'userId': user.uid,
+        });
+        await _fetchCards();
+      }
     } catch (e) {
-      // ignore: avoid_print
       print('Error adding card: $e');
     }
   }
 
   Future<void> _deleteCard(String docId) async {
     try {
-      await FirebaseFirestore.instance.collection('cards').doc(docId).delete();
-      await _fetchCards();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final cardDoc = await FirebaseFirestore.instance
+            .collection('cards')
+            .doc(docId)
+            .get();
+        if (cardDoc.exists && cardDoc.data()?['userId'] == user.uid) {
+          await FirebaseFirestore.instance
+              .collection('cards')
+              .doc(docId)
+              .delete();
+          await _fetchCards();
+        }
+      }
     } catch (e) {
-      // ignore: avoid_print
       print('Error deleting card: $e');
     }
   }
