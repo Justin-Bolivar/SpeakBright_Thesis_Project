@@ -339,6 +339,8 @@ class _DashBoardState extends State<DashBoard> {
               itemBuilder: (context, index) {
                 int colorIndex = index % boxcolors.length;
                 String title = cards[index]['Title'];
+                String imageUrl = cards[index]['image'];
+                
                 return GestureDetector(
                   onTap: () {
                     _speak(title);
@@ -383,6 +385,12 @@ class _DashBoardState extends State<DashBoard> {
                             const SizedBox(
                               height: 30,
                             ),
+
+                            Container(
+                              height: 30,
+                              child: Image.network('${cards[index]['imageUrl']}')
+                            ),
+
                             Center(
                               child: Text(
                                 title,
