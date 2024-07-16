@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -16,34 +17,34 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
-  List<dynamic> voices = [];
-  String selectedVoice = "";
   List<QueryDocumentSnapshot> cards = [];
 
   @override
   void initState() {
     super.initState();
-    _getVoices();
+    _setupTTS();
     _fetchCards();
   }
 
-  Future<void> _getVoices() async {
-    voices = await flutterTts.getVoices;
-    if (voices.isNotEmpty) {
-      voices = voices.where((voice) {
-        String locale = voice['locale'] ?? '';
-        String name = voice['name'] ?? '';
-        return locale.toLowerCase().contains('us') &&
-            !name.toLowerCase().contains('network') &&
-            !name.toLowerCase().contains('neural');
-      }).toList();
+  Future<void> _setupTTS() async {
+    await flutterTts.setLanguage("en-US");
+    await _setDefaultVoice();
+  }
 
-      setState(() {
-        if (voices.isNotEmpty) {
-          selectedVoice = voices[0]["name"];
-        }
+  Future<void> _setDefaultVoice() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.none) {
+      await flutterTts.setVoice({
+        "name": "Microsoft Aria Online (Natural) - English (United States)",
+        "locale": "en-US"
+      });
+    } else {
+      await flutterTts.setVoice({
+        "name": "Microsoft Zira - English (United States)",
+        "locale": "en-US"
       });
     }
+    await flutterTts.setPitch(1.0);
   }
 
   Future<void> _fetchCards() async {
@@ -82,9 +83,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> _speak(String text) async {
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.setVoice({"name": selectedVoice, "locale": "en-US"});
-    await flutterTts.setPitch(1.0);
+    await _setDefaultVoice();
     await flutterTts.speak(text);
   }
 
@@ -151,7 +150,78 @@ class _DashBoardState extends State<DashBoard> {
         child: Column(children: [
           Expanded(
             child: Stack(children: [
-              // ... (keep all the existing Container widgets in the stack)
+              Container(
+                height: 115,
+                decoration: BoxDecoration(
+                  color: boxcolors[0],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  color: boxcolors[1],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 105,
+                decoration: BoxDecoration(
+                  color: boxcolors[2],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: boxcolors[3],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 95,
+                decoration: BoxDecoration(
+                  color: boxcolors[4],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 90,
+                decoration: BoxDecoration(
+                  color: boxcolors[5],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 85,
+                decoration: BoxDecoration(
+                  color: boxcolors[6],
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
+              Container(
+                height: 80,
+                decoration: const BoxDecoration(
+                  color: kwhite,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(100),
+                      bottomRight: Radius.circular(100)),
+                ),
+              ),
               Container(
                   height: 80,
                   decoration: const BoxDecoration(
@@ -257,24 +327,6 @@ class _DashBoardState extends State<DashBoard> {
                   ),
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DropdownButton<String>(
-              value: selectedVoice,
-              items: voices.map<DropdownMenuItem<String>>((dynamic voice) {
-                return DropdownMenuItem<String>(
-                  value: voice["name"],
-                  child: Text(voice["name"]),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedVoice = newValue!;
-                });
-              },
-              isExpanded: true,
             ),
           ),
         ]),
