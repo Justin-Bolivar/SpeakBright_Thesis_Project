@@ -46,8 +46,7 @@ class _AddCardPageState extends State<AddCardPage> {
               icon: const Icon(Icons.camera_alt_rounded),
               label: const Text('Take Photo'),
             ),
-            if (imageUrl != null)
-              Image.network(imageUrl!),
+            if (imageUrl != null) Image.network(imageUrl!),
             ElevatedButton(
               onPressed: _submitCard,
               child: const Text('Add Card'),
@@ -64,7 +63,9 @@ class _AddCardPageState extends State<AddCardPage> {
 
     if (photo != null) {
       String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child('images/${uniqueFileName}');
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('images/${uniqueFileName}');
       try {
         await ref.putFile(File(photo.path));
         imageUrl = await ref.getDownloadURL();
@@ -82,7 +83,7 @@ class _AddCardPageState extends State<AddCardPage> {
         FirebaseFirestore.instance.collection('cards').add({
           'Title': newCardTitle,
           'userId': user.uid,
-          'image': imageUrl,
+          'imageUrl': imageUrl,
         }).then((_) {
           Navigator.pop(context); // Close the AddCardPage
         }).catchError((e) {
@@ -90,7 +91,8 @@ class _AddCardPageState extends State<AddCardPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill out all fields')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill out all fields')));
     }
   }
 }
