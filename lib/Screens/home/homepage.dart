@@ -251,13 +251,23 @@ class _DashBoardState extends State<DashBoard> {
           ),
           Expanded(
             flex: 3,
-            child: StreamBuilder<List<QueryDocumentSnapshot>>(
-                stream: cardStreamController.stream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data == null) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  List<QueryDocumentSnapshot> cards = snapshot.data!;
+            child:
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('cards')
+                  .where('userId',
+                      isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading cards'));
+                }
+
+                final cards = snapshot.data?.docs ?? [];
+
                   return GridView.builder(
                     padding: const EdgeInsets.all(16.0),
                     gridDelegate:
@@ -293,8 +303,60 @@ class _DashBoardState extends State<DashBoard> {
                               ),
                               child: Column(
                                 children: [
-                                  Row(
+                                  Stack(
+                                    alignment: Alignment.topLeft,
                                     children: [
+                                      Container(
+                                  width: double.infinity,
+                                  height: 100,
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      topRight: Radius.circular(20),
+                                    ),
+                                    color: Colors.transparent,
+                                  ),
+                                  child: imageUrl != null && imageUrl.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                          ),
+                                          child: Image.network(
+                                            imageUrl,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              print(
+                                                  'Error loading image: $error');
+                                              return  Icon(
+                                                  Icons.image_not_supported,
+                                                  color: boxcolors[colorIndex]);
+                                            },
+                                            loadingBuilder: (context, child,
+                                                loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  value: loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          loadingProgress
+                                                              .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        )
+                                      :  Icon(Icons.image,
+                                          color: boxcolors[colorIndex]),
+                                ),
                                       Container(
                                         width: 50,
                                         height: 50,
