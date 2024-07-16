@@ -16,7 +16,7 @@ const kgrey = Color(0xFFF6F5F5); // used for continer background
 
 const kDarkPruple = Color(0xFF2B045C);
 const kLightPruple = Color.fromARGB(255, 197, 164, 237);
-const mainpurple = Color.fromARGB(255, 121, 3, 119);
+const mainpurple = Color.fromARGB(255, 121, 3, 119); // hex: #790377
 const dullpurple = Color.fromARGB(255, 167, 110, 166);
 
 

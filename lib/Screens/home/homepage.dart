@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -85,35 +87,28 @@ class _DashBoardState extends State<DashBoard> {
               // flex: 1,
               child: Stack(
                 children: [
+                  
                   Container(
                     height: 115,
                     decoration: BoxDecoration(
-                      color: boxcolors[6],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
-                      
-                    ),
-                  ),
-                  Container(
-                    height: 115,
-                    decoration: BoxDecoration(
-                      color: boxcolors[6],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[0],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
                   Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: boxcolors[5],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[1],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
                   Container(
                     height: 105,
                     decoration: BoxDecoration(
-                      color: boxcolors[4],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[2],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
@@ -121,31 +116,31 @@ class _DashBoardState extends State<DashBoard> {
                     height: 100,
                     decoration: BoxDecoration(
                       color: boxcolors[3],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
                   Container(
                     height: 95,
                     decoration: BoxDecoration(
-                      color: boxcolors[2],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[4],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
                   Container(
                     height: 90,
                     decoration: BoxDecoration(
-                      color: boxcolors[1],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[5],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
                   Container(
                     height: 85,
                     decoration: BoxDecoration(
-                      color: boxcolors[0],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      color: boxcolors[6],
+                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
                   ),
@@ -153,9 +148,17 @@ class _DashBoardState extends State<DashBoard> {
                     height: 80,
                     decoration: const BoxDecoration(
                       color: kwhite,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
                       
                     ),
+                    child:
+                    
+                    const Center(
+                      child: Column(children: [
+                         Text("HI DONNA!",
+                        // style: TextStyle(),
+                        )
+                      ],),)
                   ),
                 ]),
             ),
