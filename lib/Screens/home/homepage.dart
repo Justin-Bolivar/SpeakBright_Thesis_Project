@@ -1,10 +1,7 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -13,6 +10,7 @@ class DashBoard extends StatefulWidget {
   static const String name = "Dashboard";
 
   @override
+  // ignore: library_private_types_in_public_api
   _DashBoardState createState() => _DashBoardState();
 }
 
@@ -20,17 +18,18 @@ class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
   List<dynamic> voices = [];
   String selectedVoice = "";
+  List<String> words = [];
 
   @override
   void initState() {
     super.initState();
     _getVoices();
+    _fetchCards();
   }
 
   Future<void> _getVoices() async {
     voices = await flutterTts.getVoices;
     if (voices.isNotEmpty) {
-      // Filter voices to only include natural voices from the United States
       voices = voices.where((voice) {
         String locale = voice['locale'] ?? '';
         String name = voice['name'] ?? '';
@@ -44,6 +43,20 @@ class _DashBoardState extends State<DashBoard> {
           selectedVoice = voices[0]["name"];
         }
       });
+    }
+  }
+
+  Future<void> _fetchCards() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('cards').get();
+      setState(() {
+        words =
+            querySnapshot.docs.map((doc) => doc['Title'] as String).toList();
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching cards: $e');
     }
   }
 
@@ -62,9 +75,7 @@ class _DashBoardState extends State<DashBoard> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> words = ["Charger", "Pencil", "Table", "Dice"];
-     
-      List<Color> boxcolors = [
+    List<Color> boxcolors = [
       Colors.red,
       Colors.orange,
       const Color.fromARGB(255, 237, 195, 7),
@@ -74,131 +85,100 @@ class _DashBoardState extends State<DashBoard> {
       Colors.purple,
     ];
 
-    // List<double> containerHeights = List.generate(7, (index) => index*50 * 0.5 + 1);
-
     return Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('Dashboard'),
-        // ),
         backgroundColor: kwhite,
         body: SafeArea(
           child: Column(children: [
             Expanded(
-              // flex: 1,
-              child: Stack(
-                children: [
-                  
-                  Container(
-                    height: 115,
-                    decoration: BoxDecoration(
-                      color: boxcolors[0],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+              child: Stack(children: [
+                Container(
+                  height: 115,
+                  decoration: BoxDecoration(
+                    color: boxcolors[0],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: boxcolors[1],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 110,
+                  decoration: BoxDecoration(
+                    color: boxcolors[1],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 105,
-                    decoration: BoxDecoration(
-                      color: boxcolors[2],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 105,
+                  decoration: BoxDecoration(
+                    color: boxcolors[2],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: boxcolors[3],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: boxcolors[3],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 95,
-                    decoration: BoxDecoration(
-                      color: boxcolors[4],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 95,
+                  decoration: BoxDecoration(
+                    color: boxcolors[4],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: boxcolors[5],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: boxcolors[5],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
-                    height: 85,
-                    decoration: BoxDecoration(
-                      color: boxcolors[6],
-                      borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
-                    ),
+                ),
+                Container(
+                  height: 85,
+                  decoration: BoxDecoration(
+                    color: boxcolors[6],
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(100),
+                        bottomRight: Radius.circular(100)),
                   ),
-                  Container(
+                ),
+                Container(
                     height: 80,
                     decoration: const BoxDecoration(
                       color: kwhite,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(100), bottomRight: Radius.circular(100)),
-                      
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(100),
+                          bottomRight: Radius.circular(100)),
                     ),
-                    child:
-                    
-                    const Center(
-                      child: Column(children: [
-                         Text("HI DONNA!",
-                        // style: TextStyle(),
-                        )
-                      ],),)
-                  ),
-                ]),
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            "HI DONNA!",
+                          )
+                        ],
+                      ),
+                    )),
+              ]),
             ),
-            // Expanded(
-            //   flex: 1,
-            //   child: Container(
-            //     decoration: const BoxDecoration(
-            //         color: mainpurple,
-            //         borderRadius:
-            //             BorderRadius.only(bottomLeft: Radius.circular(60))),
-            //   ),
-            // ),
-            // Expanded(
-            //   flex: 1,
-            //   child: Container(
-            //     decoration: const BoxDecoration(
-            //         color: Colors.white, // Initial container is white
-            //         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60))),
-            //   ),
-            // ),
-            // ...List.generate(6, (index) { // Generate the rainbow containers
-            //   double height = containerHeights[index + 1]; // Skip the first index for the initial white container
-            //   Color color = boxcolors[index]; // Cycle through colors starting from red
-            //   return Container(
-            //     height: height,
-            //     decoration: BoxDecoration(
-            //       color: color,
-            //       borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
-            //     ),
-            //   );
-            // }),
             const SizedBox(
               height: 10,
             ),
-            //cards area
             Expanded(
               flex: 3,
               child: GridView.builder(
-                
-                
                 padding: const EdgeInsets.all(16.0),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -254,7 +234,7 @@ class _DashBoardState extends State<DashBoard> {
                             child: Text(
                               words[index],
                               style: TextStyle(
-                                color:boxcolors[colorIndex],
+                                color: boxcolors[colorIndex],
                                 fontSize: 20,
                               ),
                             ),
@@ -266,7 +246,6 @@ class _DashBoardState extends State<DashBoard> {
                 },
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: DropdownButton<String>(
