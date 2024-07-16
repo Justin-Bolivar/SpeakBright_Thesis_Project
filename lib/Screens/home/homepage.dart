@@ -28,7 +28,6 @@ class _DashBoardState extends State<DashBoard> {
 
   String imageUrl = '';
 
-
   @override
   void initState() {
     super.initState();
@@ -81,6 +80,7 @@ class _DashBoardState extends State<DashBoard> {
         await FirebaseFirestore.instance.collection('cards').add({
           'Title': title,
           'userId': user.uid,
+          'image': imageUrl
           //add image here??
         });
         await _fetchCards();
@@ -123,8 +123,7 @@ class _DashBoardState extends State<DashBoard> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add New Card'),
-          content: 
-          Column(
+          content: Column(
             children: [
               TextField(
                 onChanged: (value) {
@@ -132,10 +131,12 @@ class _DashBoardState extends State<DashBoard> {
                 },
                 decoration: const InputDecoration(hintText: "Enter card title"),
               ),
-              const SizedBox(height: 10,),
-              IconButton.filled
-              (onPressed: () async {
-                ImagePicker imagePicker = ImagePicker();
+              const SizedBox(
+                height: 10,
+              ),
+              IconButton.filled(
+                  onPressed: () async {
+                    ImagePicker imagePicker = ImagePicker();
                     XFile? file =
                         await imagePicker.pickImage(source: ImageSource.camera);
                     print('${file?.path}');
@@ -145,16 +146,13 @@ class _DashBoardState extends State<DashBoard> {
                     String uniqueFileName =
                         DateTime.now().millisecondsSinceEpoch.toString();
 
-                    //Get a reference to storage root
                     Reference referenceRoot = FirebaseStorage.instance.ref();
                     Reference referenceDirImages =
                         referenceRoot.child('images');
 
-                    //Create a reference for the image to be stored
                     Reference referenceImageToUpload =
                         referenceDirImages.child('name');
 
-                    //Handle errors/success
                     try {
                       //Store the file
                       await referenceImageToUpload.putFile(File(file!.path));
@@ -163,8 +161,8 @@ class _DashBoardState extends State<DashBoard> {
                     } catch (error) {
                       //Some error occurred
                     }
-              }, 
-              icon: const Icon(Icons.camera_alt_rounded) )
+                  },
+                  icon: const Icon(Icons.camera_alt_rounded))
             ],
           ),
           actions: <Widget>[
@@ -177,6 +175,13 @@ class _DashBoardState extends State<DashBoard> {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
+                if (imageUrl.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please upload an image')));
+
+                  return;
+                }
+
                 if (newCardTitle.isNotEmpty) {
                   _addCard(newCardTitle);
                   Navigator.of(context).pop();
