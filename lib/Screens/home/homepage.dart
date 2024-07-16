@@ -1,11 +1,15 @@
 // ignore_for_file: avoid_print, unrelated_type_equality_checks
 
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:image_picker/image_picker.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -21,6 +25,9 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
   List<QueryDocumentSnapshot> cards = [];
+
+  String imageUrl = '';
+
 
   @override
   void initState() {
@@ -74,6 +81,7 @@ class _DashBoardState extends State<DashBoard> {
         await FirebaseFirestore.instance.collection('cards').add({
           'Title': title,
           'userId': user.uid,
+          //add image here??
         });
         await _fetchCards();
       }
@@ -115,11 +123,49 @@ class _DashBoardState extends State<DashBoard> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add New Card'),
-          content: TextField(
-            onChanged: (value) {
-              newCardTitle = value;
-            },
-            decoration: const InputDecoration(hintText: "Enter card title"),
+          content: 
+          Column(
+            children: [
+              TextField(
+                onChanged: (value) {
+                  newCardTitle = value;
+                },
+                decoration: const InputDecoration(hintText: "Enter card title"),
+              ),
+              const SizedBox(height: 10,),
+              IconButton.filled
+              (onPressed: () async {
+                ImagePicker imagePicker = ImagePicker();
+                    XFile? file =
+                        await imagePicker.pickImage(source: ImageSource.camera);
+                    print('${file?.path}');
+
+                    if (file == null) return;
+                    //Import dart:core
+                    String uniqueFileName =
+                        DateTime.now().millisecondsSinceEpoch.toString();
+
+                    //Get a reference to storage root
+                    Reference referenceRoot = FirebaseStorage.instance.ref();
+                    Reference referenceDirImages =
+                        referenceRoot.child('images');
+
+                    //Create a reference for the image to be stored
+                    Reference referenceImageToUpload =
+                        referenceDirImages.child('name');
+
+                    //Handle errors/success
+                    try {
+                      //Store the file
+                      await referenceImageToUpload.putFile(File(file!.path));
+                      //Success: get the download URL
+                      imageUrl = await referenceImageToUpload.getDownloadURL();
+                    } catch (error) {
+                      //Some error occurred
+                    }
+              }, 
+              icon: const Icon(Icons.camera_alt_rounded) )
+            ],
           ),
           actions: <Widget>[
             TextButton(
