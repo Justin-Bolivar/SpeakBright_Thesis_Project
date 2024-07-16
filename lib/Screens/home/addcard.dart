@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -9,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddCardPage extends StatefulWidget {
-  const AddCardPage({super.key});
+  const AddCardPage({Key? key}) : super(key: key);
   static const String route = '/addcard';
   static const String path = "/addcard";
   static const String name = "Add Card";
@@ -42,9 +41,14 @@ class _AddCardPageState extends State<AddCardPage> {
             ),
             const SizedBox(height: 10),
             ElevatedButton.icon(
-              onPressed: _pickImage,
+              onPressed: () => _pickImage(ImageSource.camera),
               icon: const Icon(Icons.camera_alt_rounded),
               label: const Text('Take Photo'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => _pickImage(ImageSource.gallery),
+              icon: const Icon(Icons.photo_library),
+              label: const Text('Browse Gallery'),
             ),
             if (imageUrl != null) Image.network(imageUrl!),
             ElevatedButton(
@@ -57,9 +61,9 @@ class _AddCardPageState extends State<AddCardPage> {
     );
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    final XFile? photo = await _picker.pickImage(source: source);
 
     if (photo != null) {
       String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
@@ -86,6 +90,8 @@ class _AddCardPageState extends State<AddCardPage> {
           'imageUrl': imageUrl,
         }).then((_) {
           Navigator.pop(context); // Close the AddCardPage
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Card added successfully')));
         }).catchError((e) {
           print('Error adding card: $e');
         });
