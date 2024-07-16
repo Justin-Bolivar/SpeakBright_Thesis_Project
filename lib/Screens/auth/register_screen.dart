@@ -26,7 +26,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late GlobalKey<FormState> formKey;
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
-  DateTime? selectedDate;
+
 
   bool obfuscate = true;
 
@@ -65,19 +65,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   bool _isHovering = false;
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null && picked != DateTime.now()) {
-      setState(() {
-        birthday.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +172,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: DateTimeFormField(
                   decoration: const InputDecoration(labelText: 'Birthday'),
                   mode: DateTimeFieldPickerMode.date,
+                  // controller: birthday,
+                  // focusNode: birthdayFn,
                   // pickerPlatform: dateTimePickerPlatform,
                   onChanged: (DateTime? value) {
-                    print(value);
+                    print(value); // add action here paras storing
                   },
                 ),
                 ),
