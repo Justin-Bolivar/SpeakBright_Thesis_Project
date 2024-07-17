@@ -23,7 +23,8 @@ class DashBoard extends ConsumerStatefulWidget {
 
 class _DashBoardState extends ConsumerState<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
-  List<String> categories = ['Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores'];
+  List<String> categories = ['All','Toys','Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores'];
+  int? selectedCategory;
 
 
   @override
@@ -75,38 +76,88 @@ class _DashBoardState extends ConsumerState<DashBoard> {
           children: [
             const RainbowContainer(),
             const SizedBox(height: 10),
-            const Text(
-              "Categories",
-              style: TextStyle(
-                fontSize: 15, color: Color.fromARGB(255, 56, 49, 70)
-              ),
+
+            const Row(
+              children: [
+                 Padding(
+                  padding: EdgeInsets.only(left: 20,bottom: 5),
+                   child: Text(
+                    "CATEGORIES",
+                    textAlign: TextAlign.left, // This should align the text to the left
+                    style: TextStyle(
+                      fontSize: 15, 
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromARGB(255, 130, 113, 164)
+                    ),
+                                   ),
+                 ),
+                Spacer()
+              ],
             ),
-            const SizedBox(height: 10,),
+
+            const SizedBox(height: 8),
+            
+
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 35, // Minimum height
+              maxHeight: 35, // Maximum height
+            ),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  // Calculate the color index for the current item
+                  int colorIndex = index % boxColors.length;
+                  // Set the background color based on the calculated color index
+                  Color itemColor = boxColors[colorIndex];
+
+                  bool isSelected = selectedCategory == index;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedCategory = index; // Update the selected index
+                      });
+                    },
+                    child: SizedBox(
+                      height: 30,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 18),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: itemColor,
+                          borderRadius: BorderRadius.circular(10.0),
+                          boxShadow: isSelected
+                              ? <BoxShadow>[
+                                  BoxShadow(
+                                    color: itemColor,
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1), // changes position of shadow
+                                  ),
+                                ]
+                              : [], // No shadow if not selected
+                        ),
+                        child: Text(
+                          category,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: kwhite, fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            
+          ),
 
             
-                  Expanded(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length,
-                      itemBuilder: (context, index) {
-                        final category = categories[index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Text(
-                            category,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-            const SizedBox(height: 10,),
+            Container(
+              height: 10,
+              color: Colors.transparent,
+            ),
             Expanded(
               flex: 3,
               child: cardsAsyncValue.when(
