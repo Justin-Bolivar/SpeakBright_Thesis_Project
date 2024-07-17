@@ -11,13 +11,13 @@ class RainbowContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: SizedBox(
-        height: 160,
+        height: 146,
         child: Stack(
           alignment: Alignment.topCenter,
           children: [
             Container(
               padding: const EdgeInsets.all(8.0),
-              height: 150,
+              height: 145,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
