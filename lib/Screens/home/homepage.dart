@@ -7,7 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
-import 'package:speakbright_mobile/Screens/home/rainbow_container.dart';
+import 'package:speakbright_mobile/Screens/home/header_container.dart';
 
 class DashBoard extends ConsumerStatefulWidget {
   const DashBoard({super.key});
@@ -22,6 +22,8 @@ class DashBoard extends ConsumerStatefulWidget {
 
 class _DashBoardState extends ConsumerState<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
+  List<String> categories = ['Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores'];
+
 
   @override
   void initState() {
@@ -71,6 +73,38 @@ class _DashBoardState extends ConsumerState<DashBoard> {
           children: [
             const RainbowContainer(),
             const SizedBox(height: 10),
+            const Text(
+              "Categories",
+              style: TextStyle(
+                fontSize: 15, color: Color.fromARGB(255, 56, 49, 70)
+              ),
+            ),
+            const SizedBox(height: 10,),
+
+            
+                  Expanded(
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text(
+                            category,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+            const SizedBox(height: 10,),
             Expanded(
               flex: 3,
               child: Consumer(
