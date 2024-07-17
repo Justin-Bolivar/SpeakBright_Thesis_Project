@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
+import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:speakbright_mobile/Screens/home/rainbow_container.dart';
 
@@ -57,8 +58,9 @@ class _DashBoardState extends ConsumerState<DashBoard> {
 
   @override
   Widget build(BuildContext context) {
+    final cardsAsyncValue = ref.watch(cardsStreamProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: kwhite,
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
@@ -73,22 +75,16 @@ class _DashBoardState extends ConsumerState<DashBoard> {
             const SizedBox(height: 10),
             Expanded(
               flex: 3,
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final cardsAsyncValue = ref.watch(cardsStreamProvider);
-                  return cardsAsyncValue.when(
-                    data: (cards) => CardGrid(
-                      cards: cards,
-                      onCardTap: _speak,
-                      onCardDelete: (String cardId) =>
-                          ref.read(cardProvider.notifier).deleteCard(cardId),
-                    ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) =>
-                        Center(child: Text('Error: $error')),
-                  );
-                },
+              child: cardsAsyncValue.when(
+                data: (cards) => CardGrid(
+                  cards: cards,
+                  onCardTap: _speak,
+                  onCardDelete: (String cardId) {
+                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                  },
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Error: $error')),
               ),
             ),
           ],
