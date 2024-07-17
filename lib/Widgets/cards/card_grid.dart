@@ -8,11 +8,11 @@ class CardGrid extends StatelessWidget {
   final Function(String) onCardDelete;
 
   const CardGrid({
-    super.key,
+    Key? key,
     required this.cards,
     required this.onCardTap,
     required this.onCardDelete,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class CardGrid extends StatelessWidget {
           card: cards[index],
           colorIndex: index,
           onTap: () => onCardTap(cards[index].title),
-          onDelete: () => onCardDelete(cards[index].id),
+          onDelete: onCardDelete,
         );
       },
     );
