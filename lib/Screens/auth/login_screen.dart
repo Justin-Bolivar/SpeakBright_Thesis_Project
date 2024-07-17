@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import '../../Routing/router.dart';
 import '../../Widgets/colors.dart';
@@ -48,9 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: kwhite,
-      
       bottomNavigationBar: SafeArea(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -69,13 +66,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: mainpurple,
                     foregroundColor: kwhite,
                     textStyle: const TextStyle(fontSize: 18),
-                    
-                ),
+                  ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               Center(
                 child: Flexible(
                   child: MouseRegion(
@@ -88,15 +82,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         "No account? Register",
                         style: TextStyle(
-                          color: _isHovering? kLightPruple : dullpurple
-                        ),
+                            color: _isHovering ? kLightPruple : dullpurple),
                       ),
                     ),
-                    ),
-                
                   ),
+                ),
               ),
-        
             ],
           ),
         ),
@@ -110,24 +101,24 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.max,
               children: [
-                
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-
-                      Image.asset('assets/SpeakBright_P.png', width: 450, height: 250),
-
+                      Image.asset('assets/SpeakBright_P.png',
+                          width: 450, height: 250),
                       const SizedBox(height: 30),
                       Flexible(
                         child: TextFormField(
                           decoration: decoration.copyWith(
-                              labelText: "Username",
-                              prefixIcon: const Icon(Icons.person, color: mainpurple,),
-                              labelStyle: const TextStyle(color: mainpurple), 
-                              hintStyle: const TextStyle(color: mainpurple),
-                              
-                              ),
+                            labelText: "Username",
+                            prefixIcon: const Icon(
+                              Icons.person,
+                              color: mainpurple,
+                            ),
+                            labelStyle: const TextStyle(color: mainpurple),
+                            hintStyle: const TextStyle(color: mainpurple),
+                          ),
                           focusNode: usernameFn,
                           controller: username,
                           onEditingComplete: () {
@@ -152,26 +143,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           keyboardType: TextInputType.visiblePassword,
                           obscureText: obfuscate,
                           decoration: decoration.copyWith(
-                              labelText: "Password",
-                              prefixIcon: const Icon(Icons.password, color: mainpurple,),
-                              suffixIcon: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      obfuscate = !obfuscate;
-                                    });
-                                  },
-                                  icon: Icon(obfuscate
+                            labelText: "Password",
+                            prefixIcon: const Icon(
+                              Icons.password,
+                              color: mainpurple,
+                            ),
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    obfuscate = !obfuscate;
+                                  });
+                                },
+                                icon: Icon(
+                                  obfuscate
                                       ? Icons.remove_red_eye_rounded
-                                      : CupertinoIcons.eye_slash , color: mainpurple,)),
-                              labelStyle: const TextStyle(color: mainpurple), 
-                              hintStyle: const TextStyle(color: mainpurple),
-                                      
-                                      ),
+                                      : CupertinoIcons.eye_slash,
+                                  color: mainpurple,
+                                )),
+                            labelStyle: const TextStyle(color: mainpurple),
+                            hintStyle: const TextStyle(color: mainpurple),
+                          ),
                           focusNode: passwordFn,
                           controller: password,
                           onEditingComplete: () {
                             passwordFn.unfocus();
-
                           },
                           validator: MultiValidator([
                             RequiredValidator(
@@ -185,7 +180,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                
               ],
             ),
           ),
@@ -215,13 +209,13 @@ class _LoginScreenState extends State<LoginScreen> {
       errorMaxLines: 3,
       disabledBorder: _baseBorder,
       enabledBorder: _baseBorder.copyWith(
-        borderSide: const BorderSide(color:kLightPruple, width: 1),
+        borderSide: const BorderSide(color: kLightPruple, width: 1),
       ),
       focusedBorder: _baseBorder.copyWith(
         borderSide: const BorderSide(color: mainpurple, width: 1),
       ),
       errorBorder: _baseBorder.copyWith(
-        borderSide: const BorderSide(color: Color.fromARGB(255, 244, 0, 0), width: 1),
-      )
-      );
+        borderSide:
+            const BorderSide(color: Color.fromARGB(255, 244, 0, 0), width: 1),
+      ));
 }

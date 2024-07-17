@@ -1,4 +1,4 @@
-import 'dart:ui';
+// ignore_for_file: avoid_print
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +9,6 @@ import '../../routing/router.dart';
 import 'auth_controller.dart';
 import 'login_screen.dart';
 import 'package:date_field/date_field.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 
 class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
@@ -27,7 +24,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
 
-
   bool obfuscate = true;
 
   @override
@@ -41,10 +37,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     password2 = TextEditingController();
     password2Fn = FocusNode();
 
-    name = TextEditingController(); 
-    nameFn = FocusNode(); 
-    birthday = TextEditingController(); 
-    birthdayFn = FocusNode(); 
+    name = TextEditingController();
+    nameFn = FocusNode();
+    birthday = TextEditingController();
+    birthdayFn = FocusNode();
   }
 
   @override
@@ -64,7 +60,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool _isHovering = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -170,15 +165,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 const SizedBox(height: 8),
                 Flexible(
                   child: DateTimeFormField(
-                  decoration: const InputDecoration(labelText: 'Birthday'),
-                  mode: DateTimeFieldPickerMode.date,
-                  // controller: birthday,
-                  // focusNode: birthdayFn,
-                  // pickerPlatform: dateTimePickerPlatform,
-                  onChanged: (DateTime? value) {
-                    print(value); // add action here paras storing
-                  },
-                ),
+                    decoration: const InputDecoration(labelText: 'Birthday'),
+                    mode: DateTimeFieldPickerMode.date,
+                    // controller: birthday,
+                    // focusNode: birthdayFn,
+                    // pickerPlatform: dateTimePickerPlatform,
+                    onChanged: (DateTime? value) {
+                      print(value); // add action here paras storing
+                    },
+                  ),
                 ),
                 const SizedBox(
                   height: 8,

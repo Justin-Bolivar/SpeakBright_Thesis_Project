@@ -19,11 +19,18 @@ const kLightPruple = Color.fromARGB(255, 197, 164, 237);
 const mainpurple = Color.fromARGB(255, 121, 3, 119); // hex: #790377
 const dullpurple = Color.fromARGB(255, 167, 110, 166);
 
-
-
-
 // Self Explanatory Color uses
 const kwhite = Colors.white;
 const kblack = Colors.black;
 const kerror = Colors.red;
 const ksuccess = Colors.green;
+
+final List<Color> boxColors = [
+  Colors.red,
+  Colors.orange,
+  const Color.fromARGB(255, 237, 195, 7),
+  Colors.green,
+  Colors.blue,
+  Colors.indigo,
+  Colors.purple,
+];
