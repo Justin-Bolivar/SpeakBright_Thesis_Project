@@ -8,7 +8,7 @@ class CardItem extends StatelessWidget {
   final CardModel card;
   final int colorIndex;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final Function(String) onDelete;
 
   const CardItem({
     Key? key,
@@ -59,12 +59,39 @@ class CardItem extends StatelessWidget {
             top: 0,
             right: 0,
             child: IconButton(
-              icon: const Icon(Icons.close, color: kerror),
-              onPressed: onDelete,
+              icon: const Icon(Icons.close, color: Colors.red),
+              onPressed: () => _showDeleteConfirmation(context),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Deletion"),
+          content: const Text("Are you sure you want to remove the card?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: const Text("Yes"),
+              onPressed: () {
+                onDelete(card.id); // Call the delete function
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
