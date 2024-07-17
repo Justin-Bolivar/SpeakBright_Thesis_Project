@@ -6,16 +6,23 @@ class CardGrid extends StatelessWidget {
   final List<CardModel> cards;
   final Function(String) onCardTap;
   final Function(String) onCardDelete;
+  final String selectedCategory; 
 
   const CardGrid({
-    Key? key,
+    super.key,
     required this.cards,
     required this.onCardTap,
     required this.onCardDelete,
-  }) : super(key: key);
+    required this.selectedCategory,
+  });
 
   @override
   Widget build(BuildContext context) {
+    List<CardModel> filteredCards = cards.where((card) {
+      if (selectedCategory == "All") return true;
+      return card.category == selectedCategory;
+    }).toList();
+
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -23,12 +30,12 @@ class CardGrid extends StatelessWidget {
         crossAxisSpacing: 25.0,
         mainAxisSpacing: 25.0,
       ),
-      itemCount: cards.length,
+      itemCount: filteredCards.length,
       itemBuilder: (context, index) {
         return CardItem(
-          card: cards[index],
+          card: filteredCards[index],
           colorIndex: index,
-          onTap: () => onCardTap(cards[index].title),
+          onTap: () => onCardTap(filteredCards[index].title),
           onDelete: onCardDelete,
         );
       },
