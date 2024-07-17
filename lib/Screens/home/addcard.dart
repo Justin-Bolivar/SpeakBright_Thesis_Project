@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, library_private_types_in_public_api
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddCardPage extends StatefulWidget {
-  const AddCardPage({Key? key}) : super(key: key);
+  const AddCardPage({super.key});
   static const String route = '/addcard';
   static const String path = "/addcard";
   static const String name = "Add Card";
@@ -62,14 +62,14 @@ class _AddCardPageState extends State<AddCardPage> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? photo = await _picker.pickImage(source: source);
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: source);
 
     if (photo != null) {
       String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
       firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
           .ref()
-          .child('images/${uniqueFileName}');
+          .child('images/$uniqueFileName');
       try {
         await ref.putFile(File(photo.path));
         imageUrl = await ref.getDownloadURL();
@@ -91,7 +91,7 @@ class _AddCardPageState extends State<AddCardPage> {
         }).then((_) {
           Navigator.pop(context); // Close the AddCardPage
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Card added successfully')));
+              const SnackBar(content: Text('Card added successfully')));
         }).catchError((e) {
           print('Error adding card: $e');
         });
