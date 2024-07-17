@@ -14,6 +14,7 @@ class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
   static const String name = "Registration Screen";
   const RegistrationScreen({super.key});
+  
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -60,6 +61,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool _isHovering = false;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +70,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       bottomNavigationBar: SafeArea(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          height: 52,
+          height: 200,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -84,22 +86,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     backgroundColor: mainpurple,
                     foregroundColor: Colors.white,
                     textStyle: const TextStyle(fontSize: 18),
-                    minimumSize: const Size(double.infinity, 60),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                 ),
               ),
-
-              // const SizedBox(height: 20),
-
+              const SizedBox(height: 30),
               Center(
                 child: Flexible(
                   child: MouseRegion(
                     onEnter: (_) => setState(() => _isHovering = true),
                     onExit: (_) => setState(() => _isHovering = false),
                     child: GestureDetector(
-                      onTap: () {
-                        GlobalRouter.I.router.go(LoginScreen.route);
-                      },
+                      onTap: ()
+                          => Navigator.push(context,MaterialPageRoute(builder: (context) => const LoginScreen()),),
+                          // {GlobalRouter.I.router.go(LoginScreen.route);},
+                          
                       child: Text(
                         "Already have an account? Login here",
                         style: TextStyle(
@@ -109,6 +110,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 60),
             ],
           ),
         ),

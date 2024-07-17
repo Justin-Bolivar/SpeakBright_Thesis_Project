@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: mainpurple,
                     foregroundColor: kwhite,
                     textStyle: const TextStyle(fontSize: 18),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                 ),
               ),
@@ -80,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         GlobalRouter.I.router.go(RegistrationScreen.route);
                       },
                       child: Text(
-                        "No account? Register",
+                        "No account? Register Here",
                         style: TextStyle(
                             color: _isHovering ? kLightPruple : dullpurple),
                       ),
@@ -88,6 +89,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+              SizedBox(
+                height: 250,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Image.asset(
+                        'assets/earth.png',
+                        fit: BoxFit.cover,
+                        height: 260,
+                      ),
+                    ),
+                  ],
+                ),
+                ),
+
             ],
           ),
         ),

@@ -8,14 +8,11 @@ import 'dart:async';
 import 'enum/enum.dart';
 
 class AuthController with ChangeNotifier {
-  // Static method to initialize the singleton in GetIt
   static void initialize() {
     GetIt.instance.registerSingleton<AuthController>(AuthController());
   }
 
-  // Static getter to access the instance through GetIt
   static AuthController get instance => GetIt.instance<AuthController>();
-
   static AuthController get I => GetIt.instance<AuthController>();
 
   late StreamSubscription<User?> currentAuthedUser;
@@ -39,26 +36,21 @@ class AuthController with ChangeNotifier {
   login(String userName, String password) async {
     UserCredential userCredential = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: userName, password: password);
-    // User? user  = userCredential.user;
+  
   }
 
   register(String userName, String password) async {
     UserCredential userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: userName, password: password);
-    // User? user  = userCredential.user;
+    
   }
 
 
-  ///write code to log out the user and add it to the home page.
  logout() {
-    // if (_googleSignIn.currentUser != null) {
-    //   _googleSignIn.signOut();
-    // }
     return FirebaseAuth.instance.signOut();
   }
 
   ///must be called in main before runApp
-  ///
   loadSession() async {
     listen();
     User? user = FirebaseAuth.instance.currentUser;

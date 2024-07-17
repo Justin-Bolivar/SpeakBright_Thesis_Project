@@ -18,7 +18,6 @@ class GlobalRouter {
 
   // Static getter to access the instance through GetIt
   static GlobalRouter get instance => GetIt.instance<GlobalRouter>();
-
   static GlobalRouter get I => GetIt.instance<GlobalRouter>();
 
   late GoRouter router;
