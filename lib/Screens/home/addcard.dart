@@ -20,6 +20,7 @@ class AddCardPage extends StatefulWidget {
 class _AddCardPageState extends State<AddCardPage> {
   String newCardTitle = '';
   String? imageUrl;
+  String? selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +40,23 @@ class _AddCardPageState extends State<AddCardPage> {
               },
               decoration: const InputDecoration(hintText: "Enter card title"),
             ),
+            DropdownButtonFormField<String>(
+              value: selectedCategory,
+              hint: const Text('Select Category'),
+              items: <String>['Toys', 'Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores']
+                  .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  selectedCategory = newValue;
+                });
+              },
+            ),
+            const SizedBox(height: 10),
             const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: () => _pickImage(ImageSource.camera),
@@ -84,10 +102,15 @@ class _AddCardPageState extends State<AddCardPage> {
     if (newCardTitle.isNotEmpty && imageUrl != null) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        print('Selected Category: $selectedCategory');
+        
         FirebaseFirestore.instance.collection('cards').add({
           'title': newCardTitle,
           'userId': user.uid,
           'imageUrl': imageUrl,
+          'category': selectedCategory,
+
+          
         }).then((_) {
           Navigator.pop(context); // Close the AddCardPage
           ScaffoldMessenger.of(context).showSnackBar(
