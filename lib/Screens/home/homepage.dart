@@ -24,7 +24,7 @@ class DashBoard extends ConsumerStatefulWidget {
 class _DashBoardState extends ConsumerState<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
   List<String> categories = ['All','Toys','Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores'];
-  int? selectedCategory;
+  int selectedCategory = -1;
 
 
   @override
@@ -167,6 +167,7 @@ class _DashBoardState extends ConsumerState<DashBoard> {
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
+                  selectedCategory: selectedCategory == -1 ? "All" : categories[selectedCategory],
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(child: Text('Error: $error')),
