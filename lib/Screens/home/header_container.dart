@@ -340,7 +340,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                     ),
                   ),
                   Positioned(
-                    right: 265,
+                    right: 280,
                     top: 40,
                     child: Image.asset(
                       'assets/explore.png',
