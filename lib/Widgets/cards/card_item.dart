@@ -42,7 +42,7 @@ class CardItem extends StatelessWidget {
             child: Column(
               children: [
                 _buildImageContainer(itemColor),
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
                 Center(
                   child: Text(
                     card.title,
