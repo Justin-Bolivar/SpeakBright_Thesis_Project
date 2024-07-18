@@ -131,9 +131,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Center(
                   child: Row(
                     children: [
+                      SizedBox(
+                        width: 12,
+                        child: Image.asset('assets/v_line.png'),
+                      ),
                       Image.asset(
                         'assets/v_line.png',
-                        width: 100,
+                        width: 70,
                       ),
                       const SizedBox(
                         width: 21,
@@ -149,7 +153,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(
                         width: 21,
                       ),
-                      Image.asset('assets/v_line.png', width: 100),
+                      Image.asset('assets/v_line.png', width: 70),
                     ],
                   ),
                 ),
