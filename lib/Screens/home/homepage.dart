@@ -1,4 +1,4 @@
-// ignore_for_file: unrelated_type_equality_checks
+// ignore_for_file: unrelated_type_equality_checks, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -143,7 +143,7 @@ class _DashBoardState extends ConsumerState<DashBoard> {
                                     color: itemColor,
                                     spreadRadius: 1,
                                     blurRadius: 2,
-                                    offset: Offset(0, 1),
+                                    offset: const Offset(0, 1),
                                   ),
                                 ]
                               : [],
