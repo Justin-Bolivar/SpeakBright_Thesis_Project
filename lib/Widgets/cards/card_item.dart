@@ -48,7 +48,7 @@ class CardItem extends StatelessWidget {
                     card.title,
                     style: TextStyle(
                       color: itemColor,
-                      fontSize: 20,
+                      fontSize: 15,
                     ),
                   ),
                 ),
