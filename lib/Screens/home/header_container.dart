@@ -7,6 +7,8 @@ import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Widgets/waiting_dialog.dart';
 import '../auth/auth_controller.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class RainbowContainer extends StatefulWidget {
   const RainbowContainer({Key? key}) : super(key: key);
@@ -17,16 +19,44 @@ class RainbowContainer extends StatefulWidget {
 
 class _RainbowContainerState extends State<RainbowContainer> {
   late Future<DocumentSnapshot> _userDoc;
+  final FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
     super.initState();
+    _setupTTS();
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       _userDoc = FirebaseFirestore.instance.collection('users').doc(uid).get();
     } else {
       _userDoc = Future.error('User not found');
     }
+  }
+
+  Future<void> _setupTTS() async {
+    await flutterTts.setLanguage("en-US");
+    await _setDefaultVoice();
+  }
+
+  Future<void> _setDefaultVoice() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    String voiceName = connectivityResult != ConnectivityResult.none
+        ? "Microsoft Aria Online (Natural) - English (United States)"
+        : "Microsoft Zira - English (United States)";
+
+    await flutterTts.setVoice({"name": voiceName, "locale": "en-US"});
+    await flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String text) async {
+    await _setDefaultVoice();
+    await flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
   }
 
   @override
@@ -103,65 +133,122 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                         onPressed: () async {
                                           showDialog(
                                             context: context,
-                                            barrierColor: Colors.transparent, // Transparent barrier color
+                                            barrierColor: Colors
+                                                .transparent, // Transparent barrier color
                                             builder: (BuildContext context) {
                                               return BackdropFilter(
-                                                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+                                                filter: ImageFilter.blur(
+                                                    sigmaX: 5.0,
+                                                    sigmaY:
+                                                        5.0), // Apply blur effect
                                                 child: SizedBox(
-                                                  width: 250, // Specify the width of the dialog
-                                                  height: 200, // Specify the height of the dialog
+                                                  width:
+                                                      250, // Specify the width of the dialog
+                                                  height:
+                                                      200, // Specify the height of the dialog
                                                   child: Center(
                                                     child: Container(
-                                                      constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400), // Ensure the dialog doesn't exceed the specified dimensions
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                              maxWidth: 300,
+                                                              maxHeight:
+                                                                  400), // Ensure the dialog doesn't exceed the specified dimensions
                                                       child: Stack(
                                                         children: <Widget>[
                                                           Positioned.fill(
                                                             child: Container(
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.transparent, // Dialog background color
-                                                                borderRadius: BorderRadius.circular(15), // Rounded corners
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .transparent, // Dialog background color
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            15), // Rounded corners
                                                               ),
                                                             ),
                                                           ),
-                                                          
-                                                      
-                                                           Center(
+                                                          Center(
                                                             child: Container(
-                                                              height: 150, // Adjust the height as needed
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.white, // White background for content visibility
-                                                                borderRadius: BorderRadius.circular(15), // Rounded corners
+                                                              height:
+                                                                  150, // Adjust the height as needed
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white, // White background for content visibility
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            15), // Rounded corners
                                                               ),
                                                               child: Padding(
-                                                                padding: const EdgeInsets.all(25.0),
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        25.0),
                                                                 child: Column(
-                                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .stretch,
                                                                   children: <Widget>[
-                                                                    Text(userName,
-                                                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                                                                    const Text('Name',
-                                                                        style: TextStyle(fontWeight: FontWeight.w200, fontSize: 15)),
-                                                                    const SizedBox(height: 12,),
+                                                                    Text(
+                                                                        userName,
+                                                                        style: const TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            fontSize: 20)),
+                                                                    const Text(
+                                                                        'Name',
+                                                                        style: TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.w200,
+                                                                            fontSize: 15)),
+                                                                    const SizedBox(
+                                                                      height:
+                                                                          12,
+                                                                    ),
 
                                                                     Text(
-                                                                        DateFormat('MMM dd, yyyy').format(userBirthday),
-                                                                        style: const TextStyle(fontSize: 17, color: Colors.amber),),
-                                                                    const Text('Birthday',
-                                                                        style: TextStyle(fontWeight: FontWeight.w200, fontSize: 15)), // Format date
+                                                                      DateFormat(
+                                                                              'MMM dd, yyyy')
+                                                                          .format(
+                                                                              userBirthday),
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                          color:
+                                                                              Colors.amber),
+                                                                    ),
+                                                                    const Text(
+                                                                        'Birthday',
+                                                                        style: TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.w200,
+                                                                            fontSize: 15)), // Format date
                                                                   ],
                                                                 ),
                                                               ),
                                                             ),
                                                           ),
-                                                          
                                                           Positioned(
-                                                            right: 0,
-                                                            top: 50,
-                                                            child: Image.asset(
-                                                              'assets/profile.png',
-                                                              fit: BoxFit.cover,
-                                                              height: 150,
+                                                            right: 5,
+                                                            top: 55,
+                                                            child:
+                                                                GestureDetector(
+                                                              onTap: () async {
+                                                                _speak(
+                                                                    "Your name is $userName");
+                                                              },
+                                                              child:
+                                                                  Image.asset(
+                                                                'assets/profile.png',
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                height: 170,
+                                                              ),
                                                             ),
                                                           ),
                                                           Positioned(
@@ -169,21 +256,40 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                                             left: 0,
                                                             right: 0,
                                                             child: Padding(
-                                                              padding: const EdgeInsets.all(16.0),
-                                                              child: TextButton(
-                                                                child: const Text('Close'),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                },
-                                                                style: TextButton.styleFrom(
-                                                                  foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255, 198, 65, 56), // Background color
-                                                                  shape: RoundedRectangleBorder(
-                                                                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        16.0),
+                                                                child:
+                                                                    TextButton(
+                                                                  child: const Text(
+                                                                      'Close'),
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  },
+                                                                  style: TextButton
+                                                                      .styleFrom(
+                                                                    foregroundColor:
+                                                                        Colors
+                                                                            .white,
+                                                                    backgroundColor:
+                                                                        const Color
+                                                                            .fromARGB(
+                                                                            255,
+                                                                            198,
+                                                                            65,
+                                                                            56), // Background color
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8), // Rounded corners
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              )
-
-                                                            ),
+                                                                )),
                                                           ),
                                                         ],
                                                       ),
@@ -193,7 +299,6 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                               );
                                             },
                                           );
-
                                         },
                                         style: ButtonStyle(
                                           elevation:
