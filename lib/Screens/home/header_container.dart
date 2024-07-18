@@ -1,114 +1,160 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Widgets/waiting_dialog.dart';
 import '../auth/auth_controller.dart';
 
-class RainbowContainer extends StatelessWidget {
+class RainbowContainer extends StatefulWidget {
   const RainbowContainer({super.key});
 
   @override
+  _RainbowContainerState createState() => _RainbowContainerState();
+}
+
+class _RainbowContainerState extends State<RainbowContainer> {
+  late Future<DocumentSnapshot> _userDoc;
+
+  @override
+  void initState() {
+    super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _userDoc = FirebaseFirestore.instance.collection('users').doc(uid).get();
+    } else {
+      _userDoc = Future.error('User not found');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: SizedBox(
-        height: 146,
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              height: 145,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF8E2DE2), mainpurple],
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(60),
-                  bottomRight: Radius.circular(60),
-                ),
-              ),
-              child: Column(
+    return FutureBuilder<DocumentSnapshot>(
+      future: _userDoc,
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return const Text("Something went wrong");
+          }
+
+          // Assuming the document exists and has a 'name' field
+          Map<String, dynamic> userData =
+              snapshot.data!.data() as Map<String, dynamic>;
+          String userName = userData['name'] ?? 'User';
+
+          return Expanded(
+            child: SizedBox(
+              height: 146,
+              child: Stack(
+                alignment: Alignment.topCenter,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-                        onPressed: () {
-                          WaitingDialog.show(context, future: AuthController.I.logout());
-                        },
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    height: 145,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF8E2DE2), mainpurple],
                       ),
-                    ],
-                  ),
-                  Center(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(60),
+                        bottomRight: Radius.circular(60),
+                      ),
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              children: [
-                                const Text(
-                                  "Hello Donnalyn!",
-                                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: Colors.white),
-                                ),
-                                 ElevatedButton(
-                                  //on pressed
-                                  onPressed: () async {},
-                                  //style section code here
-                                  style: ButtonStyle(
-                                    
-                                    elevation: WidgetStateProperty.all<double>(0),
-                                    shape:
-                                        WidgetStateProperty.all<RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                    )),
-                                    backgroundColor:
-                                        WidgetStateProperty.all<Color>(dullpurple),
-                                  ),
-                                  //text to shoe in to the button
-                                  child: const Text('View Profile',
-                                      style: TextStyle(color: Colors.white, fontSize: 12)),
-                                ),
-                              ],
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.logout,
+                                  color: Colors.white, size: 20),
+                              onPressed: () {
+                                WaitingDialog.show(context,
+                                    future: AuthController.I.logout());
+                              },
                             ),
-                            
-                            // SizedBox(width: 30,),
-                            // Image.asset('assets/dash_bg.png', height: 125),
                           ],
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "Hello $userName!",
+                                        style: const TextStyle(
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {},
+                                        style: ButtonStyle(
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                                  0),
+                                          shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                            ),
+                                          ),
+                                          backgroundColor:
+                                              WidgetStateProperty.all<Color>(
+                                                  dullpurple),
+                                        ),
+                                        child: const Text('View Profile',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  Positioned(
+                    right: 0,
+                    top: 55,
+                    child: Image.asset(
+                      'assets/dash_bg.png',
+                      fit: BoxFit.cover,
+                      height: 100,
+                    ),
+                  ),
+                  Positioned(
+                    right: 265,
+                    top: 40,
+                    child: Image.asset(
+                      'assets/explore.png',
+                      fit: BoxFit.cover,
+                      height: 128,
+                    ),
+                  )
                 ],
               ),
             ),
-            Positioned(
-                right: 0,
-                top: 55,
-                child: Image.asset(
-                  'assets/dash_bg.png',
-                  fit: BoxFit.cover,
-                  height: 100,
-                ),
-              ),
-              Positioned(
-                right: 265,
-                top: 40,
-                child: Image.asset(
-                  'assets/explore.png',
-                  fit: BoxFit.cover,
-                  height: 128,
-                ),
-              )
-          ],
-        ),
-      ),
+          );
+        } else {
+          // While waiting for the future to complete
+          return const CircularProgressIndicator(); // Or a similar loading indicator
+        }
+      },
     );
   }
 }

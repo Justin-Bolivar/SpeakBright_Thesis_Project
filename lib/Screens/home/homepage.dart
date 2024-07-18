@@ -1,5 +1,6 @@
-// ignore_for_file: unrelated_type_equality_checks
+// ignore_for_file: unrelated_type_equality_checks, avoid_print
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -23,14 +24,27 @@ class DashBoard extends ConsumerStatefulWidget {
 
 class _DashBoardState extends ConsumerState<DashBoard> {
   final FlutterTts flutterTts = FlutterTts();
-  List<String> categories = ['All','Toys','Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores'];
+  List<String> categories = ['All'];
   int selectedCategory = -1;
-
 
   @override
   void initState() {
     super.initState();
     _setupTTS();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('categories').get();
+      setState(() {
+        categories =
+            querySnapshot.docs.map((doc) => doc['category'] as String).toList();
+      });
+    } catch (e) {
+      print('Error fetching categories: $e');
+    }
   }
 
   Future<void> _setupTTS() async {
@@ -76,41 +90,35 @@ class _DashBoardState extends ConsumerState<DashBoard> {
           children: [
             const RainbowContainer(),
             const SizedBox(height: 10),
-
             const Row(
               children: [
-                 Padding(
-                  padding: EdgeInsets.only(left: 20,bottom: 5),
-                   child: Text(
+                Padding(
+                  padding: EdgeInsets.only(left: 20, bottom: 5),
+                  child: Text(
                     "CATEGORIES",
-                    textAlign: TextAlign.left, // This should align the text to the left
+                    textAlign: TextAlign
+                        .left, // This should align the text to the left
                     style: TextStyle(
-                      fontSize: 15, 
-                      fontWeight: FontWeight.w400,
-                      color: Color.fromARGB(255, 130, 113, 164)
-                    ),
-                                   ),
-                 ),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        color: Color.fromARGB(255, 130, 113, 164)),
+                  ),
+                ),
                 Spacer()
               ],
             ),
-
             const SizedBox(height: 8),
-            
-
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 35, // Minimum height
-              maxHeight: 35, // Maximum height
-            ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 35,
+                maxHeight: 35,
+              ),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
-                  // Calculate the color index for the current item
                   int colorIndex = index % boxColors.length;
-                  // Set the background color based on the calculated color index
                   Color itemColor = boxColors[colorIndex];
 
                   bool isSelected = selectedCategory == index;
@@ -118,7 +126,7 @@ class _DashBoardState extends ConsumerState<DashBoard> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        selectedCategory = index; // Update the selected index
+                        selectedCategory = index;
                       });
                     },
                     child: SizedBox(
@@ -135,25 +143,25 @@ class _DashBoardState extends ConsumerState<DashBoard> {
                                     color: itemColor,
                                     spreadRadius: 1,
                                     blurRadius: 2,
-                                    offset: Offset(0, 1), // changes position of shadow
+                                    offset: const Offset(0, 1),
                                   ),
                                 ]
-                              : [], // No shadow if not selected
+                              : [],
                         ),
                         child: Text(
                           category,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: kwhite, fontSize: 14, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: kwhite,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                   );
                 },
               ),
-            
-          ),
-
-            
+            ),
             Container(
               height: 10,
               color: Colors.transparent,
@@ -167,7 +175,9 @@ class _DashBoardState extends ConsumerState<DashBoard> {
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
-                  selectedCategory: selectedCategory == -1 ? "All" : categories[selectedCategory],
+                  selectedCategory: selectedCategory == -1
+                      ? "All"
+                      : categories[selectedCategory],
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(child: Text('Error: $error')),
