@@ -1,12 +1,12 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import '../../Widgets/waiting_dialog.dart';
-import '../../routing/router.dart';
-import 'auth_controller.dart';
 import 'login_screen.dart';
 import 'package:date_field/date_field.dart';
 
@@ -14,7 +14,6 @@ class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
   static const String name = "Registration Screen";
   const RegistrationScreen({super.key});
-  
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -24,6 +23,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late GlobalKey<FormState> formKey;
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
+  DateTime? selectedBirthday;
 
   bool obfuscate = true;
 
@@ -61,7 +61,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool _isHovering = false;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -97,10 +96,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     onEnter: (_) => setState(() => _isHovering = true),
                     onExit: (_) => setState(() => _isHovering = false),
                     child: GestureDetector(
-                      onTap: ()
-                          => Navigator.push(context,MaterialPageRoute(builder: (context) => const LoginScreen()),),
-                          // {GlobalRouter.I.router.go(LoginScreen.route);},
-                          
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                      ),
+                      // {GlobalRouter.I.router.go(LoginScreen.route);},
+
                       child: Text(
                         "Already have an account? Login here",
                         style: TextStyle(
@@ -296,12 +298,56 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  onSubmit() {
+  Future<void> onSubmit() async {
     if (formKey.currentState?.validate() ?? false) {
-      WaitingDialog.show(context,
-          future: AuthController.I
-              .register(username.text.trim(), password.text.trim()));
+      try {
+        // Register user with Firebase Auth and show waiting dialog
+        UserCredential? userCredential = await WaitingDialog.show(
+          context,
+          future: FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: username.text.trim(),
+            password: password.text.trim(),
+          ),
+        );
+
+        // If registration is successful, store additional data in Firestore
+        if (userCredential?.user != null) {
+          await _storeUserData(userCredential!.user!.uid);
+
+          // Navigate to next screen or show success message
+          // For example:
+          // Navigator.pushReplacementNamed(context, '/home');
+        }
+      } catch (e) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+        );
+      }
     }
+  }
+
+  Future<void> _storeUserData(String userId) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+
+    String userId = user.uid;
+
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    DateTime birthdayDate = selectedBirthday ?? DateTime.now();
+    Timestamp birthdayTimestamp = Timestamp.fromDate(DateTime(
+        birthdayDate.year, birthdayDate.month, birthdayDate.day, 0, 0, 0));
+
+    await users.doc(userId).set({
+      'name': name.text.trim(),
+      'email': username.text.trim(),
+      'birthday': birthdayTimestamp,
+      'userID': userId,
+    });
   }
 
   final OutlineInputBorder _baseBorder = const OutlineInputBorder(
