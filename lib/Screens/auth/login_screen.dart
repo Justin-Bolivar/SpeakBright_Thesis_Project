@@ -27,8 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     formKey = GlobalKey<FormState>();
-    username = TextEditingController(text: "firebase@gmail.com");
-    password = TextEditingController(text: "123456Abc!");
+    username = TextEditingController();
+    password = TextEditingController();
     usernameFn = FocusNode();
     passwordFn = FocusNode();
   }
@@ -104,8 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                ),
-
+              ),
             ],
           ),
         ),
