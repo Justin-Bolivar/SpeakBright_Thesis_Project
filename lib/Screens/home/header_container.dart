@@ -1,14 +1,13 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:speakbright_mobile/Widgets/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Widgets/waiting_dialog.dart';
 import '../auth/auth_controller.dart';
 
 class RainbowContainer extends StatefulWidget {
-  const RainbowContainer({super.key});
+  const RainbowContainer({Key? key}) : super(key: key);
 
   @override
   _RainbowContainerState createState() => _RainbowContainerState();
@@ -39,10 +38,12 @@ class _RainbowContainerState extends State<RainbowContainer> {
             return const Text("Something went wrong");
           }
 
-          // Assuming the document exists and has a 'name' field
+          // Assuming the document exists and has a 'name' and 'birthday' field
           Map<String, dynamic> userData =
               snapshot.data!.data() as Map<String, dynamic>;
           String userName = userData['name'] ?? 'User';
+          DateTime userBirthday =
+              DateTime.parse(userData['birthday'].toDate().toString());
 
           return Expanded(
             child: SizedBox(
@@ -97,7 +98,44 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                             color: Colors.white),
                                       ),
                                       ElevatedButton(
-                                        onPressed: () async {},
+                                        onPressed: () async {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Center(
+                                                // Center the dialog on the screen
+                                                child: AlertDialog(
+                                                  title: const Text('Profile'),
+                                                  content:
+                                                      SingleChildScrollView(
+                                                    // Allow scrolling if needed
+                                                    child: ListBody(
+                                                      children: <Widget>[
+                                                        Text('Name: $userName',
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold)),
+                                                        Text(
+                                                            'Birthday: ${DateFormat('MMM dd, yyyy').format(userBirthday)}'), // Format date
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child:
+                                                          const Text('Close'),
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
                                         style: ButtonStyle(
                                           elevation:
                                               WidgetStateProperty.all<double>(
