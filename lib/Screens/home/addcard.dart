@@ -33,29 +33,72 @@ class _AddCardPageState extends State<AddCardPage> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  newCardTitle = value;
-                });
-              },
-              decoration: const InputDecoration(hintText: "Enter card title"),
-            ),
-            DropdownButtonFormField<String>(
-              value: selectedCategory,
-              hint: const Text('Select Category'),
-              items: <String>['Toys', 'Food', 'School', 'Clothing', 'Activities', 'Persons', 'Favourites', 'Places', 'Chores']
-                  .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  selectedCategory = newValue;
-                });
-              },
+           Container(
+              height: 350, // Set the height of the container
+              margin: EdgeInsets.all(16), // Optional: Adds some margin around the container for spacing
+              padding: EdgeInsets.all(16), // Padding inside the container for the content
+              decoration: BoxDecoration(
+                color: kwhite,
+                borderRadius: BorderRadius.circular(16), // Rounded borders on all edges
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5), // Shadow color
+                    spreadRadius: 0, // Spread radius
+                    blurRadius: 10, // Blur radius
+                    offset: Offset(0, 5), // Shadow position
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  imageUrl == null ? 
+                  Image.asset(
+                    'assets/add_image_icon.png',
+                    fit: BoxFit.cover,
+                    height: 150, // Adjust the size as needed
+                  ) : 
+                  Image.network(imageUrl!,
+                    fit: BoxFit.cover,
+                    height: 150, // Adjust the size as needed
+                  ),
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        newCardTitle = value;
+                      });
+                    },
+                    decoration: const InputDecoration(hintText: "Enter card title"),
+                  ),
+                  SizedBox(height: 16), // Space between TextField and DropdownButtonFormField
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      hint: const Text('Select Category'),
+                      items: <String>[
+                        'Toys',
+                        'Food',
+                        'School',
+                        'Clothing',
+                        'Activities',
+                        'Persons',
+                        'Favourites',
+                        'Places',
+                        'Chores'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          selectedCategory = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
             const SizedBox(height: 10),
@@ -63,7 +106,7 @@ class _AddCardPageState extends State<AddCardPage> {
               children: [
                 SizedBox(
                   height: 80, // Enforce a minimum height for the button area
-                  width: 220, // Take full width, adjust as needed
+                  width: 170, // Take full width, adjust as needed
                   child: Stack(
                     alignment: Alignment.center, // Center the container within the stack
                     children: [
@@ -78,11 +121,12 @@ class _AddCardPageState extends State<AddCardPage> {
                             ],
                           ),
                         ),
-                        child: Center( // Center the button within the container
+                        child: Align(
+                          alignment: Alignment.centerLeft,
                           child: ElevatedButton.icon(
                             onPressed: () => _pickImage(ImageSource.camera),
                             icon: const Icon(Icons.camera_alt_rounded, color: Color.fromARGB(255, 7, 14, 93),),
-                            label: const Text('Take Photo', style: TextStyle(color: Color.fromARGB(255, 7, 14, 93)),),
+                            label: const Text('Camera', style: TextStyle(color: Color.fromARGB(255, 7, 14, 93)),),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent, // Make the button transparent to show the gradient
                               shadowColor: Colors.transparent, // Remove shadow
@@ -97,7 +141,7 @@ class _AddCardPageState extends State<AddCardPage> {
                         child: Image.asset(
                           'assets/camera.png',
                           fit: BoxFit.cover,
-                          height: 60,
+                          height: 70,
                         ),
                       ),
 
@@ -109,7 +153,7 @@ class _AddCardPageState extends State<AddCardPage> {
 
                 SizedBox(
                   height: 80, // Enforce a minimum height for the button area
-                  width: 220, // Take full width, adjust as needed
+                  width: 170, // Take full width, adjust as needed
                   child: Stack(
                     alignment: Alignment.center, // Center the container within the stack
                     children: [
@@ -124,11 +168,12 @@ class _AddCardPageState extends State<AddCardPage> {
                             ],
                           ),
                         ),
-                        child: Center( // Center the button within the container
+                        child: Align(
+                          alignment: Alignment.centerLeft,
                           child: ElevatedButton.icon(
                             onPressed: () => _pickImage(ImageSource.gallery),
                             icon: const Icon(Icons.photo_library, color: Color.fromARGB(255, 137, 61, 7),),
-                            label: const Text('Browse Gallery', style: TextStyle(color: Color.fromARGB(255, 137, 61, 7)),),
+                            label: const Text('Gallery', style: TextStyle(color: Color.fromARGB(255, 137, 61, 7)),),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent, // Make the button transparent to show the gradient
                               shadowColor: Colors.transparent, // Remove shadow
@@ -140,12 +185,12 @@ class _AddCardPageState extends State<AddCardPage> {
 
                       Positioned(
                         // left: 10,
-                        right: 0,
+                        right: 10,
                         top: 0,
                         child: Image.asset(
                           'assets/album.png',
                           fit: BoxFit.cover,
-                          height: 55,
+                          height: 70,
                         ),
                       ),
                     ],
