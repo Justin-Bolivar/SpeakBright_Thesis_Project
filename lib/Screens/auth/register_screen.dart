@@ -24,8 +24,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
   DateTime? selectedBirthday;
+  String? userType;
 
   bool obfuscate = true;
+  bool _isHovering = false;
 
   @override
   void initState() {
@@ -37,7 +39,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     passwordFn = FocusNode();
     password2 = TextEditingController();
     password2Fn = FocusNode();
-
     name = TextEditingController();
     nameFn = FocusNode();
     birthday = TextEditingController();
@@ -53,14 +54,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     passwordFn.dispose();
     password2.dispose();
     password2Fn.dispose();
-
     name.dispose();
     nameFn.dispose();
     birthday.dispose();
     birthdayFn.dispose();
   }
 
-  bool _isHovering = false;
+  Widget buildUserTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: decoration.copyWith(
+        labelText: "User Type",
+        prefixIcon: const Icon(Icons.person_outline),
+      ),
+      value: userType,
+      items: ["Student", "Guardian"].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          userType = newValue;
+        });
+      },
+      validator: (value) => value == null ? 'Please select a user type' : null,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +99,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   onPressed: () {
                     onSubmit();
                   },
-                  // ignore: sort_child_properties_last
                   child: const Text("Register"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainpurple,
@@ -101,8 +120,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         MaterialPageRoute(
                             builder: (context) => const LoginScreen()),
                       ),
-                      // {GlobalRouter.I.router.go(LoginScreen.route);},
-
                       child: Text(
                         "Already have an account? Login here",
                         style: TextStyle(
@@ -143,7 +160,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         width: 21,
                       ),
                       const Text(
-                        "Registration", // Title
+                        "Registration",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w100,
@@ -172,14 +189,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Flexible(
+                  child: buildUserTypeDropdown(),
+                ),
+                const SizedBox(height: 8),
+                Flexible(
                   child: DateTimeFormField(
                     decoration: const InputDecoration(labelText: 'Birthday'),
                     mode: DateTimeFieldPickerMode.date,
-                    // controller: birthday,
-                    // focusNode: birthdayFn,
-                    // pickerPlatform: dateTimePickerPlatform,
                     onChanged: (DateTime? value) {
-                      print(value); // add action here paras storing
+                      print(value);
+                      setState(() {
+                        selectedBirthday = value;
+                      });
                     },
                   ),
                 ),
@@ -226,8 +247,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     controller: password,
                     onEditingComplete: () {
                       password2Fn.requestFocus();
-
-                      ///call submit maybe?
                     },
                     validator: MultiValidator([
                       RequiredValidator(errorText: "Password is required"),
@@ -266,8 +285,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       controller: password2,
                       onEditingComplete: () {
                         password2Fn.unfocus();
-
-                        ///call submit maybe?
                       },
                       validator: (v) {
                         String? doesMatchPasswords =
@@ -305,7 +322,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Future<void> onSubmit() async {
     if (formKey.currentState?.validate() ?? false) {
       try {
-        // Register user with Firebase Auth and show waiting dialog
         UserCredential? userCredential = await WaitingDialog.show(
           context,
           future: FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -314,16 +330,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         );
 
-        // If registration is successful, store additional data in Firestore
         if (userCredential?.user != null) {
           await _storeUserData(userCredential!.user!.uid);
-
           // Navigate to next screen or show success message
-          // For example:
-          // Navigator.pushReplacementNamed(context, '/home');
         }
       } catch (e) {
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed: ${e.toString()}')),
         );
@@ -351,6 +362,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
       'userID': userId,
+      'userType': userType,
     });
   }
 
@@ -360,7 +372,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   );
 
   InputDecoration get decoration => InputDecoration(
-      // prefixIconColor: AppColors.primary.shade700,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: true,
       fillColor: Colors.white,
