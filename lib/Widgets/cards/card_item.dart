@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
@@ -9,6 +7,7 @@ class CardItem extends StatelessWidget {
   final CardModel card;
   final int colorIndex;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final Function(String) onDelete;
 
   const CardItem({
@@ -16,6 +15,7 @@ class CardItem extends StatelessWidget {
     required this.card,
     required this.colorIndex,
     required this.onTap,
+    required this.onLongPress,
     required this.onDelete,
   });
 
@@ -25,10 +25,10 @@ class CardItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Stack(
         children: [
           Container(
-            width: double.infinity,
             decoration: BoxDecoration(
               color: kwhite,
               borderRadius: BorderRadius.circular(20),
