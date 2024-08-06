@@ -1,5 +1,7 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
 
+import 'dart:ui_web';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,6 @@ import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
-import 'package:speakbright_mobile/Screens/home/header_container.dart';
 
 class DashBoard extends ConsumerStatefulWidget {
   const DashBoard({super.key});
@@ -78,6 +79,34 @@ class _DashBoardState extends ConsumerState<DashBoard> {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
     return Scaffold(
       backgroundColor: kwhite,
+      appBar: AppBar(
+        backgroundColor: mainpurple,
+        elevation: 5,
+        title: Row(
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: Text(
+                "Communicate",
+                style: TextStyle(
+                  color: kwhite,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: () {
+                // Add home funcionality
+              },
+              icon: const Icon(
+                Icons.home,
+                color: kwhite,
+              ),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
@@ -88,23 +117,38 @@ class _DashBoardState extends ConsumerState<DashBoard> {
       body: SafeArea(
         child: Column(
           children: [
-            const RainbowContainer(),
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(left: 20, bottom: 5),
-                  child: Text(
-                    "CATEGORIES",
-                    textAlign: TextAlign
-                        .left, // This should align the text to the left
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        color: Color.fromARGB(255, 130, 113, 164)),
+                  padding: const EdgeInsets.only(left: 20, bottom: 5),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/Diversity.png',
+                        height: 40,
+                        width: 40,
+                      ),
+                      const SizedBox(width: 10),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Categories",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(fontSize: 24, color: kblack),
+                          ),
+                          Text(
+                            "Select a category and tap on cards you want",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(fontSize: 12, color: kblack),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                Spacer()
+                const Spacer()
               ],
             ),
             const SizedBox(height: 8),
