@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import '../../Routing/router.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'login_screen.dart';
 
@@ -138,11 +139,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 child: Flexible(
                   child: MouseRegion(
                     child: GestureDetector(
-                        onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginScreen()),
-                            ),
+                        onTap: ()
+                        // => Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => const LoginScreen()),
+                        //     ),
+                        {
+                        GlobalRouter.I.router.go(LoginScreen.route);
+                      },
                         child: RichText(
                           text: const TextSpan(
                             children: <TextSpan>[
