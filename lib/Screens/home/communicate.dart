@@ -7,7 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
-import 'package:speakbright_mobile/Widgets/colors.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:speakbright_mobile/Screens/home/header_container.dart';
 
