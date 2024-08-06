@@ -114,7 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       bottomNavigationBar: SafeArea(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          height: 200,
+          height: 150,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
