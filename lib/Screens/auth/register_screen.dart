@@ -8,7 +8,6 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'login_screen.dart';
-import 'package:date_field/date_field.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String route = "/register";
@@ -28,6 +27,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   bool obfuscate = true;
   bool _isHovering = false;
+  double _userTypeSliderValue = 0.0; // 0.0 for Guardian, 1.0 for Student
 
   @override
   void initState() {
@@ -60,25 +60,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     birthdayFn.dispose();
   }
 
-  Widget buildUserTypeDropdown() {
-    return DropdownButtonFormField<String>(
-      decoration: decoration.copyWith(
-        labelText: "User Type",
-        prefixIcon: const Icon(Icons.person_outline),
+  Widget buildUserTypeSegmentedButton() {
+    return Container(
+      decoration: const BoxDecoration(),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(7),
+        child: SegmentedButton<String>(
+          segments: const [
+            ButtonSegment<String>(
+              value: 'Student',
+              label: Center(child: Text('Student')),
+            ),
+            ButtonSegment<String>(
+              value: 'Guardian',
+              label: Center(child: Text('Guardian')),
+            ),
+          ],
+          selected: {userType ?? 'Student'},
+          onSelectionChanged: (Set<String> newSelection) {
+            setState(() {
+              userType = newSelection.first;
+            });
+          },
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
+                  return mainpurple;
+                }
+                return Colors.grey[200]!;
+              },
+            ),
+            foregroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.grey[200]!;
+                }
+                return mainpurple;
+              },
+            ),
+            side: WidgetStateProperty.all(BorderSide.none),
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )),
+          ),
+        ),
       ),
-      value: userType,
-      items: ["Student", "Guardian"].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          userType = newValue;
-        });
-      },
-      validator: (value) => value == null ? 'Please select a user type' : null,
     );
   }
 
@@ -99,13 +126,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   onPressed: () {
                     onSubmit();
                   },
-                  child: const Text("Register"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainpurple,
                     foregroundColor: Colors.white,
                     textStyle: const TextStyle(fontSize: 18),
                     minimumSize: const Size(double.infinity, 50),
                   ),
+                  child: const Text("Register"),
                 ),
               ),
               const SizedBox(height: 30),
@@ -115,17 +142,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     onEnter: (_) => setState(() => _isHovering = true),
                     onExit: (_) => setState(() => _isHovering = false),
                     child: GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      ),
-                      child: Text(
-                        "Already have an account? Login here",
-                        style: TextStyle(
-                            color: _isHovering ? mainpurple : dullpurple),
-                      ),
-                    ),
+                        onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()),
+                            ),
+                        child: RichText(
+                          text: const TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: 'Already have an account? ',
+                                  style: TextStyle(color: mainpurple)),
+                              TextSpan(
+                                  text: 'Login here',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: mainpurple)),
+                            ],
+                          ),
+                        )),
                   ),
                 ),
               ),
@@ -145,41 +180,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: [
                 Image.asset('assets/SpeakBright_P.png',
                     width: 300, height: 180),
-                Center(
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 12,
-                        child: Image.asset('assets/v_line.png'),
-                      ),
-                      Image.asset(
-                        'assets/v_line.png',
-                        width: 70,
-                      ),
-                      const SizedBox(
-                        width: 21,
-                      ),
-                      const Text(
-                        "Registration",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w100,
-                          color: dullpurple,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 21,
-                      ),
-                      Image.asset('assets/v_line.png', width: 70),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 8),
+                buildUserTypeSegmentedButton(),
+                const SizedBox(height: 8),
                 Flexible(
                   child: TextFormField(
                     decoration: decoration.copyWith(
                         labelText: "Name",
-                        prefixIcon: const Icon(Icons.person)),
+                        prefixIcon: const Icon(
+                          Icons.person,
+                          color: mainpurple,
+                        )),
                     focusNode: nameFn,
                     controller: name,
                     validator: MultiValidator([
@@ -189,18 +200,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Flexible(
-                  child: buildUserTypeDropdown(),
-                ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: DateTimeFormField(
-                    decoration: const InputDecoration(labelText: 'Birthday'),
-                    mode: DateTimeFieldPickerMode.date,
-                    onChanged: (DateTime? value) {
-                      print(value);
-                      setState(() {
-                        selectedBirthday = value;
-                      });
+                  child: TextFormField(
+                    decoration: decoration.copyWith(
+                      labelText: "Birthday",
+                      prefixIcon: const Icon(
+                        Icons.cake,
+                        color: mainpurple,
+                      ),
+                    ),
+                    readOnly: true,
+                    controller: TextEditingController(
+                      text: selectedBirthday?.toString().split(' ')[0] ?? '',
+                    ),
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: selectedBirthday ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null && picked != selectedBirthday) {
+                        setState(() {
+                          selectedBirthday = picked;
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      if (selectedBirthday == null) {
+                        return 'Please select your birthday';
+                      }
+                      return null;
                     },
                   ),
                 ),
@@ -211,7 +240,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: TextFormField(
                     decoration: decoration.copyWith(
                         labelText: "Email",
-                        prefixIcon: const Icon(Icons.person)),
+                        prefixIcon: const Icon(
+                          Icons.person,
+                          color: mainpurple,
+                        )),
                     focusNode: usernameFn,
                     controller: username,
                     onEditingComplete: () {
@@ -233,8 +265,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     obscureText: obfuscate,
                     decoration: decoration.copyWith(
                         labelText: "Password",
-                        prefixIcon: const Icon(Icons.password),
+                        prefixIcon: const Icon(
+                          Icons.password,
+                          color: mainpurple,
+                        ),
                         suffixIcon: IconButton(
+                            color: mainpurple,
                             onPressed: () {
                               setState(() {
                                 obfuscate = !obfuscate;
@@ -271,8 +307,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       obscureText: obfuscate,
                       decoration: decoration.copyWith(
                           labelText: "Confirm Password",
-                          prefixIcon: const Icon(Icons.password),
+                          prefixIcon: const Icon(
+                            Icons.password,
+                            color: mainpurple,
+                          ),
                           suffixIcon: IconButton(
+                              color: mainpurple,
                               onPressed: () {
                                 setState(() {
                                   obfuscate = !obfuscate;
