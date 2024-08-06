@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:speakbright_mobile/Widgets/colors.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class AddCardPage extends StatefulWidget {
   const AddCardPage({super.key});
@@ -35,9 +35,9 @@ class _AddCardPageState extends State<AddCardPage> {
           children: [
             Container(
               height: 350, // Set the height of the container
-              margin: EdgeInsets.all(
+              margin: const EdgeInsets.all(
                   16), // Optional: Adds some margin around the container for spacing
-              padding: EdgeInsets.all(
+              padding: const EdgeInsets.all(
                   16), // Padding inside the container for the content
               decoration: BoxDecoration(
                 color: kwhite,
@@ -48,7 +48,7 @@ class _AddCardPageState extends State<AddCardPage> {
                     color: Colors.grey.withOpacity(0.5), // Shadow color
                     spreadRadius: 0, // Spread radius
                     blurRadius: 10, // Blur radius
-                    offset: Offset(0, 5), // Shadow position
+                    offset: const Offset(0, 5), // Shadow position
                   ),
                 ],
               ),
@@ -74,7 +74,7 @@ class _AddCardPageState extends State<AddCardPage> {
                     decoration:
                         const InputDecoration(hintText: "Enter card title"),
                   ),
-                  SizedBox(
+                  const SizedBox(
                       height:
                           16), // Space between TextField and DropdownButtonFormField
                   Expanded(
@@ -84,6 +84,7 @@ class _AddCardPageState extends State<AddCardPage> {
                       items: <String>[
                         'Toys',
                         'Food',
+                        'Emotions',
                         'School',
                         'Clothing',
                         'Activities',
