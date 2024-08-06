@@ -12,12 +12,12 @@ class CardItem extends StatelessWidget {
   final Function(String) onDelete;
 
   const CardItem({
-    Key? key,
+    super.key,
     required this.card,
     required this.colorIndex,
     required this.onTap,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +28,7 @@ class CardItem extends StatelessWidget {
       child: Stack(
         children: [
           Container(
+            width: double.infinity,
             decoration: BoxDecoration(
               color: kwhite,
               borderRadius: BorderRadius.circular(20),
@@ -43,7 +44,7 @@ class CardItem extends StatelessWidget {
             child: Column(
               children: [
                 _buildImageContainer(itemColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Center(
                   child: Text(
                     card.title,
@@ -102,7 +103,7 @@ class CardItem extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          height: 100,
+          height: 110,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
