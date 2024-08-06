@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:speakbright_mobile/Screens/home/communicate.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Screens/home/header_container.dart';
+
+import '../../Routing/router.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -85,48 +88,71 @@ Widget build(BuildContext context) {
               child: ListView.builder(
                 itemCount: 4,
                 itemBuilder: (context, index) {
-                  return Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(25, 15, 25, 15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
+                  return InkWell( // Wrap each Card with InkWell for tap detection
+                    onTap: () {
+                      // Determine the action based on the index of the tapped card
+                      switch (index) {
+                        case 0:
+                          // print('Card 1 tapped');
+                          GlobalRouter.I.router.push(Communicate.route);
+                          break;
+                        case 1:
+                          print('Card 2 tapped');
+                          break;
+                        case 2:
+                          print('Card 3 tapped');
+                          break;
+                        case 3:
+                          print('Card 4 tapped');
+                          break;
+                        default:
+                          print('Unknown card tapped');
+                          break;
+                      }
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(25, 15, 25, 15.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  [
+                                    'Communicate',
+                                    'Explore',
+                                    'Play a Game',
+                                    'Test'
+                                  ][index],
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: baseFontSize),
+                                ),
+                                Text(
+                                  [
+                                    'Tap on cards you want',
+                                    'Discover new cards',
+                                    'Enjoy learning',
+                                    'Let’s test what you know'
+                                  ][index],
+                                  style: TextStyle(fontSize: baseFontSize * 0.8), // Smaller relative font size
+                                ),
+                              ],
+                            ),
+                            Image.asset(
                                 [
-                                  'Communicate',
-                                  'Explore',
-                                  'Play a Game',
-                                  'Test'
+                                  'assets/communicate.png',
+                                  'assets/train.png',
+                                  'assets/play.png',
+                                  'assets/test_books.png'
                                 ][index],
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: baseFontSize),
-                              ),
-                              Text(
-                                [
-                                  'Tap on cards you want',
-                                  'Discover new cards',
-                                  'Enjoy learning',
-                                  'Let’s test what you know'
-                                ][index],
-                                style: TextStyle(fontSize: baseFontSize * 0.8), // Smaller relative font size
-                              ),
-                            ],
-                          ),
-                          Image.asset(
-                              [
-                                'assets/communicate.png',
-                                'assets/train.png',
-                                'assets/play.png',
-                                'assets/test_books.png'
-                              ][index],
-                              height: imageHeight,
-                              fit: BoxFit.cover,
-                          ),
-                        ],
+                                height: imageHeight,
+                                fit: BoxFit.cover,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
