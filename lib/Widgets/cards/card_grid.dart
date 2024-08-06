@@ -6,6 +6,7 @@ class CardGrid extends StatelessWidget {
   final List<CardModel> cards;
   final Function(String) onCardTap;
   final Function(String) onCardDelete;
+  final Function(String) onCardLongPress;
   final String selectedCategory;
 
   const CardGrid({
@@ -13,6 +14,7 @@ class CardGrid extends StatelessWidget {
     required this.cards,
     required this.onCardTap,
     required this.onCardDelete,
+    required this.onCardLongPress,
     required this.selectedCategory,
   });
 
@@ -37,6 +39,7 @@ class CardGrid extends StatelessWidget {
           colorIndex: index,
           onTap: () => onCardTap(filteredCards[index].title),
           onDelete: onCardDelete,
+          onLongPress: () => onCardLongPress(filteredCards[index].title),
         );
       },
     );
