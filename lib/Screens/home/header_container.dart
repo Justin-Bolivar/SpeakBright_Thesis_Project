@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Screens/home/profile_dialogue.dart';
@@ -11,7 +9,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class RainbowContainer extends StatefulWidget {
-  const RainbowContainer({Key? key}) : super(key: key);
+  const RainbowContainer({super.key});
 
   @override
   _RainbowContainerState createState() => _RainbowContainerState();
