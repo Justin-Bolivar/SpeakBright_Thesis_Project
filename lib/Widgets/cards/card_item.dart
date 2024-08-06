@@ -1,8 +1,9 @@
-// ignore_for_file: avoid_print, use_super_parameters
+// ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
-import 'package:speakbright_mobile/Widgets/colors.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class CardItem extends StatelessWidget {
   final CardModel card;
@@ -42,7 +43,7 @@ class CardItem extends StatelessWidget {
             child: Column(
               children: [
                 _buildImageContainer(itemColor),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Center(
                   child: Text(
                     card.title,
@@ -79,14 +80,14 @@ class CardItem extends StatelessWidget {
             TextButton(
               child: const Text("No"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text("Yes"),
               onPressed: () {
-                onDelete(card.id); // Call the delete function
-                Navigator.of(context).pop(); // Close the dialog
+                onDelete(card.id);
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -141,23 +142,17 @@ class CardItem extends StatelessWidget {
         topLeft: Radius.circular(20),
         topRight: Radius.circular(20),
       ),
-      child: Image.network(
-        card.imageUrl,
+      child: CachedNetworkImage(
+        imageUrl: card.imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
+        placeholder: (context, url) => Center(
+          child: CircularProgressIndicator(
+            color: color,
+          ),
+        ),
+        errorWidget: (context, url, error) {
           print('Error loading image: $error');
           return Icon(Icons.image_not_supported, color: color);
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
         },
       ),
     );
