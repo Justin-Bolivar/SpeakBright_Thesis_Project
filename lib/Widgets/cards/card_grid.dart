@@ -6,7 +6,7 @@ class CardGrid extends StatelessWidget {
   final List<CardModel> cards;
   final Function(String) onCardTap;
   final Function(String) onCardDelete;
-  final String selectedCategory; 
+  final String selectedCategory;
 
   const CardGrid({
     super.key,
@@ -27,8 +27,8 @@ class CardGrid extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 25.0,
-        mainAxisSpacing: 25.0,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
       ),
       itemCount: filteredCards.length,
       itemBuilder: (context, index) {
