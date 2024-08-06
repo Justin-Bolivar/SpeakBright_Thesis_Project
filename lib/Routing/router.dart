@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
+import "package:speakbright_mobile/Screens/home/homepage.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -24,10 +25,10 @@ class GlobalRouter {
       BuildContext context, GoRouterState state) async {
     if (AuthController.I.state == AuthState.authenticated) {
       if (state.matchedLocation == LoginScreen.route) {
-        return DashBoard.route;
+        return HomePage.route;
       }
       if (state.matchedLocation == RegistrationScreen.route) {
-        return DashBoard.route;
+        return HomePage.route;
       }
       return null;
     }
@@ -48,7 +49,7 @@ class GlobalRouter {
     _shellNavigatorKey = GlobalKey<NavigatorState>();
     router = GoRouter(
         navigatorKey: _rootNavigatorKey,
-        initialLocation: DashBoard.route,
+        initialLocation: HomePage.route,
         redirect: handleRedirect,
         refreshListenable: AuthController.I,
         routes: [
@@ -71,14 +72,14 @@ class GlobalRouter {
               routes: [
                 GoRoute(
                     parentNavigatorKey: _shellNavigatorKey,
-                    path: DashBoard.route,
-                    name: DashBoard.name,
+                    path: HomePage.route,
+                    name: HomePage.name,
                     builder: (context, _) {
-                      return const DashBoard();
+                      return const HomePage();
                     }),
               ],
               builder: (context, state, child) {
-                return const DashBoard();
+                return const HomePage();
               })
         ]);
   }
