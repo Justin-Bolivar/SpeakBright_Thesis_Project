@@ -176,7 +176,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: [
                 Image.asset('assets/SpeakBright_P.png',
                     width: 300, height: 180),
-                const SizedBox(height: 8),
                 buildUserTypeSegmentedButton(),
                 const SizedBox(height: 8),
                 Flexible(
