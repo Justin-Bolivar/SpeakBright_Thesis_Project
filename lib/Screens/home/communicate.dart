@@ -14,9 +14,9 @@ import 'package:speakbright_mobile/Screens/home/header_container.dart';
 class DashBoard extends ConsumerStatefulWidget {
   const DashBoard({super.key});
 
-  static const String route = "/home";
-  static const String path = "/home";
-  static const String name = "Dashboard";
+  static const String route = "/communicate";
+  static const String path = "/communicate";
+  static const String name = "Communicate";
 
   @override
   ConsumerState<DashBoard> createState() => _DashBoardState();
