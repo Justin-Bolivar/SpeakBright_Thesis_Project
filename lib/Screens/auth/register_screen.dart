@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:speakbright_mobile/Widgets/colors.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'login_screen.dart';
 import 'package:date_field/date_field.dart';
