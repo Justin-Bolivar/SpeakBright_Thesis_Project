@@ -6,13 +6,15 @@ class CardGrid extends StatelessWidget {
   final List<CardModel> cards;
   final Function(String) onCardTap;
   final Function(String) onCardDelete;
-  final String selectedCategory; 
+  final Function(String) onCardLongPress;
+  final String selectedCategory;
 
   const CardGrid({
     super.key,
     required this.cards,
     required this.onCardTap,
     required this.onCardDelete,
+    required this.onCardLongPress,
     required this.selectedCategory,
   });
 
@@ -27,8 +29,8 @@ class CardGrid extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 25.0,
-        mainAxisSpacing: 25.0,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
       ),
       itemCount: filteredCards.length,
       itemBuilder: (context, index) {
@@ -37,6 +39,7 @@ class CardGrid extends StatelessWidget {
           colorIndex: index,
           onTap: () => onCardTap(filteredCards[index].title),
           onDelete: onCardDelete,
+          onLongPress: () => onCardLongPress(filteredCards[index].title),
         );
       },
     );
