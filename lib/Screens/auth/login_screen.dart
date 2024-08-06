@@ -48,56 +48,112 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      body: SafeArea(
+        child: SingleChildScrollView( // Wrap everything in SingleChildScrollView
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Flexible(
-                child: ElevatedButton(
-                  onPressed: () {
-                    onSubmit();
-                  },
-                  // ignore: sort_child_properties_last
-                  child: const Text("Login"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainpurple,
-                    foregroundColor: kwhite,
-                    textStyle: const TextStyle(fontSize: 18),
-                    minimumSize: const Size(double.infinity, 50),
+              Image.asset('assets/SpeakBright_P.png', width: 450, height: 250),
+              const SizedBox(height: 30),
+              Form(
+                key: formKey,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          TextFormField(
+                            decoration: decoration.copyWith(
+                              labelText: "Username",
+                              prefixIcon: const Icon(Icons.person, color: mainpurple),
+                              labelStyle: const TextStyle(color: mainpurple),
+                              hintStyle: const TextStyle(color: mainpurple),
+                            ),
+                            focusNode: usernameFn,
+                            controller: username,
+                            onEditingComplete: () {
+                              passwordFn.requestFocus();
+                            },
+                            validator: MultiValidator([
+                              RequiredValidator(errorText: 'Please fill out the username'),
+                              MaxLengthValidator(32, errorText: "Username cannot exceed 32 characters"),
+                              EmailValidator(errorText: "Please select a valid email"),
+                            ]).call,
+                          ),
+                          const SizedBox(height: 15),
+                          TextFormField(
+                            keyboardType: TextInputType.visiblePassword,
+                            obscureText: obfuscate,
+                            decoration: decoration.copyWith(
+                              labelText: "Password",
+                              prefixIcon: const Icon(Icons.password, color: mainpurple),
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      obfuscate = !obfuscate;
+                                    });
+                                  },
+                                  icon: Icon(obfuscate ? Icons.remove_red_eye_rounded : CupertinoIcons.eye_slash, color: mainpurple)),
+                              labelStyle: const TextStyle(color: mainpurple),
+                              hintStyle: const TextStyle(color: mainpurple),
+                            ),
+                            focusNode: passwordFn,
+                            controller: password,
+                            onEditingComplete: () {
+                              passwordFn.unfocus();
+                            },
+                            validator: MultiValidator([
+                              RequiredValidator(errorText: "Password is required"),
+                              MaxLengthValidator(128, errorText: "Password cannot exceed 72 characters"),
+                            ]).call,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-              Center(
-                child: Flexible(
-                  child: MouseRegion(
-                    onEnter: (_) => setState(() => _isHovering = true),
-                    onExit: (_) => setState(() => _isHovering = false),
-                    child: GestureDetector(
-                        onTap: () {
-                          GlobalRouter.I.router.go(RegistrationScreen.route);
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: 'No Account? ',
-                                  style: TextStyle(color: mainpurple)),
-                              TextSpan(
-                                  text: 'Register Here',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: mainpurple)), // Make "Login" bold
-                            ],
-                          ),
-                        )),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: 
+                  ElevatedButton(
+                    onPressed: () {
+                      onSubmit();
+                    },
+                    child: const Text("Login"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mainpurple,
+                      foregroundColor: kwhite,
+                      textStyle: const TextStyle(fontSize: 18),
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
                   ),
+                
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: MouseRegion(
+                  onEnter: (_) => setState(() => _isHovering = true),
+                  onExit: (_) => setState(() => _isHovering = false),
+                  child: GestureDetector(
+                      onTap: () {
+                        GlobalRouter.I.router.go(RegistrationScreen.route);
+                      },
+                      child: RichText(
+                        text: const TextSpan(
+                          children: <TextSpan>[
+                            TextSpan(text: 'No Account? ', style: TextStyle(color: mainpurple)),
+                            TextSpan(text: 'Register Here', style: TextStyle(fontWeight: FontWeight.bold, color: mainpurple)),
+                          ],
+                        ),
+                      )),
                 ),
               ),
-              SizedBox(
+                SizedBox(
                 height: 250,
                 child: Stack(
                   children: [
@@ -112,99 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Image.asset('assets/SpeakBright_P.png',
-                          width: 450, height: 250),
-                      const SizedBox(height: 30),
-                      Flexible(
-                        child: TextFormField(
-                          decoration: decoration.copyWith(
-                            labelText: "Username",
-                            prefixIcon: const Icon(
-                              Icons.person,
-                              color: mainpurple,
-                            ),
-                            labelStyle: const TextStyle(color: mainpurple),
-                            hintStyle: const TextStyle(color: mainpurple),
-                          ),
-                          focusNode: usernameFn,
-                          controller: username,
-                          onEditingComplete: () {
-                            passwordFn.requestFocus();
-                          },
-                          validator: MultiValidator([
-                            RequiredValidator(
-                                errorText: 'Please fill out the username'),
-                            MaxLengthValidator(32,
-                                errorText:
-                                    "Username cannot exceed 32 characters"),
-                            EmailValidator(
-                                errorText: "Please select a valid email"),
-                          ]).call,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Flexible(
-                        child: TextFormField(
-                          keyboardType: TextInputType.visiblePassword,
-                          obscureText: obfuscate,
-                          decoration: decoration.copyWith(
-                            labelText: "Password",
-                            prefixIcon: const Icon(
-                              Icons.password,
-                              color: mainpurple,
-                            ),
-                            suffixIcon: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    obfuscate = !obfuscate;
-                                  });
-                                },
-                                icon: Icon(
-                                  obfuscate
-                                      ? Icons.remove_red_eye_rounded
-                                      : CupertinoIcons.eye_slash,
-                                  color: mainpurple,
-                                )),
-                            labelStyle: const TextStyle(color: mainpurple),
-                            hintStyle: const TextStyle(color: mainpurple),
-                          ),
-                          focusNode: passwordFn,
-                          controller: password,
-                          onEditingComplete: () {
-                            passwordFn.unfocus();
-                          },
-                          validator: MultiValidator([
-                            RequiredValidator(
-                                errorText: "Password is required"),
-                            MaxLengthValidator(128,
-                                errorText:
-                                    "Password cannot exceed 72 characters"),
-                          ]).call,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
