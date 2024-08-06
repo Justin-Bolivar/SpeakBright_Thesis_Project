@@ -1,7 +1,5 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
 
-import 'dart:ui_web';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -117,6 +115,27 @@ class _DashBoardState extends ConsumerState<DashBoard> {
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Container(
+                width: double.infinity,
+                height: 100,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: mainpurple,
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Drag cards Here",
+                    style: TextStyle(color: mainpurple),
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
