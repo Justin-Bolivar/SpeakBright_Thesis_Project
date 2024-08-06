@@ -26,8 +26,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String? userType;
 
   bool obfuscate = true;
-  bool _isHovering = false;
-  double _userTypeSliderValue = 0.0; // 0.0 for Guardian, 1.0 for Student
 
   @override
   void initState() {
@@ -139,8 +137,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Center(
                 child: Flexible(
                   child: MouseRegion(
-                    onEnter: (_) => setState(() => _isHovering = true),
-                    onExit: (_) => setState(() => _isHovering = false),
                     child: GestureDetector(
                         onTap: () => Navigator.push(
                               context,
