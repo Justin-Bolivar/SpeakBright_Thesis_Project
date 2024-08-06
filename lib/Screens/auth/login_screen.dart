@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import '../../Routing/router.dart';
-import '../../Widgets/colors.dart';
+import '../../Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'auth_controller.dart';
 import 'register_screen.dart';
@@ -77,15 +77,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     onEnter: (_) => setState(() => _isHovering = true),
                     onExit: (_) => setState(() => _isHovering = false),
                     child: GestureDetector(
-                      onTap: () {
-                        GlobalRouter.I.router.go(RegistrationScreen.route);
-                      },
-                      child: Text(
-                        "No account? Register Here",
-                        style: TextStyle(
-                            color: _isHovering ? kLightPruple : dullpurple),
-                      ),
-                    ),
+                        onTap: () {
+                          GlobalRouter.I.router.go(RegistrationScreen.route);
+                        },
+                        child: RichText(
+                          text: const TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: 'No Account? ',
+                                  style: TextStyle(color: mainpurple)),
+                              TextSpan(
+                                  text: 'Register Here',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: mainpurple)), // Make "Login" bold
+                            ],
+                          ),
+                        )),
                   ),
                 ),
               ),
@@ -93,9 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 250,
                 child: Stack(
                   children: [
-                    Positioned(
-                      right: 0,
-                      top: 0,
+                    Center(
                       child: Image.asset(
                         'assets/earth.png',
                         fit: BoxFit.cover,

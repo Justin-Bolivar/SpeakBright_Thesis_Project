@@ -1,22 +1,18 @@
 import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
-
+import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
 import "../Screens/auth/register_screen.dart";
-import "../Screens/home/homepage.dart";
 
 class GlobalRouter {
-  // Static method to initialize the singleton in GetIt
   static void initialize() {
     GetIt.instance.registerSingleton<GlobalRouter>(GlobalRouter());
   }
 
-  // Static getter to access the instance through GetIt
   static GlobalRouter get instance => GetIt.instance<GlobalRouter>();
   static GlobalRouter get I => GetIt.instance<GlobalRouter>();
 
@@ -80,14 +76,10 @@ class GlobalRouter {
                     builder: (context, _) {
                       return const DashBoard();
                     }),
-                
               ],
               builder: (context, state, child) {
-                return const  DashBoard(
-                );
-              }
-          ) 
-              ]
-        );
+                return const DashBoard();
+              })
+        ]);
   }
 }
