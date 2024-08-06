@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import '../../Routing/router.dart';
-import '../../Widgets/colors.dart';
+import '../../Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'auth_controller.dart';
 import 'register_screen.dart';
@@ -93,9 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 250,
                 child: Stack(
                   children: [
-                    Positioned(
-                      right: 0,
-                      top: 0,
+                    Center(
                       child: Image.asset(
                         'assets/earth.png',
                         fit: BoxFit.cover,
