@@ -8,18 +8,18 @@ import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 
-class DashBoard extends ConsumerStatefulWidget {
-  const DashBoard({super.key});
+class Communicate extends ConsumerStatefulWidget {
+  const Communicate({super.key});
 
   static const String route = "/communicate";
   static const String path = "/communicate";
   static const String name = "Communicate";
 
   @override
-  ConsumerState<DashBoard> createState() => _DashBoardState();
+  ConsumerState<Communicate> createState() => _CommunicateState();
 }
 
-class _DashBoardState extends ConsumerState<DashBoard> {
+class _CommunicateState extends ConsumerState<Communicate> {
   final FlutterTts flutterTts = FlutterTts();
   List<String> sentence = [];
   List<String> categories = ['All'];
