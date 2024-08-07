@@ -7,6 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
+import 'package:dotted_border/dotted_border.dart';
 
 class Communicate extends ConsumerStatefulWidget {
   const Communicate({super.key});
@@ -89,7 +90,16 @@ class _CommunicateState extends ConsumerState<Communicate> {
     return Scaffold(
       backgroundColor: kwhite,
       appBar: AppBar(
-        backgroundColor: mainpurple,
+        leading: const BackButton(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerRight,
+              end: Alignment.centerLeft,
+              colors: [Color(0xFF8E2DE2), mainpurple], // Your gradient colors
+            ),
+          ),
+        ),
         elevation: 5,
         title: Row(
           children: [
@@ -129,30 +139,37 @@ class _CommunicateState extends ConsumerState<Communicate> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: kgrey,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
+              padding: const EdgeInsets.all(10.0),
+              child: DottedBorder(
+                color: dullpurple, 
+                strokeWidth: 1, 
+                dashPattern: const [6, 7], 
+                borderType: BorderType.RRect, 
+                radius: const Radius.circular(20.0),
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: kwhite,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: sentence.length,
                   itemBuilder: (context, index) {
                     return Container(
-                      margin: const EdgeInsets.all(8.0),
-                      padding: const EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.fromLTRB(5,30,5,30),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: mainpurple,
+                        color: dullpurple.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(20.0),
+                      
                       ),
                       child: Center(
                         child: Text(
                           sentence[index],
                           style: const TextStyle(
-                            color: kwhite,
-                            fontSize: 16.0,
+                            color: dullpurple,
+                            fontSize: 14.0,
                           ),
                         ),
                       ),
@@ -161,6 +178,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 ),
               ),
             ),
+          ),
           ),
           Row(
             children: [
