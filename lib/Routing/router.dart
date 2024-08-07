@@ -8,6 +8,7 @@ import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
 import "../Screens/auth/register_screen.dart";
+import "../Screens/home/explore.dart";
 
 class GlobalRouter {
   static void initialize() {
@@ -125,6 +126,13 @@ class GlobalRouter {
                     name: Communicate.name,
                     builder: (context, _) {
                       return const Communicate();
+                    }),
+              GoRoute(
+                      parentNavigatorKey: _rootNavigatorKey,
+                      path: Explore.route,
+                      name: Explore.name,
+                      builder: (context, _) {
+                        return const Explore();
                     }),
           
         ]);

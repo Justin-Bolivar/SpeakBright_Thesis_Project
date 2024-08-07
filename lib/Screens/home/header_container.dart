@@ -74,126 +74,124 @@ class _RainbowContainerState extends State<RainbowContainer> {
           DateTime userBirthday =
               DateTime.parse(userData['birthday'].toDate().toString());
 
-          return Expanded(
-            child: SizedBox(
-              height: 146,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    height: 145,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFF8E2DE2), mainpurple],
-                      ),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(60),
-                        bottomRight: Radius.circular(60),
-                      ),
+          return SizedBox(
+            height: MediaQuery.of(context).size.height*0.8,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  height:  MediaQuery.of(context).size.height*0.6,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF8E2DE2), mainpurple],
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(500),
+                      bottomRight: Radius.circular(500),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.logout,
+                                color: Colors.white, size: 20),
+                            onPressed: () {
+                              WaitingDialog.show(context,
+                                  future: AuthController.I.logout());
+                            },
+                          ),
+                        ],
+                      ),
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.logout,
-                                  color: Colors.white, size: 20),
-                              onPressed: () {
-                                WaitingDialog.show(context,
-                                    future: AuthController.I.logout());
-                              },
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Column(
+                                  children: [
+                                    Text(
+                                      "Hello $userName!",
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context).size.width*0.04,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: Colors
+                                              .transparent, // Transparent barrier color
+                                          builder: (BuildContext context) {
+                                            return ProfileDialogue(
+                                              name: userName,
+                                              birthday: userBirthday,
+                                              onTap: () async {
+                                                _speak(
+                                                    "Your name is $userName");
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                      style: ButtonStyle(
+                                        elevation:
+                                            WidgetStateProperty.all<double>(
+                                                0),
+                                        shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20.0),
+                                          ),
+                                        ),
+                                        backgroundColor:
+                                            WidgetStateProperty.all<Color>(
+                                                dullpurple),
+                                      ),
+                                      child: const Text('View Profile',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12)),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text(
-                                        "Hello $userName!",
-                                        style: const TextStyle(
-                                            fontSize: 21,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors
-                                                .transparent, // Transparent barrier color
-                                            builder: (BuildContext context) {
-                                              return ProfileDialogue(
-                                                name: userName,
-                                                birthday: userBirthday,
-                                                onTap: () async {
-                                                  _speak(
-                                                      "Your name is $userName");
-                                                },
-                                              );
-                                            },
-                                          );
-                                        },
-                                        style: ButtonStyle(
-                                          elevation:
-                                              WidgetStateProperty.all<double>(
-                                                  0),
-                                          shape: WidgetStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20.0),
-                                            ),
-                                          ),
-                                          backgroundColor:
-                                              WidgetStateProperty.all<Color>(
-                                                  dullpurple),
-                                        ),
-                                        child: const Text('View Profile',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Positioned(
-                    right: 0,
-                    top: 70,
-                    child: Image.asset(
-                      'assets/dash_bg.png',
-                      fit: BoxFit.cover,
-                      height: MediaQuery.of(context).size.width*0.2,
-                    ),
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    'assets/dash_bg.png',
+                    fit: BoxFit.cover,
+                    height: MediaQuery.of(context).size.height*0.2,
                   ),
-                  Positioned(
-                    left: 0,
-                    top: 40,
-                    child: Image.asset(
-                      'assets/explore.png',
-                      fit: BoxFit.cover,
-                      height: MediaQuery.of(context).size.width*0.3,
-                    ),
-                  )
-                ],
-              ),
+                ),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    'assets/explore.png',
+                    fit: BoxFit.cover,
+                    height: MediaQuery.of(context).size.height*0.3,
+                  ),
+                )
+              ],
             ),
           );
         } else {
