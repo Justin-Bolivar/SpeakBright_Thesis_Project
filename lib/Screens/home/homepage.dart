@@ -1,10 +1,13 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
+import 'package:speakbright_mobile/Screens/home/explore.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Screens/home/header_container.dart';
 
@@ -27,33 +30,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    _setupTTS();
-  }
-
-  Future<void> _setupTTS() async {
-    await flutterTts.setLanguage("en-US");
-    await _setDefaultVoice();
-  }
-
-  Future<void> _setDefaultVoice() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    String voiceName = connectivityResult != ConnectivityResult.none
-        ? "Microsoft Aria Online (Natural) - English (United States)"
-        : "Microsoft Zira - English (United States)";
-
-    await flutterTts.setVoice({"name": voiceName, "locale": "en-US"});
-    await flutterTts.setPitch(1.0);
-  }
-
-  Future<void> _speak(String text) async {
-    await _setDefaultVoice();
-    await flutterTts.speak(text);
-  }
-
-  @override
-  void dispose() {
-    flutterTts.stop();
-    super.dispose();
   }
 
  @override
@@ -61,28 +37,23 @@ Widget build(BuildContext context) {
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
 
-  // Calculate relative font sizes and image heights based on screen width
-  double baseFontSize = screenWidth * 0.03; // Base font size as 3% of the screen width
-  double imageHeight = screenWidth * 0.2; // Image height as 20% of the screen width
-
+  double baseFontSize = screenWidth * 0.03; 
+  double imageHeight = screenWidth * 0.2; 
   return Scaffold(
     backgroundColor: kwhite,
     body: SafeArea(
       child: Column(
         children: [
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: SizedBox(
-                height: screenHeight * 0.2,
-                child: const RainbowContainer(),
-              ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+              height: max(screenHeight * 0.2, 200),
+              child: const RainbowContainer(),
             ),
           ),
 
           Expanded(
-            flex: 3,
+            flex: 2,
             child: SizedBox(
               width: screenWidth * 0.85, 
               child: ListView.builder(
@@ -97,7 +68,8 @@ Widget build(BuildContext context) {
                           GlobalRouter.I.router.push(Communicate.route);
                           break;
                         case 1:
-                          print('Card 2 tapped');
+                          // print('Card 2 tapped');
+                          GlobalRouter.I.router.push(Explore.route);
                           break;
                         case 2:
                           print('Card 3 tapped');
@@ -137,7 +109,7 @@ Widget build(BuildContext context) {
                                     'Enjoy learning',
                                     'Let’s test what you know'
                                   ][index],
-                                  style: TextStyle(fontSize: baseFontSize * 0.8), // Smaller relative font size
+                                  style: TextStyle(fontSize: baseFontSize * 0.8), 
                                 ),
                               ],
                             ),
