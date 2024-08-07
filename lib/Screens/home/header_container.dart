@@ -141,167 +141,6 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                                       "Your name is $userName");
                                                 },
                                               );
-                                              // return BackdropFilter(
-                                              //   filter: ImageFilter.blur(
-                                              //       sigmaX: 5.0,
-                                              //       sigmaY:
-                                              //           5.0), // Apply blur effect
-                                              //   child: SizedBox(
-                                              //     width:
-                                              //         250, // Specify the width of the dialog
-                                              //     height:
-                                              //         200, // Specify the height of the dialog
-                                              //     child: Center(
-                                              //       child: Container(
-                                              //         constraints:
-                                              //             const BoxConstraints(
-                                              //                 maxWidth: 300,
-                                              //                 maxHeight:
-                                              //                     400), // Ensure the dialog doesn't exceed the specified dimensions
-                                              //         child: Stack(
-                                              //           children: <Widget>[
-                                              //             Positioned.fill(
-                                              //               child: Container(
-                                              //                 decoration:
-                                              //                     BoxDecoration(
-                                              //                   color: Colors
-                                              //                       .transparent, // Dialog background color
-                                              //                   borderRadius:
-                                              //                       BorderRadius
-                                              //                           .circular(
-                                              //                               15), // Rounded corners
-                                              //                 ),
-                                              //               ),
-                                              //             ),
-                                              //             Center(
-                                              //               child: Container(
-                                              //                 height:
-                                              //                     200, // Adjust the height as needed
-                                              //                 decoration:
-                                              //                     BoxDecoration(
-                                              //                   color: Colors
-                                              //                       .white, // White background for content visibility
-                                              //                   borderRadius:
-                                              //                       BorderRadius
-                                              //                           .circular(
-                                              //                               15), // Rounded corners
-                                              //                 ),
-                                              //                 child: Padding(
-                                              //                   padding:
-                                              //                       const EdgeInsets
-                                              //                           .all(
-                                              //                           25.0),
-                                              //                   child: Column(
-                                              //                     mainAxisAlignment:
-                                              //                         MainAxisAlignment
-                                              //                             .start,
-                                              //                     crossAxisAlignment:
-                                              //                         CrossAxisAlignment
-                                              //                             .stretch,
-                                              //                     children: <Widget>[
-                                              //                       Text(
-                                              //                           userName,
-                                              //                           style: const TextStyle(
-                                              //                               fontWeight:
-                                              //                                   FontWeight.bold,
-                                              //                               fontSize: 20)),
-                                              //                       const Text(
-                                              //                           'Name',
-                                              //                           style: TextStyle(
-                                              //                               fontWeight:
-                                              //                                   FontWeight.w200,
-                                              //                               fontSize: 15)),
-                                              //                       const SizedBox(
-                                              //                         height:
-                                              //                             12,
-                                              //                       ),
-
-                                              //                       Text(
-                                              //                         DateFormat(
-                                              //                                 'MMM dd, yyyy')
-                                              //                             .format(
-                                              //                                 userBirthday),
-                                              //                         style: const TextStyle(
-                                              //                             fontSize:
-                                              //                                 17,
-                                              //                             color:
-                                              //                                 Colors.amber),
-                                              //                       ),
-                                              //                       const Text(
-                                              //                           'Birthday',
-                                              //                           style: TextStyle(
-                                              //                               fontWeight:
-                                              //                                   FontWeight.w200,
-                                              //                               fontSize: 15)), // Format date
-                                              //                     ],
-                                              //                   ),
-                                              //                 ),
-                                              //               ),
-                                              //             ),
-                                              //             Positioned(
-                                              //               right: 5,
-                                              //               top: 55,
-                                              //               child:
-                                              //                   GestureDetector(
-                                              //                 onTap: () async {
-                                              //                   _speak(
-                                              //                       "Your name is $userName");
-                                              //                 },
-                                              //                 child:
-                                              //                     Image.asset(
-                                              //                   'assets/profile.png',
-                                              //                   fit: BoxFit
-                                              //                       .cover,
-                                              //                   height: 170,
-                                              //                 ),
-                                              //               ),
-                                              //             ),
-                                              //             Positioned(
-                                              //               bottom: 0,
-                                              //               left: 0,
-                                              //               right: 0,
-                                              //               child: Padding(
-                                              //                   padding:
-                                              //                       const EdgeInsets
-                                              //                           .all(
-                                              //                           16.0),
-                                              //                   child:
-                                              //                       TextButton(
-                                              //                     child: const Text(
-                                              //                         'Close'),
-                                              //                     onPressed:
-                                              //                         () {
-                                              //                       Navigator.of(
-                                              //                               context)
-                                              //                           .pop();
-                                              //                     },
-                                              //                     style: TextButton
-                                              //                         .styleFrom(
-                                              //                       foregroundColor:
-                                              //                           Colors
-                                              //                               .white,
-                                              //                       backgroundColor:
-                                              //                           const Color
-                                              //                               .fromARGB(
-                                              //                               255,
-                                              //                               198,
-                                              //                               65,
-                                              //                               56), // Background color
-                                              //                       shape:
-                                              //                           RoundedRectangleBorder(
-                                              //                         borderRadius:
-                                              //                             BorderRadius.circular(
-                                              //                                 8), // Rounded corners
-                                              //                       ),
-                                              //                     ),
-                                              //                   )),
-                                              //             ),
-                                              //           ],
-                                              //         ),
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // );
                                             },
                                           );
                                         },
@@ -341,16 +180,16 @@ class _RainbowContainerState extends State<RainbowContainer> {
                     child: Image.asset(
                       'assets/dash_bg.png',
                       fit: BoxFit.cover,
-                      height: 100,
+                      height: MediaQuery.of(context).size.width*0.2,
                     ),
                   ),
                   Positioned(
-                    right: 240,
+                    left: 0,
                     top: 40,
                     child: Image.asset(
                       'assets/explore.png',
                       fit: BoxFit.cover,
-                      height: 128,
+                      height: MediaQuery.of(context).size.width*0.3,
                     ),
                   )
                 ],
