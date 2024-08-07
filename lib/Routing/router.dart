@@ -71,16 +71,62 @@ class GlobalRouter {
               navigatorKey: _shellNavigatorKey,
               routes: [
                 GoRoute(
-                    parentNavigatorKey: _shellNavigatorKey,
-                    path: HomePage.route,
-                    name: HomePage.name,
-                    builder: (context, _) {
-                      return const HomePage();
-                    }),
+                  parentNavigatorKey: _shellNavigatorKey,
+                  path: HomePage.route,
+                  name: HomePage.name,
+                  builder: (context, _) {
+                    return const HomePage();
+                  },
+                  // routes: [
+                  //   GoRoute(
+                  //       parentNavigatorKey: _shellNavigatorKey,
+                  //       path: Communicate.route,
+                  //       name: Communicate.name,
+                  //       builder: (context, _) {
+                  //         return Communicate();
+                  //       }),
+                  // GoRoute(
+                  //     parentNavigatorKey: _rootNavigatorKey,
+                  //     path: Explore.route,
+                  //     name: Explore.name,
+                  //     builder: (context, _) {
+                  //       return const Explore(
+                  //          );}),
+                  // GoRoute(
+                  //     parentNavigatorKey: _rootNavigatorKey,
+                  //     path: Play.route,
+                  //     name: Play.name,
+                  //     builder: (context, _) {
+                  //       return const Play();
+                  //     }),
+                  // GoRoute(
+                  //     parentNavigatorKey: _rootNavigatorKey,
+                  //     path: Test.route,
+                  //     name: Test.name,
+                  //     builder: (context, _) {
+                  //       return const Test();
+                  //     }),
+                  // ]
+                ),
+                // GoRoute(
+                //     parentNavigatorKey: _shellNavigatorKey,
+                //     path: Communicate.route,
+                //     name: Communicate.name,
+                //     builder: (context, _) {
+                //       return const Communicate();
+                //     }),
               ],
               builder: (context, state, child) {
                 return const HomePage();
-              })
+              }),
+              GoRoute(
+                    parentNavigatorKey: _rootNavigatorKey,
+                    path: Communicate.route,
+                    name: Communicate.name,
+                    builder: (context, _) {
+                      return const Communicate();
+                    }),
+          
         ]);
   }
 }
