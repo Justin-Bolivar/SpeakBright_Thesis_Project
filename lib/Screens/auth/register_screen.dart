@@ -59,55 +59,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     birthdayFn.dispose();
   }
 
-  Widget buildUserTypeSegmentedButton() {
-    return Container(
-      decoration: const BoxDecoration(),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(7),
-        child: SegmentedButton<String>(
-          segments: const [
-            ButtonSegment<String>(
-              value: 'Student',
-              label: Center(child: Text('Student')),
-            ),
-            ButtonSegment<String>(
-              value: 'Guardian',
-              label: Center(child: Text('Guardian')),
-            ),
-          ],
-          selected: {userType ?? 'Student'},
-          onSelectionChanged: (Set<String> newSelection) {
-            setState(() {
-              userType = newSelection.first;
-            });
-          },
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.resolveWith<Color>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
-                  return mainpurple;
-                }
-                return Colors.grey[200]!;
-              },
-            ),
-            foregroundColor: WidgetStateProperty.resolveWith<Color>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Colors.grey[200]!;
-                }
-                return mainpurple;
-              },
-            ),
-            side: WidgetStateProperty.all(BorderSide.none),
-            shape: WidgetStateProperty.all(RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            )),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,20 +90,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 child: Flexible(
                   child: MouseRegion(
                     child: GestureDetector(
-                        onTap: ()
-                        // => Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //           builder: (context) => const LoginScreen()),
-                        //     ),
-                        {
-                        GlobalRouter.I.router.go(LoginScreen.route);
-                      },
+                        onTap: () {
+                          GlobalRouter.I.router.go(LoginScreen.route);
+                        },
                         child: RichText(
                           text: const TextSpan(
                             children: <TextSpan>[
                               TextSpan(
-                                  text: 'Already have an account? ',
+                                  text: 'Already have an Guardian account? ',
                                   style: TextStyle(color: mainpurple)),
                               TextSpan(
                                   text: 'Login here',
@@ -181,7 +126,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: [
                 Image.asset('assets/SpeakBright_P.png',
                     width: 300, height: 180),
-                buildUserTypeSegmentedButton(),
                 const SizedBox(height: 8),
                 Flexible(
                   child: TextFormField(
@@ -372,7 +316,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
         if (userCredential?.user != null) {
           await _storeUserData(userCredential!.user!.uid);
-          // Navigate to next screen or show success message
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -384,26 +327,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Future<void> _storeUserData(String userId) async {
     User? user = FirebaseAuth.instance.currentUser;
-
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
 
-    String userId = user.uid;
-
     CollectionReference users = FirebaseFirestore.instance.collection('users');
+    CollectionReference userGuardians =
+        FirebaseFirestore.instance.collection('user_guardian');
 
     DateTime birthdayDate = selectedBirthday ?? DateTime.now();
     Timestamp birthdayTimestamp = Timestamp.fromDate(DateTime(
         birthdayDate.year, birthdayDate.month, birthdayDate.day, 0, 0, 0));
 
-    await users.doc(userId).set({
+    Map<String, dynamic> userData = {
       'name': name.text.trim(),
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
       'userID': userId,
       'userType': userType,
-    });
+    };
+
+    // Store data in 'users' collection
+    await users.doc(userId).set(userData);
+
+    // Store data in 'user_guardian' collection
+    await userGuardians.doc(userId).set(userData);
   }
 
   final OutlineInputBorder _baseBorder = const OutlineInputBorder(
