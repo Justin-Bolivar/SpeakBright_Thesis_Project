@@ -42,14 +42,13 @@ class _LoginScreenState extends State<LoginScreen> {
     passwordFn.dispose();
   }
 
-  bool _isHovering = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
       body: SafeArea(
-        child: SingleChildScrollView( // Wrap everything in SingleChildScrollView
+        child: SingleChildScrollView(
+          // Wrap everything in SingleChildScrollView
           child: Column(
             children: [
               Image.asset('assets/SpeakBright_P.png', width: 450, height: 250),
@@ -57,7 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Form(
                 key: formKey,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.max,
@@ -68,7 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             decoration: decoration.copyWith(
                               labelText: "Username",
-                              prefixIcon: const Icon(Icons.person, color: mainpurple),
+                              prefixIcon:
+                                  const Icon(Icons.person, color: mainpurple),
                               labelStyle: const TextStyle(color: mainpurple),
                               hintStyle: const TextStyle(color: mainpurple),
                             ),
@@ -78,9 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               passwordFn.requestFocus();
                             },
                             validator: MultiValidator([
-                              RequiredValidator(errorText: 'Please fill out the username'),
-                              MaxLengthValidator(32, errorText: "Username cannot exceed 32 characters"),
-                              EmailValidator(errorText: "Please select a valid email"),
+                              RequiredValidator(
+                                  errorText: 'Please fill out the username'),
+                              MaxLengthValidator(32,
+                                  errorText:
+                                      "Username cannot exceed 32 characters"),
+                              EmailValidator(
+                                  errorText: "Please select a valid email"),
                             ]).call,
                           ),
                           const SizedBox(height: 15),
@@ -89,14 +94,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             obscureText: obfuscate,
                             decoration: decoration.copyWith(
                               labelText: "Password",
-                              prefixIcon: const Icon(Icons.password, color: mainpurple),
+                              prefixIcon:
+                                  const Icon(Icons.password, color: mainpurple),
                               suffixIcon: IconButton(
                                   onPressed: () {
                                     setState(() {
                                       obfuscate = !obfuscate;
                                     });
                                   },
-                                  icon: Icon(obfuscate ? Icons.remove_red_eye_rounded : CupertinoIcons.eye_slash, color: mainpurple)),
+                                  icon: Icon(
+                                      obfuscate
+                                          ? Icons.remove_red_eye_rounded
+                                          : CupertinoIcons.eye_slash,
+                                      color: mainpurple)),
                               labelStyle: const TextStyle(color: mainpurple),
                               hintStyle: const TextStyle(color: mainpurple),
                             ),
@@ -106,8 +116,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               passwordFn.unfocus();
                             },
                             validator: MultiValidator([
-                              RequiredValidator(errorText: "Password is required"),
-                              MaxLengthValidator(128, errorText: "Password cannot exceed 72 characters"),
+                              RequiredValidator(
+                                  errorText: "Password is required"),
+                              MaxLengthValidator(128,
+                                  errorText:
+                                      "Password cannot exceed 72 characters"),
                             ]).call,
                           ),
                         ],
@@ -118,27 +131,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: 
-                  ElevatedButton(
-                    onPressed: () {
-                      onSubmit();
-                    },
-                    child: const Text("Login"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: mainpurple,
-                      foregroundColor: kwhite,
-                      textStyle: const TextStyle(fontSize: 18),
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: ElevatedButton(
+                  onPressed: () {
+                    onSubmit();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainpurple,
+                    foregroundColor: kwhite,
+                    textStyle: const TextStyle(fontSize: 18),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
-                
+                  child: const Text("Login"),
+                ),
               ),
               const SizedBox(height: 20),
               Center(
                 child: MouseRegion(
-                  onEnter: (_) => setState(() => _isHovering = true),
-                  onExit: (_) => setState(() => _isHovering = false),
                   child: GestureDetector(
                       onTap: () {
                         GlobalRouter.I.router.go(RegistrationScreen.route);
@@ -146,14 +156,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: RichText(
                         text: const TextSpan(
                           children: <TextSpan>[
-                            TextSpan(text: 'No Account? ', style: TextStyle(color: mainpurple)),
-                            TextSpan(text: 'Register Here', style: TextStyle(fontWeight: FontWeight.bold, color: mainpurple)),
+                            TextSpan(
+                                text: 'No Guardian account Yet? ',
+                                style: TextStyle(color: mainpurple)),
+                            TextSpan(
+                                text: 'Register Here',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: mainpurple)),
                           ],
                         ),
                       )),
                 ),
               ),
-                SizedBox(
+              SizedBox(
                 height: 250,
                 child: Stack(
                   children: [
@@ -188,10 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
   );
 
   InputDecoration get decoration => InputDecoration(
-      // prefixIconColor: AppColors.primary.shade700,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       filled: false,
-      // fillColor: mainpurple,
       errorMaxLines: 3,
       disabledBorder: _baseBorder,
       enabledBorder: _baseBorder.copyWith(
