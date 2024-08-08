@@ -95,6 +95,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   ),
                   child: Column(
                     children: [
+                      const SizedBox(height: 15,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -179,7 +180,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   child: Image.asset(
                     'assets/dash_bg.png',
                     fit: BoxFit.cover,
-                    height: MediaQuery.of(context).size.height*0.2,
+                    height: MediaQuery.of(context).size.height*0.14,
                   ),
                 ),
                 Positioned(
@@ -188,7 +189,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   child: Image.asset(
                     'assets/explore.png',
                     fit: BoxFit.cover,
-                    height: MediaQuery.of(context).size.height*0.3,
+                    height: MediaQuery.of(context).size.height*0.17,
                   ),
                 )
               ],
