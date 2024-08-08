@@ -1,30 +1,27 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import '../../Routing/router.dart';
 import '../../Widgets/waiting_dialog.dart';
-import 'login_screen.dart';
 
-class RegistrationScreen extends StatefulWidget {
+class RegistrationStudent extends StatefulWidget {
   static const String route = "/register";
   static const String name = "Registration Screen";
-  const RegistrationScreen({super.key});
+  const RegistrationStudent({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  State<RegistrationStudent> createState() => _RegistrationStudentState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationStudentState extends State<RegistrationStudent> {
   late GlobalKey<FormState> formKey;
   late TextEditingController username, password, password2, name, birthday;
   late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
   DateTime? selectedBirthday;
   String? userType;
+  String? guardianID;
 
   bool obfuscate = true;
 
@@ -42,6 +39,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     nameFn = FocusNode();
     birthday = TextEditingController();
     birthdayFn = FocusNode();
+
+    fetchGuardianID();
+  }
+
+  Future<void> fetchGuardianID() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        guardianID = currentUser.uid;
+      });
+    }
   }
 
   @override
@@ -62,6 +70,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(RegistrationStudent.name),
+        backgroundColor: kwhite,
+      ),
       backgroundColor: kwhite,
       bottomNavigationBar: SafeArea(
         child: Container(
@@ -91,7 +109,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: MouseRegion(
                     child: GestureDetector(
                         onTap: () {
-                          GlobalRouter.I.router.go(LoginScreen.route);
+                          print(FirebaseAuth.instance.currentUser?.uid);
                         },
                         child: RichText(
                           text: const TextSpan(
@@ -315,7 +333,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         );
 
         if (userCredential?.user != null) {
-          await storeUserData(userCredential!.user!.uid);
+          await storeStudentData();
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -325,29 +343,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  Future<void> storeUserData(String userId) async {
+  Future<void> storeStudentData() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
 
-    CollectionReference users = FirebaseFirestore.instance.collection('user');
-    CollectionReference userGuardians =
+    CollectionReference userGuardianRef =
         FirebaseFirestore.instance.collection('user_guardian');
+    DocumentReference userGuardianDoc = userGuardianRef.doc(guardianID);
+    CollectionReference studentsRef = userGuardianDoc.collection('Students');
 
     DateTime birthdayDate = selectedBirthday ?? DateTime.now();
     Timestamp birthdayTimestamp = Timestamp.fromDate(DateTime(
         birthdayDate.year, birthdayDate.month, birthdayDate.day, 0, 0, 0));
 
-    Map<String, dynamic> userData = {
+    Map<String, dynamic> studentData = {
       'name': name.text.trim(),
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
-      'userID': userId,
     };
 
-    await users.doc(userId).set(userData);
-    await userGuardians.doc(userId).set(userData);
+    await studentsRef.add(studentData);
   }
 
   final OutlineInputBorder _baseBorder = const OutlineInputBorder(
