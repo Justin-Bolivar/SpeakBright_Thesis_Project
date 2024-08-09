@@ -164,7 +164,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
             child: cardsAsyncValue.when(
               data: (cards) => CardGrid(
                 cards: cards,
-                onCardTap: _ttsService.speak,
+                onCardTap: (String cardTitle, String category) {
+                  _ttsService.speak(cardTitle);
+                  _firestoreService.storeTappedCards(cardTitle, category); 
+                },
                 onCardDelete: (String cardId) {
                   ref.read(cardProvider.notifier).deleteCard(cardId);
                 },
