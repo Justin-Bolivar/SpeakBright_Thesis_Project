@@ -2,11 +2,11 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:speakbright_mobile/Screens/home/profile_dialogue.dart';
+import 'package:speakbright_mobile/Widgets/profile_dialogue.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../Widgets/waiting_dialog.dart';
-import '../auth/auth_controller.dart';
+import 'waiting_dialog.dart';
+import '../Screens/auth/auth_controller.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
