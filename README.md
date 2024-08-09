@@ -1,10 +1,20 @@
-# SpeakBright_Mobile_Dev_Ver
+# SpeakBright Application for Computer Science Thesis Project
 
-Thesis proect with features removed or made using public API's
+Thesis project for our Computer Science Mobile Development side
+[Mobile App](https://github.com/Justin-Bolivar/SpeakBright_Thesis_Project)
+[Web App](https://github.com/zitroeth/SpeakBright-WebApp)
 
-## Feature
-- Login / Register [x]
-- text to Speach of Cards [x]
-- Adding of Cards [x]
-- Taking Picure for Cards[ ]
-- Deleting Cards [x]
+# Features for 60% Project Completion 
+- Basic data entry
+- LogIn
+- Registration
+
+## Guardian: 
+- Build Profile of Learner (vocabulary, emotions)
+- Create card - take picture or from list
+
+## Learner: 
+- Browse cards
+- Frequently used cards, by category (AI)
+- Communicate - build sentence by tapping cards (AI)
+- Express emotion by tapping emotion cards
