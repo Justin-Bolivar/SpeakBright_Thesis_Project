@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unnecessary_brace_in_string_interps, no_leading_underscores_for_local_identifiers, library_private_types_in_public_api, use_super_parameters
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -91,7 +91,7 @@ class _AddCardPageState extends State<AddCardPage> {
         }).then((_) {
           Navigator.pop(context); // Close the AddCardPage
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Card added successfully')));
+              const SnackBar(content: Text('Card added successfully')));
         }).catchError((e) {
           print('Error adding card: $e');
         });

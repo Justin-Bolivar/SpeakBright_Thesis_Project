@@ -1,12 +1,8 @@
-// Explore.dart
-// ignore_for_file: unrelated_type_equality_checks
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Widgets/cards/explore_card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 
 class Explore extends ConsumerStatefulWidget {
@@ -21,40 +17,17 @@ class Explore extends ConsumerStatefulWidget {
 }
 
 class _ExploreState extends ConsumerState<Explore> {
-  final FlutterTts flutterTts = FlutterTts();
-  List<String> sentence = [];
-  List<String> categories = ['All'];
-  int selectedCategory = -1;
+  final TTSService _ttsService = TTSService();
 
   @override
   void initState() {
     super.initState();
-    _setupTTS();
-  }
-
-  Future<void> _setupTTS() async {
-    await flutterTts.setLanguage("en-US");
-    await _setDefaultVoice();
-  }
-
-  Future<void> _setDefaultVoice() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    String voiceName = connectivityResult != ConnectivityResult.none
-        ? "Microsoft Aria Online (Natural) - English (United States)"
-        : "Microsoft Zira - English (United States)";
-
-    await flutterTts.setVoice({"name": voiceName, "locale": "en-US"});
-    await flutterTts.setPitch(1.0);
-  }
-
-  Future<void> _speak(String text) async {
-    await _setDefaultVoice();
-    await flutterTts.speak(text);
+    _ttsService.setupTTS();
   }
 
   @override
   void dispose() {
-    flutterTts.stop();
+    _ttsService.stop();
     super.dispose();
   }
 
@@ -70,7 +43,7 @@ class _ExploreState extends ConsumerState<Explore> {
             gradient: LinearGradient(
               begin: Alignment.centerRight,
               end: Alignment.centerLeft,
-              colors: [Color(0xFF8E2DE2), mainpurple], // Your gradient colors
+              colors: [Color(0xFF8E2DE2), mainpurple],
             ),
           ),
         ),
@@ -126,12 +99,11 @@ class _ExploreState extends ConsumerState<Explore> {
               const Spacer()
             ],
           ),
-          const SizedBox(height: 8),
           Expanded(
             child: cardsAsyncValue.when(
               data: (cards) => ExploreCardGrid(
                 cards: cards,
-                onCardTap: _speak,
+                onCardTap: _ttsService.speak,
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(child: Text('Error: $error')),

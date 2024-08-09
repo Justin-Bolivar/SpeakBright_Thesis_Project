@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
@@ -7,13 +9,12 @@ class ExploreCardItem extends StatelessWidget {
   final CardModel card;
   final int colorIndex;
   final VoidCallback onTap;
-  
-  const ExploreCardItem({
-    super.key,
-    required this.card,
-    required this.colorIndex,
-    required this.onTap
-  });
+
+  const ExploreCardItem(
+      {super.key,
+      required this.card,
+      required this.colorIndex,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +53,11 @@ class ExploreCardItem extends StatelessWidget {
               ],
             ),
           ),
-          
         ],
       ),
     );
   }
 
- 
   Widget _buildImageContainer(Color color) {
     return Stack(
       alignment: Alignment.topLeft,
