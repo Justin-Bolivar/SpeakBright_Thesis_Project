@@ -1,5 +1,6 @@
 // Explore.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -29,26 +30,6 @@ class _ExploreState extends ConsumerState<Explore> {
   void initState() {
     super.initState();
     _setupTTS();
-    _fetchCategories();
-  }
-
-  void _clearSentence() {
-    setState(() {
-      sentence.clear();
-    });
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('categories').get();
-      setState(() {
-        categories =
-            querySnapshot.docs.map((doc) => doc['category'] as String).toList();
-      });
-    } catch (e) {
-      print('Error fetching categories: $e');
-    }
   }
 
   Future<void> _setupTTS() async {
@@ -79,7 +60,7 @@ class _ExploreState extends ConsumerState<Explore> {
 
   @override
   Widget build(BuildContext context) {
-    final cardsAsyncValue = ref.watch(cardsStreamProvider);
+    final cardsAsyncValue = ref.watch(cardsExploreProvider);
     return Scaffold(
       backgroundColor: kwhite,
       appBar: AppBar(
@@ -107,7 +88,6 @@ class _ExploreState extends ConsumerState<Explore> {
               ),
             ),
             Spacer(),
-           
           ],
         ),
       ),
@@ -147,7 +127,6 @@ class _ExploreState extends ConsumerState<Explore> {
             ],
           ),
           const SizedBox(height: 8),
-          
           Expanded(
             child: cardsAsyncValue.when(
               data: (cards) => ExploreCardGrid(
