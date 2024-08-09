@@ -1,3 +1,5 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -5,10 +7,10 @@ class TTSService {
   final FlutterTts _flutterTts = FlutterTts();
 
   TTSService() {
-    _setupTTS();
+    setupTTS();
   }
 
-  Future<void> _setupTTS() async {
+  Future<void> setupTTS() async {
     await _flutterTts.setLanguage("en-US");
     await setDefaultVoice();
   }

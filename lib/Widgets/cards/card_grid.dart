@@ -25,6 +25,15 @@ class CardGrid extends StatelessWidget {
       return card.category == selectedCategory;
     }).toList();
 
+    if (filteredCards.isEmpty) {
+      return const Center(
+        child: Text(
+          'No cards available',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
