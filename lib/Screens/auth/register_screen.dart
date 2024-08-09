@@ -331,7 +331,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       throw Exception('No user is currently signed in.');
     }
 
-    CollectionReference users = FirebaseFirestore.instance.collection('user');
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
     CollectionReference userGuardians =
         FirebaseFirestore.instance.collection('user_guardian');
 
@@ -344,6 +344,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
       'userID': userId,
+      'userType': 'guardian',
     };
 
     await users.doc(userId).set(userData);
