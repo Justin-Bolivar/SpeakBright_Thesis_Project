@@ -22,6 +22,15 @@ final cardsStreamProvider = StreamProvider<List<CardModel>>((ref) {
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
+final cardsExploreProvider = StreamProvider<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance.collection('cards').snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+});
+
 class CardNotifier extends StateNotifier<List<CardModel>> {
   CardNotifier() : super([]);
 
