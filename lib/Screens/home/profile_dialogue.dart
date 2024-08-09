@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 class ProfileDialogue extends StatelessWidget {
@@ -88,7 +87,6 @@ class ProfileDialogue extends StatelessWidget {
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: TextButton(
-                      child: const Text('Close'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -101,6 +99,7 @@ class ProfileDialogue extends StatelessWidget {
                               BorderRadius.circular(8), // Rounded corners
                         ),
                       ),
+                      child: const Text('Close'),
                     )),
               ],
             ),
