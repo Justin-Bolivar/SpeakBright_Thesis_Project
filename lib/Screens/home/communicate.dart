@@ -1,14 +1,12 @@
 // communicate.dart
-// ignore_for_file: avoid_print, unrelated_type_equality_checks
+// ignore_for_file: avoid_print
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
+import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 
@@ -24,33 +22,16 @@ class Communicate extends ConsumerStatefulWidget {
 }
 
 class _CommunicateState extends ConsumerState<Communicate> {
-  final FlutterTts flutterTts = FlutterTts();
+  final TTSService _ttsService = TTSService();
+  final FirestoreService _firestoreService = FirestoreService();
+
   List<String> sentence = [];
   List<String> categories = ['All'];
   int selectedCategory = -1;
 
-  Future<void> storeSentence() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw Exception('No user is currently signed in.');
-    }
-
-    CollectionReference sentences =
-        FirebaseFirestore.instance.collection('sentences');
-
-    Map<String, dynamic> sentenceData = {
-      'sentence': sentence.join(' '),
-      'userID': user.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-    };
-
-    await sentences.add(sentenceData);
-  }
-
   @override
   void initState() {
     super.initState();
-    _setupTTS();
     _fetchCategories();
   }
 
@@ -62,47 +43,26 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   Future<void> _fetchCategories() async {
     try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('categories').get();
+      List<String> fetchedCategories =
+          await _firestoreService.fetchCategories();
       setState(() {
-        categories =
-            querySnapshot.docs.map((doc) => doc['category'] as String).toList();
+        categories = fetchedCategories;
       });
     } catch (e) {
-      print('Error fetching categories: $e');
+      print(e);
     }
-  }
-
-  Future<void> _setupTTS() async {
-    await flutterTts.setLanguage("en-US");
-    await _setDefaultVoice();
-  }
-
-  Future<void> _setDefaultVoice() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    String voiceName = connectivityResult != ConnectivityResult.none
-        ? "Microsoft Aria Online (Natural) - English (United States)"
-        : "Microsoft Zira - English (United States)";
-
-    await flutterTts.setVoice({"name": voiceName, "locale": "en-US"});
-    await flutterTts.setPitch(1.0);
-  }
-
-  Future<void> _speak(String text) async {
-    await _setDefaultVoice();
-    await flutterTts.speak(text);
-  }
-
-  @override
-  void dispose() {
-    flutterTts.stop();
-    super.dispose();
   }
 
   void _addCardTitleToSentence(String title) {
     setState(() {
       sentence.add(title);
     });
+  }
+
+  @override
+  void dispose() {
+    _ttsService.stop();
+    super.dispose();
   }
 
   @override
@@ -137,8 +97,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
             const Spacer(),
             IconButton(
               onPressed: () {
-                storeSentence();
-                _speak(sentence.join(' '));
+                _firestoreService.storeSentence(sentence);
+                _ttsService.speak(sentence.join(' '));
               },
               icon: const Icon(
                 Icons.volume_up,
@@ -200,99 +160,11 @@ class _CommunicateState extends ConsumerState<Communicate> {
               ),
             ),
           ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 5),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/Diversity.png',
-                      height: 40,
-                      width: 40,
-                    ),
-                    const SizedBox(width: 10),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Categories",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 24, color: kblack),
-                        ),
-                        Text(
-                          "Select a category and tap on cards you want",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 12, color: kblack),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer()
-            ],
-          ),
-          const SizedBox(height: 8),
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 35,
-              maxHeight: 35,
-            ),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                int colorIndex = index % boxColors.length;
-                Color itemColor = boxColors[colorIndex];
-
-                bool isSelected = selectedCategory == index;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedCategory = index;
-                    });
-                  },
-                  child: SizedBox(
-                    height: 30,
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 18),
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: itemColor,
-                        borderRadius: BorderRadius.circular(10.0),
-                        boxShadow: isSelected
-                            ? <BoxShadow>[
-                                BoxShadow(
-                                  color: itemColor,
-                                  spreadRadius: 1,
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: Text(
-                        category,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: kwhite,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
           Expanded(
             child: cardsAsyncValue.when(
               data: (cards) => CardGrid(
                 cards: cards,
-                onCardTap: _speak,
+                onCardTap: _ttsService.speak,
                 onCardDelete: (String cardId) {
                   ref.read(cardProvider.notifier).deleteCard(cardId);
                 },
