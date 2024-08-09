@@ -354,7 +354,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
     CollectionReference userGuardianRef =
         FirebaseFirestore.instance.collection('user_guardian');
     DocumentReference userGuardianDoc = userGuardianRef.doc(guardianID);
-    CollectionReference studentsRef = userGuardianDoc.collection('Students');
+    CollectionReference studentsRef = userGuardianDoc.collection('students');
 
     DateTime birthdayDate = selectedBirthday ?? DateTime.now();
     Timestamp birthdayTimestamp = Timestamp.fromDate(DateTime(

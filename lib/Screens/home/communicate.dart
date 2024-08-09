@@ -1,5 +1,8 @@
 // communicate.dart
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -25,6 +28,24 @@ class _CommunicateState extends ConsumerState<Communicate> {
   List<String> sentence = [];
   List<String> categories = ['All'];
   int selectedCategory = -1;
+
+  Future<void> storeSentence() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+
+    CollectionReference sentences =
+        FirebaseFirestore.instance.collection('sentences');
+
+    Map<String, dynamic> sentenceData = {
+      'sentence': sentence.join(' '),
+      'userID': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+
+    await sentences.add(sentenceData);
+  }
 
   @override
   void initState() {
@@ -96,7 +117,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
             gradient: LinearGradient(
               begin: Alignment.centerRight,
               end: Alignment.centerLeft,
-              colors: [Color(0xFF8E2DE2), mainpurple], // Your gradient colors
+              colors: [Color(0xFF8E2DE2), mainpurple],
             ),
           ),
         ),
@@ -116,7 +137,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
             const Spacer(),
             IconButton(
               onPressed: () {
-                _speak(sentence.join(' ')); // Speak the current sentence
+                storeSentence();
+                _speak(sentence.join(' '));
               },
               icon: const Icon(
                 Icons.volume_up,
@@ -124,10 +146,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
               ),
             ),
             IconButton(
-              onPressed: _clearSentence, // Add this line
+              onPressed: _clearSentence,
               icon: const Icon(
-                Icons
-                    .delete_outline, // Change the icon to something suitable for clearing
+                Icons.delete_outline,
                 color: kwhite,
               ),
             ),
@@ -141,10 +162,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: DottedBorder(
-                color: dullpurple, 
-                strokeWidth: 1, 
-                dashPattern: const [6, 7], 
-                borderType: BorderType.RRect, 
+                color: dullpurple,
+                strokeWidth: 1,
+                dashPattern: const [6, 7],
+                borderType: BorderType.RRect,
                 radius: const Radius.circular(20.0),
                 child: Container(
                   height: 100,
@@ -152,33 +173,32 @@ class _CommunicateState extends ConsumerState<Communicate> {
                     color: kwhite,
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: sentence.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.fromLTRB(5,30,5,30),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: dullpurple.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(20.0),
-                      
-                      ),
-                      child: Center(
-                        child: Text(
-                          sentence[index],
-                          style: const TextStyle(
-                            color: dullpurple,
-                            fontSize: 14.0,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: sentence.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: dullpurple.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        child: Center(
+                          child: Text(
+                            sentence[index],
+                            style: const TextStyle(
+                              color: dullpurple,
+                              fontSize: 14.0,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
           ),
           Row(
             children: [
