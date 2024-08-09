@@ -348,7 +348,9 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
+    String userId = user.uid;
 
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
     CollectionReference userGuardianRef =
         FirebaseFirestore.instance.collection('user_guardian');
     DocumentReference userGuardianDoc = userGuardianRef.doc(guardianID);
@@ -362,8 +364,10 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
       'name': name.text.trim(),
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
+      'userType': 'student',
     };
 
+    await users.doc(userId).set(studentData);
     await studentsRef.add(studentData);
   }
 
