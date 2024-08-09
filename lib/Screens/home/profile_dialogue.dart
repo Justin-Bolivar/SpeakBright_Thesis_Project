@@ -16,7 +16,7 @@ class ProfileDialogue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Apply blur effect
+      filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
       child: Align(
         alignment: Alignment.center,
         child: Container(
@@ -34,10 +34,8 @@ class ProfileDialogue extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         margin: const EdgeInsets.only(top: 85),
                         decoration: BoxDecoration(
-                          color: Colors
-                              .white, // White background for content visibility
-                          borderRadius:
-                              BorderRadius.circular(15), // Rounded corners
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -92,11 +90,9 @@ class ProfileDialogue extends StatelessWidget {
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
-                        backgroundColor: const Color.fromARGB(
-                            255, 198, 65, 56), // Background color
+                        backgroundColor: const Color.fromARGB(255, 198, 65, 56),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8), // Rounded corners
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: const Text('Close'),
