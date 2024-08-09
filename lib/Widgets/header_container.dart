@@ -1,10 +1,12 @@
+// ignore_for_file: unrelated_type_equality_checks, library_private_types_in_public_api
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:speakbright_mobile/Screens/home/profile_dialogue.dart';
+import 'package:speakbright_mobile/Widgets/profile_dialogue.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../Widgets/waiting_dialog.dart';
-import '../auth/auth_controller.dart';
+import 'waiting_dialog.dart';
+import '../Screens/auth/auth_controller.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -75,13 +77,13 @@ class _RainbowContainerState extends State<RainbowContainer> {
               DateTime.parse(userData['birthday'].toDate().toString());
 
           return SizedBox(
-            height: MediaQuery.of(context).size.height*0.8,
+            height: MediaQuery.of(context).size.height * 0.8,
             child: Stack(
               alignment: Alignment.topCenter,
               children: [
                 Container(
                   padding: const EdgeInsets.all(8.0),
-                  height:  MediaQuery.of(context).size.height*0.6,
+                  height: MediaQuery.of(context).size.height * 0.6,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -95,7 +97,9 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   ),
                   child: Column(
                     children: [
-                      const SizedBox(height: 15,),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -122,7 +126,10 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                     Text(
                                       "Hello $userName!",
                                       style: TextStyle(
-                                          fontSize: MediaQuery.of(context).size.width*0.04,
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04,
                                           fontWeight: FontWeight.w900,
                                           color: Colors.white),
                                     ),
@@ -146,8 +153,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                       },
                                       style: ButtonStyle(
                                         elevation:
-                                            WidgetStateProperty.all<double>(
-                                                0),
+                                            WidgetStateProperty.all<double>(0),
                                         shape: WidgetStateProperty.all<
                                             RoundedRectangleBorder>(
                                           RoundedRectangleBorder(
@@ -180,7 +186,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   child: Image.asset(
                     'assets/dash_bg.png',
                     fit: BoxFit.cover,
-                    height: MediaQuery.of(context).size.height*0.14,
+                    height: MediaQuery.of(context).size.height * 0.14,
                   ),
                 ),
                 Positioned(
@@ -189,7 +195,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                   child: Image.asset(
                     'assets/explore.png',
                     fit: BoxFit.cover,
-                    height: MediaQuery.of(context).size.height*0.17,
+                    height: MediaQuery.of(context).size.height * 0.17,
                   ),
                 )
               ],

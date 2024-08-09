@@ -6,7 +6,7 @@ import 'explore_card_item.dart';
 class ExploreCardGrid extends StatelessWidget {
   final List<CardModel> cards;
   final Function(String) onCardTap;
-  
+
   const ExploreCardGrid({
     super.key,
     required this.cards,
@@ -15,8 +15,6 @@ class ExploreCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -30,7 +28,6 @@ class ExploreCardGrid extends StatelessWidget {
           card: cards[index],
           colorIndex: index,
           onTap: () => onCardTap(cards[index].title),
-          
         );
       },
     );
