@@ -5,8 +5,9 @@ import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
+import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
-import "package:speakbright_mobile/Screens/home/homepage.dart";
+import "package:speakbright_mobile/Screens/home/student_homepage.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -35,10 +36,6 @@ class GlobalRouter {
       if (state.matchedLocation == RegistrationScreen.route) {
         return Home.route;
       }
-
-      // if (state.matchedLocation == LoginScreen.route) {
-      //   return HomePage.route;
-      // }
       return null;
     }
 
@@ -90,10 +87,18 @@ class GlobalRouter {
                 ),
                 GoRoute(
                   parentNavigatorKey: _shellNavigatorKey,
-                  path: HomePage.route,
-                  name: HomePage.name,
+                  path: StudentHomepage.route,
+                  name: StudentHomepage.name,
                   builder: (context, _) {
-                    return const HomePage();
+                    return const StudentHomepage();
+                  },
+                ),
+                GoRoute(
+                  parentNavigatorKey: _shellNavigatorKey,
+                  path: GuardianHomepage.route,
+                  name: GuardianHomepage.name,
+                  builder: (context, _) {
+                    return const GuardianHomepage();
                   },
                 ),
               ],
