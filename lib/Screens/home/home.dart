@@ -3,15 +3,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Screens/home/guardian_homepage.dart';
+import 'package:speakbright_mobile/Screens/home/student_homepage.dart';
 import '../auth/auth_controller.dart';
-import '../../Widgets/waiting_dialog.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
-  static const String route = "/h";
-  static const String path = "/h";
+  static const String route = "/";
+  static const String path = "/";
   static const String name = "Home";
 
   @override
@@ -35,59 +35,20 @@ class _HomeState extends ConsumerState<Home> {
     print('home: $isGuardian');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home Page')),
       body: FutureBuilder<bool>(
         future: isUserAGuardian(AuthController.I.currentUser?.uid),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData && snapshot.data == true) {
-              return const GuardianLayout();
+              return const GuardianHomepage();
             } else {
-              return const StudentLayout();
+              return const StudentHomepage();
             }
           } else {
             return const CircularProgressIndicator();
           }
         },
       ),
-    );
-  }
-}
-
-class GuardianLayout extends StatelessWidget {
-  const GuardianLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Center(child: Text('Welcome, Guardian!')),
-        IconButton(
-          icon: const Icon(Icons.logout, color: mainpurple, size: 20),
-          onPressed: () {
-            WaitingDialog.show(context, future: AuthController.I.logout());
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class StudentLayout extends StatelessWidget {
-  const StudentLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Center(child: Text('Welcome, Student!')),
-        IconButton(
-          icon: const Icon(Icons.logout, color: mainpurple, size: 20),
-          onPressed: () {
-            WaitingDialog.show(context, future: AuthController.I.logout());
-          },
-        ),
-      ],
     );
   }
 }
