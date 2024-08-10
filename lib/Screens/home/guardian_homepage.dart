@@ -49,34 +49,24 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
               child: const RainbowContainer(),
             ),
           ),
-          const Text("Guradian"),
           Expanded(
             flex: 2,
             child: SizedBox(
               width: screenWidth * 0.85,
               child: ListView.builder(
-                itemCount: 4,
+                itemCount: 2,
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
                       switch (index) {
                         case 0:
-                          GlobalRouter.I.router.push(Communicate.route);
+                          GlobalRouter.I.router.push(RegistrationStudent.route);
                           break;
                         case 1:
-                          GlobalRouter.I.router.push(Explore.route);
+                        // student list??
+                          // GlobalRouter.I.router.push(Explore.route);
                           break;
-                        case 2:
-                          print('Card 3 tapped');
-                          break;
-                        case 3:
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const RegistrationStudent()),
-                          );
-                          break;
+
                         default:
                           print('Unknown card tapped');
                           break;
@@ -96,10 +86,8 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                               children: [
                                 Text(
                                   [
-                                    'Communicate',
-                                    'Explore',
-                                    'Play a Game',
-                                    'Test'
+                                    'Register Student',
+                                    'Student List',
                                   ][index],
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -107,10 +95,8 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                                 ),
                                 Text(
                                   [
-                                    'Tap on cards you want',
-                                    'Discover new cards',
-                                    'Enjoy learning',
-                                    'Let’s test what you know'
+                                    'Register a student',
+                                    'Check your students'
                                   ][index],
                                   style:
                                       TextStyle(fontSize: baseFontSize * 0.8),
@@ -120,9 +106,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                             Image.asset(
                               [
                                 'assets/communicate.png',
-                                'assets/train.png',
-                                'assets/play.png',
-                                'assets/test_books.png'
+                                'assets/test_books.png',
                               ][index],
                               height: imageHeight,
                               fit: BoxFit.cover,

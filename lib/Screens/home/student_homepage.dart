@@ -69,12 +69,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           print('Card 3 tapped');
                           break;
                         case 3:
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const RegistrationStudent()),
-                          );
+                          print('Card 4 tapped');
                           break;
                         default:
                           print('Unknown card tapped');
