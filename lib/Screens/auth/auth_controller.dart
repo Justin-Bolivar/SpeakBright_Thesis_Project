@@ -1,14 +1,10 @@
 // ignore_for_file: unused_local_variable
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-
 import 'enum/enum.dart';
-
-
 
 class AuthController with ChangeNotifier {
   static void initialize() {
@@ -16,13 +12,12 @@ class AuthController with ChangeNotifier {
   }
 
   User? _currentUser;
-  bool _isGuardian = false;
 
   User? get currentUser => _currentUser;
-  bool get isGuardian => _isGuardian;
 
   static AuthController get instance => GetIt.instance<AuthController>();
   static AuthController get I => GetIt.instance<AuthController>();
+  final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) => AuthController());
 
   late StreamSubscription<User?> currentAuthedUser;
   AuthState state = AuthState.unauthenticated;
@@ -34,12 +29,11 @@ class AuthController with ChangeNotifier {
 
   Future<void> handleUserChanges(User? user) async {
     _currentUser = user;
-    
+
     if (user == null) {
       state = AuthState.unauthenticated;
     } else {
       state = AuthState.authenticated;
-      _isGuardian = await isUserAGuardian(user.uid); 
     }
     notifyListeners();
   }
@@ -47,27 +41,6 @@ class AuthController with ChangeNotifier {
   login(String userName, String password) async {
     UserCredential userCredential = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: userName, password: password);
-
-  }
-
-  Future<bool> isUserAGuardian(String? uid) async {
-    CollectionReference userGuardianCollection =
-        FirebaseFirestore.instance.collection('user_guardian');
-    final DocumentSnapshot userDocument =
-        await userGuardianCollection.doc(uid).get();
-
-    //debigging delete later
-
-    if (FirebaseAuth.instance.currentUser?.uid != null) {
-      // ignore: avoid_print
-      print('uid:${FirebaseAuth.instance.currentUser?.uid}');
-      print('$uid');
-    } else {
-      // ignore: avoid_print
-      print('error no uid');
-    }
-
-    return userDocument.exists;
   }
 
   register(String userName, String password) async {
