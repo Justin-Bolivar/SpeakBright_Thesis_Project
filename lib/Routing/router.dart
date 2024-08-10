@@ -4,6 +4,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
+import "package:speakbright_mobile/Screens/auth/register_student.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
@@ -118,6 +119,13 @@ class GlobalRouter {
               name: Explore.name,
               builder: (context, _) {
                 return const Explore();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: RegistrationStudent.route,
+              name: RegistrationStudent.name,
+              builder: (context, _) {
+                return const RegistrationStudent();
               }),
         ]);
   }
