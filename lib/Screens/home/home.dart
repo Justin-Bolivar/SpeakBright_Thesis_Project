@@ -37,19 +37,15 @@ class _HomeState extends ConsumerState<Home> {
     return Scaffold(
       appBar: AppBar(title: const Text('Home Page')),
       body: FutureBuilder<bool>(
-        // Pass the future to FutureBuilder
         future: isUserAGuardian(AuthController.I.currentUser?.uid),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          // Check if the future is resolved
           if (snapshot.connectionState == ConnectionState.done) {
-            // Use snapshot.data to determine which layout to show
             if (snapshot.hasData && snapshot.data == true) {
               return const GuardianLayout();
             } else {
               return const StudentLayout();
             }
           } else {
-            // Show a loading indicator while waiting for the future to complete
             return const CircularProgressIndicator();
           }
         },
