@@ -12,18 +12,18 @@ import 'package:speakbright_mobile/Widgets/header_container.dart';
 
 import '../../Routing/router.dart';
 
-class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+class StudentHomepage extends ConsumerStatefulWidget {
+  const StudentHomepage({super.key});
 
-  static const String route = "/home";
-  static const String path = "/home";
-  static const String name = "HomePage";
+  static const String route = "/studenthome";
+  static const String path = "/studenthome";
+  static const String name = "StudentHomepage";
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  ConsumerState<StudentHomepage> createState() => _StudentHomepageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _StudentHomepageState extends ConsumerState<StudentHomepage> {
   final FlutterTts flutterTts = FlutterTts();
   final intro = "You have selected";
   @override
