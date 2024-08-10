@@ -1,11 +1,9 @@
 // ignore_for_file: avoid_print
 
 import "dart:async";
-import "package:cloud_firestore/cloud_firestore.dart";
 import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
-import "package:speakbright_mobile/Screens/guardian_screens/guradian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
 import "package:speakbright_mobile/Screens/home/homepage.dart";
@@ -26,42 +24,14 @@ class GlobalRouter {
   late GoRouter router;
   late GlobalKey<NavigatorState> _rootNavigatorKey;
   late GlobalKey<NavigatorState> _shellNavigatorKey;
-
-  Future<bool> _isUserAGuardian(String? uid) async {
-    final CollectionReference userGuardianCollection =
-        FirebaseFirestore.instance.collection('user_guardian');
-    final DocumentSnapshot userDocument =
-        await userGuardianCollection.doc(uid).get();
-//for debugging only delete later
-    // print('Checking document ID: $uid');
-    // print('user: ${AuthController.I.currentUser}');
-    // print('Document data: ${userDocument.data()}');
-    // print('Document exists: ${userDocument.exists}');
-
-   
-    if (userDocument.exists) {
-      print('Document data: ${userDocument.data()}');
-    }
-
-    return userDocument.exists;
-  }
-
   FutureOr<String?> handleRedirect(
       BuildContext context, GoRouterState state) async {
     //authenticated
     if (AuthController.I.state == AuthState.authenticated) {
-      bool isGuardian =
-          await _isUserAGuardian(AuthController.I.currentUser?.uid);
 
-      if (isGuardian && state.matchedLocation == LoginScreen.route) {
-        print("guardian");
+      if (state.matchedLocation == LoginScreen.route) {
         return Home.route;
       }
-      if (!isGuardian && state.matchedLocation == LoginScreen.route) {
-        print("student");
-        return HomePage.route;
-      }
-
       if (state.matchedLocation == RegistrationScreen.route) {
         return Home.route;
       }
