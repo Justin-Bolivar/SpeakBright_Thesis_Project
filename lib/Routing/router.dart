@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/auth/register_student.dart";
+import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
@@ -30,7 +31,6 @@ class GlobalRouter {
       BuildContext context, GoRouterState state) async {
     //authenticated
     if (AuthController.I.state == AuthState.authenticated) {
-
       if (state.matchedLocation == LoginScreen.route) {
         return Home.route;
       }
@@ -112,6 +112,14 @@ class GlobalRouter {
               name: Communicate.name,
               builder: (context, _) {
                 return const Communicate();
+              }),
+          GoRoute(
+              //only for testing remove later
+              parentNavigatorKey: _rootNavigatorKey,
+              path: AddCardPage.route,
+              name: AddCardPage.name,
+              builder: (context, _) {
+                return const AddCardPage();
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
