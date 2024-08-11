@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speakbright_mobile/Screens/auth/register_student.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
 import 'package:speakbright_mobile/Screens/home/explore.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
