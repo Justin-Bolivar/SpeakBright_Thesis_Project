@@ -34,25 +34,17 @@ class _CommunicateState extends ConsumerState<Communicate> {
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
+    _firestoreService.fetchCategories().then((value) {
+      setState(() {
+        categories.addAll(value);
+      });
+    });
   }
 
   void _clearSentence() {
     setState(() {
       sentence.clear();
     });
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      List<String> fetchedCategories =
-          await _firestoreService.fetchCategories();
-      setState(() {
-        categories = fetchedCategories;
-      });
-    } catch (e) {
-      print(e);
-    }
   }
 
   void _addCardTitleToSentence(String title) {
@@ -161,6 +153,94 @@ class _CommunicateState extends ConsumerState<Communicate> {
                     ),
                   ),
                 ),
+              ),
+            ),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, bottom: 5),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/Diversity.png',
+                        height: 40,
+                        width: 40,
+                      ),
+                      const SizedBox(width: 10),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Categories",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(fontSize: 24, color: kblack),
+                          ),
+                          Text(
+                            "Select a category and tap on cards you want",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(fontSize: 12, color: kblack),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer()
+              ],
+            ),
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 35,
+                maxHeight: 35,
+              ),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  int colorIndex = index % boxColors.length;
+                  Color itemColor = boxColors[colorIndex];
+
+                  bool isSelected = selectedCategory == index;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedCategory = index;
+                      });
+                    },
+                    child: SizedBox(
+                      height: 30,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 18),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: itemColor,
+                          borderRadius: BorderRadius.circular(10.0),
+                          boxShadow: isSelected
+                              ? <BoxShadow>[
+                                  BoxShadow(
+                                    color: itemColor,
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Text(
+                          category,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: kwhite,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             Expanded(
