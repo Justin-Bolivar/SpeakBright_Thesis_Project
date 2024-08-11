@@ -353,8 +353,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
     String userId = user.uid;
 
     CollectionReference users = FirebaseFirestore.instance.collection('users');
-    CollectionReference userGuardianRef =
-        FirebaseFirestore.instance.collection('user_guardian');
+    CollectionReference userGuardianRef = FirebaseFirestore.instance.collection('user_guardian');
     DocumentReference userGuardianDoc = userGuardianRef.doc(guardianID);
     CollectionReference studentsRef = userGuardianDoc.collection('students');
 
