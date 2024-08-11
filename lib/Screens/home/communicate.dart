@@ -250,6 +250,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   onCardTap: (String cardTitle, String category) {
                     _ttsService.speak(cardTitle);
                     _firestoreService.storeTappedCards(cardTitle, category);
+                    print('title: $cardTitle, cat: $category'); //debugging
                   },
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
