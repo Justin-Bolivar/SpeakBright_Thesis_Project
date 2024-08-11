@@ -32,20 +32,26 @@ class FirestoreService {
     }
   }
 
-  //record for the tapped cards
   Future<void> storeTappedCards(String cardTitle, String category) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
 
-    final CollectionReference tappedRef =
-        FirebaseFirestore.instance.collection('tappedCardsPerSession');
-    final DateTime now = DateTime.now();
+    final CollectionReference usersCollection =
+        FirebaseFirestore.instance.collection('card_basket');
+    final DocumentReference userDoc = usersCollection.doc(user.uid);
 
-    //latest session within the last 5 minutes
-    final QuerySnapshot querySnapshot = await tappedRef
-        .where('userID', isEqualTo: user.uid)
+    await userDoc.set({
+      'userID': user.uid,
+    }, SetOptions(merge: true));
+
+    final CollectionReference sessionsCollection =
+        userDoc.collection('sessions');
+
+    // find lastest session
+    final DateTime now = DateTime.now();
+    final QuerySnapshot querySnapshot = await sessionsCollection
         .where('sessionTime',
             isGreaterThan:
                 Timestamp.fromDate(now.subtract(const Duration(minutes: 5))))
@@ -56,23 +62,21 @@ class FirestoreService {
     DocumentReference sessionDoc;
 
     if (querySnapshot.docs.isNotEmpty) {
-      // recent session exists, use it
+      // Recent session exists, use it
       sessionDoc = querySnapshot.docs.first.reference;
     } else {
-      // if no recent session found
+      // if recent session found, create a new one
       final Map<String, dynamic> newSessionData = {
-        'userID': user.uid,
-        'sessionID': FirebaseFirestore.instance.collection('sessions').doc().id,
+        'sessionID': sessionsCollection.doc().id,
         'sessionTime': Timestamp.fromDate(now),
       };
-      sessionDoc = await tappedRef.add(newSessionData);
+      sessionDoc = await sessionsCollection.add(newSessionData);
     }
 
-    // subcollection
-    await sessionDoc.collection('cards').add({
+    await sessionDoc.collection('cardsTapped').add({
       'cardTitle': cardTitle,
       'category': category,
-      'tapTime': Timestamp.fromDate(now),
+      'timeTapped': Timestamp.fromDate(now),
     });
   }
 }
