@@ -9,8 +9,8 @@ import 'package:speakbright_mobile/Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 
 class RegistrationStudent extends StatefulWidget {
-  static const String route = "/register";
-  static const String name = "Registration Screen";
+  static const String route = "/registerstudent";
+  static const String name = "Student Registration";
   const RegistrationStudent({super.key});
 
   @override

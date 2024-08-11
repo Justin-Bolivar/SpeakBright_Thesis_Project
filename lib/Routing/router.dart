@@ -1,9 +1,14 @@
+// ignore_for_file: avoid_print
+
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
+import "package:speakbright_mobile/Screens/auth/register_student.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
-import "package:speakbright_mobile/Screens/home/homepage.dart";
+import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
+import "package:speakbright_mobile/Screens/home/home.dart";
+import "package:speakbright_mobile/Screens/home/student_homepage.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -21,25 +26,27 @@ class GlobalRouter {
   late GoRouter router;
   late GlobalKey<NavigatorState> _rootNavigatorKey;
   late GlobalKey<NavigatorState> _shellNavigatorKey;
-
   FutureOr<String?> handleRedirect(
       BuildContext context, GoRouterState state) async {
+    //authenticated
     if (AuthController.I.state == AuthState.authenticated) {
+
       if (state.matchedLocation == LoginScreen.route) {
-        return HomePage.route;
+        return Home.route;
       }
       if (state.matchedLocation == RegistrationScreen.route) {
-        return HomePage.route;
+        return Home.route;
       }
       return null;
     }
+
+    //not authenticated
     if (AuthController.I.state != AuthState.authenticated) {
-      if (state.matchedLocation == LoginScreen.route) {
+      if (state.matchedLocation == LoginScreen.route ||
+          state.matchedLocation == RegistrationScreen.route) {
         return null;
       }
-      if (state.matchedLocation == RegistrationScreen.route) {
-        return null;
-      }
+
       return LoginScreen.route;
     }
     return null;
@@ -50,7 +57,7 @@ class GlobalRouter {
     _shellNavigatorKey = GlobalKey<NavigatorState>();
     router = GoRouter(
         navigatorKey: _rootNavigatorKey,
-        initialLocation: HomePage.route,
+        initialLocation: Home.route,
         redirect: handleRedirect,
         refreshListenable: AuthController.I,
         routes: [
@@ -73,68 +80,53 @@ class GlobalRouter {
               routes: [
                 GoRoute(
                   parentNavigatorKey: _shellNavigatorKey,
-                  path: HomePage.route,
-                  name: HomePage.name,
+                  path: Home.route,
+                  name: Home.name,
                   builder: (context, _) {
-                    return const HomePage();
+                    return const Home();
                   },
-                  // routes: [
-                  //   GoRoute(
-                  //       parentNavigatorKey: _shellNavigatorKey,
-                  //       path: Communicate.route,
-                  //       name: Communicate.name,
-                  //       builder: (context, _) {
-                  //         return Communicate();
-                  //       }),
-                  // GoRoute(
-                  //     parentNavigatorKey: _rootNavigatorKey,
-                  //     path: Explore.route,
-                  //     name: Explore.name,
-                  //     builder: (context, _) {
-                  //       return const Explore(
-                  //          );}),
-                  // GoRoute(
-                  //     parentNavigatorKey: _rootNavigatorKey,
-                  //     path: Play.route,
-                  //     name: Play.name,
-                  //     builder: (context, _) {
-                  //       return const Play();
-                  //     }),
-                  // GoRoute(
-                  //     parentNavigatorKey: _rootNavigatorKey,
-                  //     path: Test.route,
-                  //     name: Test.name,
-                  //     builder: (context, _) {
-                  //       return const Test();
-                  //     }),
-                  // ]
                 ),
-                // GoRoute(
-                //     parentNavigatorKey: _shellNavigatorKey,
-                //     path: Communicate.route,
-                //     name: Communicate.name,
-                //     builder: (context, _) {
-                //       return const Communicate();
-                //     }),
+                GoRoute(
+                  parentNavigatorKey: _shellNavigatorKey,
+                  path: StudentHomepage.route,
+                  name: StudentHomepage.name,
+                  builder: (context, _) {
+                    return const StudentHomepage();
+                  },
+                ),
+                GoRoute(
+                  parentNavigatorKey: _shellNavigatorKey,
+                  path: GuardianHomepage.route,
+                  name: GuardianHomepage.name,
+                  builder: (context, _) {
+                    return const GuardianHomepage();
+                  },
+                ),
               ],
               builder: (context, state, child) {
-                return const HomePage();
+                return const Home();
               }),
-              GoRoute(
-                    parentNavigatorKey: _rootNavigatorKey,
-                    path: Communicate.route,
-                    name: Communicate.name,
-                    builder: (context, _) {
-                      return const Communicate();
-                    }),
-              GoRoute(
-                      parentNavigatorKey: _rootNavigatorKey,
-                      path: Explore.route,
-                      name: Explore.name,
-                      builder: (context, _) {
-                        return const Explore();
-                    }),
-          
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Communicate.route,
+              name: Communicate.name,
+              builder: (context, _) {
+                return const Communicate();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Explore.route,
+              name: Explore.name,
+              builder: (context, _) {
+                return const Explore();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: RegistrationStudent.route,
+              name: RegistrationStudent.name,
+              builder: (context, _) {
+                return const RegistrationStudent();
+              }),
         ]);
   }
 }
