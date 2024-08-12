@@ -1,6 +1,5 @@
 // ignore_for_file: unused_local_variable
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
@@ -17,7 +16,6 @@ class AuthController with ChangeNotifier {
 
   static AuthController get instance => GetIt.instance<AuthController>();
   static AuthController get I => GetIt.instance<AuthController>();
-  final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) => AuthController());
 
   late StreamSubscription<User?> currentAuthedUser;
   AuthState state = AuthState.unauthenticated;
@@ -38,18 +36,28 @@ class AuthController with ChangeNotifier {
     notifyListeners();
   }
 
-  login(String userName, String password) async {
-    UserCredential userCredential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: userName, password: password);
+  login(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      print(FirebaseAuth.instance.currentUser);
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
-  register(String userName, String password) async {
-    UserCredential userCredential = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: userName, password: password);
+  register(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
-  logout() {
-    return FirebaseAuth.instance.signOut();
+Future<void> logout() async {
+    // return FirebaseAuth.instance.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   ///must be called in main before runApp
