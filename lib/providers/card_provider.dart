@@ -10,16 +10,24 @@ final cardProvider =
   return CardNotifier();
 });
 
-final cardsStreamProvider = StreamProvider<List<CardModel>>((ref) {
+final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
 
+print("Fetching cards for user ${FirebaseAuth.instance.currentUser?.uid}"); //debugging only delte later
   return FirebaseFirestore.instance
       .collection('cards')
       .where('userId', isEqualTo: user.uid)
       .snapshots()
+      .handleError((error) {
+        // print("Error fetching cards: $error");
+        // print("user ID: ${FirebaseAuth.instance.currentUser?.uid}");
+        return Stream.value([]);
+      })
+
       .map((snapshot) =>
-          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList()
+    );
 });
 
 final cardsExploreProvider = StreamProvider<List<CardModel>>((ref) {
