@@ -1,6 +1,7 @@
 // communicate.dart
 // ignore_for_file: avoid_print
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
@@ -59,6 +60,34 @@ class _CommunicateState extends ConsumerState<Communicate> {
     super.dispose();
   }
 
+  Future<void> _sendSentenceAndSpeak() async {
+    String url = 'http://192.168.1.4:8000/create-sentence';
+    String sentenceString = sentence.join(' ');
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(<String, dynamic>{'words': sentenceString}),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        setState(() {
+          sentence.clear();
+          sentence.addAll(responseBody['sentence'].split(' '));
+        });
+
+        _ttsService.speak(sentence.join(' '));
+      } else {
+        print('Failed to create sentence: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred while sending sentence: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
@@ -91,10 +120,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
               ),
               const Spacer(),
               IconButton(
-                onPressed: () {
-                  _firestoreService.storeSentence(sentence);
-                  _ttsService.speak(sentence.join(' '));
-                },
+                onPressed: _sendSentenceAndSpeak,
                 icon: const Icon(
                   Icons.volume_up,
                   color: kwhite,
@@ -143,9 +169,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                             child: Text(
                               sentence[index],
                               style: const TextStyle(
-                                color: dullpurple,
-                                fontSize: 14.0,
-                              ),
+                                  color: dullpurple, fontSize: 14.0),
                             ),
                           ),
                         );
@@ -261,17 +285,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
                       : categories[selectedCategory],
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('Error: $error')),
+                error: (err, stack) => Text('Error: $err'),
               ),
             ),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            GlobalRouter.I.router.push(AddCardPage.route);
-          },
-          tooltip: 'Add',
-          child: const Icon(Icons.add),
         ));
   }
 }
