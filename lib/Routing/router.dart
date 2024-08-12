@@ -10,6 +10,7 @@ import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
+import "package:speakbright_mobile/Screens/home/student_list.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -134,6 +135,13 @@ class GlobalRouter {
               name: RegistrationStudent.name,
               builder: (context, _) {
                 return const RegistrationStudent();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: StudentListPage.route,
+              name: StudentListPage.name,
+              builder: (context, _) {
+                return const StudentListPage();
               }),
         ]);
   }

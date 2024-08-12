@@ -366,12 +366,13 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
       'name': name.text.trim(),
       'email': username.text.trim(),
       'birthday': birthdayTimestamp,
-      'userId': userId,
+      'userID': userId,
       'userType': 'student',
     };
+    print(userId);
 
     await users.doc(userId).set(studentData);
-    await studentsRef.add(studentData);
+    await studentsRef.doc(userId).set(studentData);
   }
 
   final OutlineInputBorder _baseBorder = const OutlineInputBorder(
