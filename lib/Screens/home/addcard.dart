@@ -1,33 +1,35 @@
-// ignore_for_file: avoid_print, library_private_types_in_public_api
-
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/providers/student_provider.dart';
 
-class AddCardPage extends StatefulWidget {
-  const AddCardPage({super.key});
+// ignore: must_be_immutable
+class AddCardPage extends ConsumerWidget {
+  AddCardPage({super.key});
+
   static const String route = '/addcard';
   static const String path = "/addcard";
   static const String name = "Add Card";
 
-  @override
-  _AddCardPageState createState() => _AddCardPageState();
-}
-
-class _AddCardPageState extends State<AddCardPage> {
-  String newCardTitle = '';
-  String? imageUrl;
-  String? selectedCategory;
+  // String newCardTitle = '';
+  // String? imageUrl;
+  // String? selectedCategory;
+  final newCardTitleProvider = StateProvider<String>((ref) => '');
+  final selectedCategoryProvider = StateProvider<String?>((ref) => null);
+  final imageUrlProvider = StateProvider<String?>((ref) => null);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    String? imageUrl = ref.read(imageUrlProvider);
+    String? selectedCategory = ref.read(selectedCategoryProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Card'),
+        title: Text('Add New Card'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -64,9 +66,7 @@ class _AddCardPageState extends State<AddCardPage> {
                         ),
                   TextField(
                     onChanged: (value) {
-                      setState(() {
-                        newCardTitle = value;
-                      });
+                      ref.read(newCardTitleProvider.notifier).state = value;
                     },
                     decoration:
                         const InputDecoration(hintText: "Enter card title"),
@@ -92,9 +92,7 @@ class _AddCardPageState extends State<AddCardPage> {
                         );
                       }).toList(),
                       onChanged: (newValue) {
-                        setState(() {
-                          selectedCategory = newValue;
-                        });
+                        ref.read(selectedCategoryProvider.notifier).state = newValue;
                       },
                     ),
                   ),
@@ -125,7 +123,8 @@ class _AddCardPageState extends State<AddCardPage> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: ElevatedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.camera),
+                            onPressed: () =>
+                                _pickImage(ImageSource.camera, ref),
                             icon: const Icon(
                               Icons.camera_alt_rounded,
                               color: Color.fromARGB(255, 7, 14, 93),
@@ -176,7 +175,8 @@ class _AddCardPageState extends State<AddCardPage> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: ElevatedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.gallery),
+                            onPressed: () =>
+                                _pickImage(ImageSource.gallery, ref),
                             icon: const Icon(
                               Icons.photo_library,
                               color: Color.fromARGB(255, 137, 61, 7),
@@ -195,7 +195,6 @@ class _AddCardPageState extends State<AddCardPage> {
                         ),
                       ),
                       Positioned(
-                        // left: 10,
                         right: 0,
                         top: 0,
                         child: Image.asset(
@@ -212,7 +211,7 @@ class _AddCardPageState extends State<AddCardPage> {
             if (imageUrl != null) Image.network(imageUrl!),
             ElevatedButton.icon(
                 icon: const Icon(Icons.add, color: kwhite),
-                onPressed: _submitCard,
+                onPressed: () => _submitCard(context, ref),
                 label: const Text(
                   'Add Card',
                   style: TextStyle(color: kwhite),
@@ -226,7 +225,7 @@ class _AddCardPageState extends State<AddCardPage> {
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> _pickImage(ImageSource source, WidgetRef ref1) async {
     final ImagePicker picker = ImagePicker();
     final XFile? photo = await picker.pickImage(source: source);
 
@@ -237,23 +236,27 @@ class _AddCardPageState extends State<AddCardPage> {
           .child('images/$uniqueFileName');
       try {
         await ref.putFile(File(photo.path));
-        imageUrl = await ref.getDownloadURL();
-        setState(() {});
+        String? imageUrl = await ref.getDownloadURL();
+        ref1.read(imageUrlProvider.notifier).state = imageUrl;
       } catch (e) {
         print(e);
       }
     }
   }
 
-  void _submitCard() {
+  void _submitCard(BuildContext context, WidgetRef ref) {
+    String newCardTitle = ref.read(newCardTitleProvider);
+    String? imageUrl = ref.read(imageUrlProvider);
+    String? selectedCategory = ref.read(selectedCategoryProvider);
+
     if (newCardTitle.isNotEmpty && imageUrl != null) {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        print('Selected Category: $selectedCategory');
+      String studentID = ref.watch(studentIdProvider);
+      if (studentID != '') {
+        print('Selected Category: $selectedCategory'); // for debugging
 
         FirebaseFirestore.instance.collection('cards').add({
           'title': newCardTitle,
-          'userId': user.uid,
+          'userId': studentID,
           'imageUrl': imageUrl,
           'category': selectedCategory,
           'tapCount': 0,
