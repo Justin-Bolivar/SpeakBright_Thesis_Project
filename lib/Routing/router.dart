@@ -12,7 +12,6 @@ import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
 import "package:speakbright_mobile/Widgets/student_list.dart";
-import "package:speakbright_mobile/providers/student_provider.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";

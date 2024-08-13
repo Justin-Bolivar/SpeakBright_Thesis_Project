@@ -105,32 +105,6 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
                   child: const Text("Register"),
                 ),
               ),
-              const SizedBox(height: 30),
-              Center(
-                child: Flexible(
-                  child: MouseRegion(
-                    child: GestureDetector(
-                        onTap: () {
-                          print(FirebaseAuth.instance.currentUser?.uid);
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: 'Already have an Guardian account? ',
-                                  style: TextStyle(color: mainpurple)),
-                              TextSpan(
-                                  text: 'Login here',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: mainpurple)),
-                            ],
-                          ),
-                        )),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 60),
             ],
           ),
         ),
@@ -145,7 +119,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Image.asset('assets/SpeakBright_P.png',
-                    width: 300, height: 180),
+                    height: 120),
                 const SizedBox(height: 8),
                 Flexible(
                   child: TextFormField(
