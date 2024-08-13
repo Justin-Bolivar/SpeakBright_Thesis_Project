@@ -4,7 +4,7 @@ import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 
 class CardGrid extends StatelessWidget {
   final List<CardModel> cards;
-  final Function(String, String) onCardTap;
+  final Function(String, String, String) onCardTap;
   final Function(String) onCardDelete;
   final Function(String) onCardLongPress;
   final String selectedCategory;
@@ -46,7 +46,8 @@ class CardGrid extends StatelessWidget {
         return CardItem(
           card: filteredCards[index],
           colorIndex: index,
-          onTap: () => onCardTap(filteredCards[index].title,filteredCards[index].category),
+          onTap: () => onCardTap(filteredCards[index].title,
+              filteredCards[index].category, filteredCards[index].id),
           onDelete: onCardDelete,
           onLongPress: () => onCardLongPress(filteredCards[index].title),
         );
