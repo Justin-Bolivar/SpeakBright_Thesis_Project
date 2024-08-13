@@ -45,7 +45,7 @@ final cardsGuardianProvider =
 
   return FirebaseFirestore.instance
       .collection('cards')
-      .where('userID', isEqualTo: studentId)
+      .where('userId', isEqualTo: studentId)
       .snapshots()
       .handleError((error) {
     print("Error fetching cards: $error");
