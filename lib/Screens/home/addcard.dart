@@ -34,21 +34,18 @@ class _AddCardPageState extends State<AddCardPage> {
         child: ListView(
           children: [
             Container(
-              height: 350, 
-              margin: const EdgeInsets.all(
-                  16), 
-              padding: const EdgeInsets.all(
-                  16), 
+              height: 350,
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: kwhite,
-                borderRadius:
-                    BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5), 
-                    spreadRadius: 0, 
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 0,
                     blurRadius: 10,
-                    offset: const Offset(0, 5), 
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
@@ -58,12 +55,12 @@ class _AddCardPageState extends State<AddCardPage> {
                       ? Image.asset(
                           'assets/add_image_icon.png',
                           fit: BoxFit.cover,
-                          height: 150, 
+                          height: 150,
                         )
                       : Image.network(
                           imageUrl!,
                           fit: BoxFit.cover,
-                          height: 150, 
+                          height: 150,
                         ),
                   TextField(
                     onChanged: (value) {
@@ -74,9 +71,7 @@ class _AddCardPageState extends State<AddCardPage> {
                     decoration:
                         const InputDecoration(hintText: "Enter card title"),
                   ),
-                  const SizedBox(
-                      height:
-                          16), 
+                  const SizedBox(height: 16),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: selectedCategory,
@@ -111,22 +106,19 @@ class _AddCardPageState extends State<AddCardPage> {
             Row(
               children: [
                 SizedBox(
-                  height: 80, 
-                  width: 150, 
+                  height: 80,
+                  width: 150,
                   child: Stack(
-                    alignment: Alignment
-                        .center, 
+                    alignment: Alignment.center,
                     children: [
                       Container(
-                        height: 60, 
+                        height: 60,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              8), 
+                          borderRadius: BorderRadius.circular(8),
                           gradient: const LinearGradient(
                             colors: [
-                              Colors.blue, 
-                              Color.fromARGB(137, 24, 51,
-                                  186), 
+                              Colors.blue,
+                              Color.fromARGB(137, 24, 51, 186),
                             ],
                           ),
                         ),
@@ -144,10 +136,9 @@ class _AddCardPageState extends State<AddCardPage> {
                                   color: Color.fromARGB(255, 7, 14, 93)),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors
-                                  .transparent, 
-                              shadowColor: Colors.transparent, 
-                              elevation: 0, 
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
                             ),
                           ),
                         ),
@@ -166,22 +157,19 @@ class _AddCardPageState extends State<AddCardPage> {
                 ),
                 const SizedBox(width: 10),
                 SizedBox(
-                  height: 80, 
-                  width: 150, 
+                  height: 80,
+                  width: 150,
                   child: Stack(
-                    alignment: Alignment
-                        .center, 
+                    alignment: Alignment.center,
                     children: [
                       Container(
-                        height: 60, 
+                        height: 60,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              8),
+                          borderRadius: BorderRadius.circular(8),
                           gradient: const LinearGradient(
                             colors: [
-                              Colors.yellow, 
-                              Colors
-                                  .orange, 
+                              Colors.yellow,
+                              Colors.orange,
                             ],
                           ),
                         ),
@@ -199,10 +187,9 @@ class _AddCardPageState extends State<AddCardPage> {
                                   color: Color.fromARGB(255, 137, 61, 7)),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors
-                                  .transparent,
-                              shadowColor: Colors.transparent, 
-                              elevation: 0, 
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
                             ),
                           ),
                         ),
@@ -269,8 +256,9 @@ class _AddCardPageState extends State<AddCardPage> {
           'userId': user.uid,
           'imageUrl': imageUrl,
           'category': selectedCategory,
+          'tapCount': 0,
         }).then((_) {
-          Navigator.pop(context); 
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Card added successfully')));
         }).catchError((e) {

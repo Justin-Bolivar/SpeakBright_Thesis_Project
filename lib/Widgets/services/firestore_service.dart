@@ -62,10 +62,8 @@ class FirestoreService {
     DocumentReference sessionDoc;
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Recent session exists, use it
       sessionDoc = querySnapshot.docs.first.reference;
     } else {
-      // if recent session found, create a new one
       final Map<String, dynamic> newSessionData = {
         'sessionID': sessionsCollection.doc().id,
         'sessionTime': Timestamp.fromDate(now),
@@ -77,6 +75,12 @@ class FirestoreService {
       'cardTitle': cardTitle,
       'category': category,
       'timeTapped': Timestamp.fromDate(now),
+    });
+  }
+
+  void tapCountIncrement(String cardId) {
+    FirebaseFirestore.instance.collection('cards').doc(cardId).update({
+      'tapCount': FieldValue.increment(1),
     });
   }
 }
