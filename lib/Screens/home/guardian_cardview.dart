@@ -26,7 +26,6 @@ class GuardianCommunicate extends ConsumerStatefulWidget {
 class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
   final TTSService _ttsService = TTSService();
   final FirestoreService _firestoreService = FirestoreService();
-  
 
   List<String> sentence = [];
   List<String> categories = ['All'];
@@ -54,7 +53,6 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
     });
   }
 
-  
   @override
   void dispose() {
     _ttsService.stop();
@@ -248,11 +246,8 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
               child: cardsAsyncValue.when(
                 data: (cards) => CardGrid(
                   cards: cards,
-                  onCardTap: (String cardTitle, String category) {
-                    _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(cardTitle, category);
-                    print('title: $cardTitle, cat: $category'); //debugging
-                  },
+                  onCardTap:
+                      (String cardTitle, String category, String cardId) {},
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
