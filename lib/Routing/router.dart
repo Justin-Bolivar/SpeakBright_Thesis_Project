@@ -121,7 +121,7 @@ class GlobalRouter {
               path: AddCardPage.route,
               name: AddCardPage.name,
               builder: (context, _) {
-                return const AddCardPage();
+                return AddCardPage();
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
