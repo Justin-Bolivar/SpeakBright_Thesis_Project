@@ -266,12 +266,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            GlobalRouter.I.router.push(AddCardPage.route);
-          },
-          tooltip: 'Add',
-          child: const Icon(Icons.add),
-        ));
+        
+        );
   }
 }
