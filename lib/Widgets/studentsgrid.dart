@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 
 class StudentsGrid extends StatelessWidget {
   final List<Map<String, dynamic>> students;
+  final Function(String) onStudentTap;
+  // final WidgetRef ref;
 
-  const StudentsGrid({super.key, required this.students});
+  const StudentsGrid({
+    super.key,
+    required this.students,
+    required this.onStudentTap,
+    // required this.ref,
+  });
+
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +22,19 @@ class StudentsGrid extends StatelessWidget {
       ),
       itemBuilder: (BuildContext context, int index) {
         final student = students[index];
-        return Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(student['name'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), 
-              Text(student['userID'], style: const TextStyle(fontSize: 14)), 
-            ],
+        return InkWell(
+          // Wrap the Card with InkWell to detect taps
+          onTap: () => onStudentTap(student['userID']),
+          child: Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(student['name'],
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(student['userID'], style: const TextStyle(fontSize: 14)),
+              ],
+            ),
           ),
         );
       },

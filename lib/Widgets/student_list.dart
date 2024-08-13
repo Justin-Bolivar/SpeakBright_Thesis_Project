@@ -4,8 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/studentsgrid.dart';
+import 'package:speakbright_mobile/providers/student_provider.dart';
 
 class StudentListPage extends ConsumerStatefulWidget {
   const StudentListPage({super.key});
@@ -33,7 +36,7 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
     }
     String guardianUid = guardian.uid;
     print(guardianUid);
-    
+
     final studentsRef = FirebaseFirestore.instance
         .collection('user_guardian')
         .doc(guardianUid)
@@ -89,7 +92,13 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return StudentsGrid(students: snapshot.data!);
+            return StudentsGrid(
+              students: snapshot.data!,
+              onStudentTap: (studentID) {
+                ref.read(studentIdProvider.notifier).state = studentID;
+                GlobalRouter.I.router.push(GuardianCommunicate.route);
+              },
+            );
           }
         },
       ),
