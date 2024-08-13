@@ -7,10 +7,12 @@ import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/auth/register_student.dart";
 import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
+import "package:speakbright_mobile/Screens/home/guardian_cardview.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
-import "package:speakbright_mobile/Screens/home/student_list.dart";
+import "package:speakbright_mobile/Widgets/student_list.dart";
+import "package:speakbright_mobile/providers/student_provider.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -142,6 +144,14 @@ class GlobalRouter {
               name: StudentListPage.name,
               builder: (context, _) {
                 return const StudentListPage();
+              }),
+
+              GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: GuardianCommunicate.route,
+              name: GuardianCommunicate.name,
+              builder: (context, _) {
+                return const GuardianCommunicate();
               }),
         ]);
   }
