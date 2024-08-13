@@ -6,6 +6,7 @@ class CardModel {
   final String imageUrl;
   final String userId;
   final String category;
+  final int tapCount;
 
   CardModel({
     required this.id,
@@ -13,6 +14,7 @@ class CardModel {
     required this.imageUrl,
     required this.userId,
     required this.category,
+    required this.tapCount,
   });
 
   factory CardModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +25,7 @@ class CardModel {
       imageUrl: data['imageUrl'] ?? '',
       userId: data['userId'] ?? '',
       category: data['category'] ?? '',
+      tapCount: 0,
     );
   }
 }
