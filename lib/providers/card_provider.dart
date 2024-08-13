@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
+import 'package:speakbright_mobile/providers/student_provider.dart';
 
 final cardProvider =
     StateNotifierProvider<CardNotifier, List<CardModel>>((ref) {
@@ -14,20 +15,18 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
 
-print("Fetching cards for user ${FirebaseAuth.instance.currentUser?.uid}"); //debugging only delte later
+  print(
+      "Fetching cards for user ${FirebaseAuth.instance.currentUser?.uid}"); //debugging only delte later
   return FirebaseFirestore.instance
       .collection('cards')
       .where('userId', isEqualTo: user.uid)
       .snapshots()
       .handleError((error) {
-        // print("Error fetching cards: $error");
-        // print("user ID: ${FirebaseAuth.instance.currentUser?.uid}");
-        return Stream.value([]);
-      })
-
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList()
-    );
+    // print("Error fetching cards: $error");
+    // print("user ID: ${FirebaseAuth.instance.currentUser?.uid}");
+    return Stream.value([]);
+  }).map((snapshot) =>
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
 final cardsExploreProvider = StreamProvider<List<CardModel>>((ref) {
@@ -36,6 +35,22 @@ final cardsExploreProvider = StreamProvider<List<CardModel>>((ref) {
 
   return FirebaseFirestore.instance.collection('cards').snapshots().map(
       (snapshot) =>
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+});
+
+final cardsGuardianProvider =
+  StreamProvider.autoDispose<List<CardModel>>((ref) {
+  String studentId = ref.read(studentIdProvider);
+  print("Fetching cards for student $studentId");
+
+  return FirebaseFirestore.instance
+      .collection('cards')
+      .where('userID', isEqualTo: studentId)
+      .snapshots()
+      .handleError((error) {
+    print("Error fetching cards: $error");
+    return Stream.value([]);
+  }).map((snapshot) =>
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
