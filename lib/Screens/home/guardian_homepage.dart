@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Screens/auth/register_student.dart';
-import 'package:speakbright_mobile/Screens/home/student_list.dart';
+import 'package:speakbright_mobile/Widgets/student_list.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/header_container.dart';
 
