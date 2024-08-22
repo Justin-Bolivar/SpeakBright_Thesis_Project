@@ -29,7 +29,7 @@ class AddCardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Card'),
+        title: Text('Add New Card'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -53,14 +53,14 @@ class AddCardPage extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  imageUrl == ''
+                  imageUrl == null
                       ? Image.asset(
                           'assets/add_image_icon.png',
                           fit: BoxFit.cover,
                           height: 150,
                         )
                       : Image.network(
-                          imageUrl!,
+                          imageUrl,
                           fit: BoxFit.cover,
                           height: 150,
                         ),
@@ -208,7 +208,7 @@ class AddCardPage extends ConsumerWidget {
                 ),
               ],
             ),
-            if (imageUrl != '') Image.network(imageUrl!),
+            if (imageUrl != null) Image.network(imageUrl!),
             ElevatedButton.icon(
                 icon: const Icon(Icons.add, color: kwhite),
                 onPressed: () => _submitCard(context, ref),
