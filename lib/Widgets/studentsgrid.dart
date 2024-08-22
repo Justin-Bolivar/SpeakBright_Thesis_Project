@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class StudentsGrid extends StatelessWidget {
   final List<Map<String, dynamic>> students;
@@ -18,22 +19,38 @@ class StudentsGrid extends StatelessWidget {
     return GridView.builder(
       itemCount: students.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Number of columns
+        crossAxisCount: 2,
+        crossAxisSpacing: 8.0, 
+        mainAxisSpacing: 8.0, 
       ),
+      padding: const EdgeInsets.all(16.0), 
       itemBuilder: (BuildContext context, int index) {
         final student = students[index];
         return InkWell(
-          // Wrap the Card with InkWell to detect taps
           onTap: () => onStudentTap(student['userID']),
           child: Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(student['name'],
+            child: Padding( 
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    student['name'],
+                    textAlign: TextAlign.center, 
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(student['userID'], style: const TextStyle(fontSize: 14)),
-              ],
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: mainpurple,
+                    ),
+                  ),
+                  Text(
+                    student['userID'],
+                    textAlign: TextAlign.center, 
+                    style: const TextStyle(fontSize: 10), 
+                  ),
+                ],
+              ),
             ),
           ),
         );
