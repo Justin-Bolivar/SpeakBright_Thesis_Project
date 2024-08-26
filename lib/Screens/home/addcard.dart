@@ -24,8 +24,8 @@ class AddCardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    String? imageUrl = ref.read(imageUrlProvider);
-    String? selectedCategory = ref.read(selectedCategoryProvider);
+    String? imageUrl = ref.watch(imageUrlProvider);
+    String? selectedCategory = ref.watch(selectedCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,7 +60,7 @@ class AddCardPage extends ConsumerWidget {
                           height: 150,
                         )
                       : Image.network(
-                          imageUrl!,
+                          imageUrl,
                           fit: BoxFit.cover,
                           height: 150,
                         ),
@@ -208,7 +208,7 @@ class AddCardPage extends ConsumerWidget {
                 ),
               ],
             ),
-            if (imageUrl != null) Image.network(imageUrl!),
+            if (imageUrl != null) Image.network(imageUrl),
             ElevatedButton.icon(
                 icon: const Icon(Icons.add, color: kwhite),
                 onPressed: () => _submitCard(context, ref),
@@ -237,7 +237,7 @@ class AddCardPage extends ConsumerWidget {
       try {
         await ref.putFile(File(photo.path));
         String? imageUrl = await ref.getDownloadURL();
-        ref1.read(imageUrlProvider.notifier).state = imageUrl;
+        ref1.watch(imageUrlProvider.notifier).state = imageUrl;
       } catch (e) {
         print(e);
       }
@@ -246,7 +246,7 @@ class AddCardPage extends ConsumerWidget {
 
   void _submitCard(BuildContext context, WidgetRef ref) {
     String newCardTitle = ref.read(newCardTitleProvider);
-    String? imageUrl = ref.read(imageUrlProvider);
+    String? imageUrl = ref.watch(imageUrlProvider);
     String? selectedCategory = ref.read(selectedCategoryProvider);
 
     if (newCardTitle.isNotEmpty && imageUrl != null) {
