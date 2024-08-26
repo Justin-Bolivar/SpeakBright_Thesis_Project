@@ -61,13 +61,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String url = 'http://192.168.1.4:8000/create-sentence';
+    String url =
+        'https://speakbright-api-fastapi.onrender.com/complete_sentence';
     String sentenceString = sentence.join(' ');
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{'words': sentenceString}),
+        body: jsonEncode(<String, dynamic>{'text': sentenceString}),
       );
 
       if (response.statusCode == 200) {
@@ -75,9 +76,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
         setState(() {
           sentence.clear();
-          sentence.addAll(responseBody['sentence'].split(' '));
+          sentence.addAll(responseBody['completed_sentence'].split(' '));
         });
 
+        _firestoreService.storeSentence(sentence);
         _ttsService.speak(sentence.join(' '));
       } else {
         print('Failed to create sentence: ${response.statusCode}');
