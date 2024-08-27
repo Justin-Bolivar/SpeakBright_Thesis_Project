@@ -1,11 +1,10 @@
 // communicate.dart
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakbright_mobile/Routing/router.dart';
-import 'package:speakbright_mobile/Screens/home/addcard.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
@@ -64,6 +63,20 @@ class _CommunicateState extends ConsumerState<Communicate> {
     String url =
         'https://speakbright-api-fastapi.onrender.com/complete_sentence';
     String sentenceString = sentence.join(' ');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+            color: kLightPruple,
+            size: 50.0,
+          ),
+        );
+      },
+    );
+
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -87,6 +100,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
       }
     } catch (e) {
       print('Error occurred while sending sentence: $e');
+    } finally {
+      // Hide the loading animation
+      Navigator.of(context).pop();
     }
   }
 
