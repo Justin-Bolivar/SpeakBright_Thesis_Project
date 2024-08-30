@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Widgets/cards/explore_card_grid.dart';
@@ -18,6 +19,7 @@ class Explore extends ConsumerStatefulWidget {
 
 class _ExploreState extends ConsumerState<Explore> {
   final TTSService _ttsService = TTSService();
+  final uid = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void initState() {
@@ -102,6 +104,7 @@ class _ExploreState extends ConsumerState<Explore> {
           Expanded(
             child: cardsAsyncValue.when(
               data: (cards) => ExploreCardGrid(
+                userId: uid ?? '', //cause uid is String? userId is String
                 cards: cards,
                 onCardTap: _ttsService.speak,
               ),
