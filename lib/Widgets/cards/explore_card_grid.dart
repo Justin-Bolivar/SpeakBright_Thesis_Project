@@ -4,7 +4,7 @@ import 'explore_card_item.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-// Keep this function as is
+
 Future<List<dynamic>> fetchRecommendations(String userId) async {
   final url = Uri.parse('http://localhost:8000/recommendations/$userId');
   try {
