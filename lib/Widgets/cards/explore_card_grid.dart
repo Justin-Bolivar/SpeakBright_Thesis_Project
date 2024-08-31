@@ -4,14 +4,14 @@ import 'explore_card_item.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 Future<List<dynamic>> fetchRecommendations(String userId) async {
-  final url = Uri.parse('http://localhost:8000/recommendations/$userId');
+  final url = Uri.parse('http://127.0.0.1:8000/recommendations/$userId');
   try {
     final response = await http.post(url);
-    
+
     if (response.statusCode == 200) {
-      return json.decode(response.body)['recommendations'];
+      final jsonData = json.decode(response.body);
+      return jsonData['recommendations'] ?? [];
     } else {
       throw Exception('Failed to load recommendations');
     }
@@ -20,6 +20,7 @@ Future<List<dynamic>> fetchRecommendations(String userId) async {
     rethrow;
   }
 }
+
 
 class ExploreCardGrid extends StatefulWidget {
   final String userId;
@@ -47,25 +48,47 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
   });
 
   try {
-    Map<String, dynamic> response = (await fetchRecommendations(widget.userId)) as Map<String, dynamic>;
+    List<dynamic> recommendationsData = await fetchRecommendations(widget.userId);
 
-    List<dynamic> recommendations = response['recommendations']
-        .map((doc) => CardModel.fromFirestore(doc))
+    // Check if the response contains the expected data structure
+    if (recommendationsData.isNotEmpty) {
+      // Cast each item in the list to Map<String, dynamic>
+      List<Map<String, dynamic>> recommendationsMap = 
+          recommendationsData.map((e) => e as Map<String, dynamic>).toList();
+
+      List recommendationTitles = recommendationsMap
+          .map((rec) => rec['title'])
           .toList();
 
-    List<CardModel> nonRecommendedCards = widget.cards.where((card) => !recommendations.contains(card)).toList();
+      List<CardModel> allCards = widget.cards.where((card) =>
+              recommendationTitles.contains(card.title) ||
+              card.userId != widget.userId)
+          .toList();
 
-    setState(() {
-      recommendations.addAll(nonRecommendedCards);
-      isLoading = false;
-    });
+      setState(() {
+        isLoading = false;
+        recommendations = allCards;
+      });
+    } else {
+      // Handle case where recommendations are empty
+      List<CardModel> allCards = widget.cards.where((card) => card.userId != widget.userId).toList();
+      setState(() {
+        isLoading = false;
+        recommendations = allCards;
+      });
+    }
   } catch (e) {
     print('Error fetching recommendations: $e');
     setState(() {
       isLoading = false;
+      recommendations = widget.cards.where((card) => card.userId != widget.userId).toList();
     });
   }
 }
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -87,7 +110,8 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
 
         return ExploreCardItem(
           card: card,
-          colorIndex: recommendations[index],
+          // colorIndex: recommendations[index],
+          colorIndex: index % 7,
           onTap: () => widget.onCardTap(card.title),
         );
       },
