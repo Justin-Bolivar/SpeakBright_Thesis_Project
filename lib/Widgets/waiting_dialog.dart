@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'information_service.dart';
 
 class WaitingDialog extends StatelessWidget {
@@ -51,7 +52,7 @@ class WaitingDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SpinKitChasingDots(
-              color: color ?? Colors.white,
+              color: color ?? mainpurple,
               size: 32,
             ),
             const SizedBox(
