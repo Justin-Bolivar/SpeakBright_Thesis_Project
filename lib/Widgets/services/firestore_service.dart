@@ -44,6 +44,7 @@ class FirestoreService {
 
     await userDoc.set({
       'userID': user.uid,
+      'email': user.email,
     }, SetOptions(merge: true));
 
     final CollectionReference sessionsCollection =
