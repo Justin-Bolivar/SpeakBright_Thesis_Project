@@ -94,8 +94,8 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                                 ),
                                 Text(
                                   [
-                                    'Register a student',
-                                    'Check your students'
+                                    'Add a student/child',
+                                    'Check students & add cards'
                                   ][index],
                                   style:
                                       TextStyle(fontSize: baseFontSize * 0.8),
@@ -104,8 +104,8 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                             ),
                             Image.asset(
                               [
-                                'assets/communicate.png',
-                                'assets/test_books.png',
+                                'assets/addStudent.png',
+                                'assets/list.png',
                               ][index],
                               height: imageHeight,
                               fit: BoxFit.cover,
