@@ -52,7 +52,7 @@ class WaitingDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SpinKitChasingDots(
-              color: color ?? mainpurple,
+              color: color ?? kLightPruple,
               size: 32,
             ),
             const SizedBox(
