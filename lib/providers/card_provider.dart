@@ -26,7 +26,7 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
-final cardsExploreProvider = StreamProvider<List<CardModel>>((ref) {
+final cardsExploreProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
 
