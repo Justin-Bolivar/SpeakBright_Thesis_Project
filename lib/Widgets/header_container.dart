@@ -106,7 +106,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
                           const Spacer(),
                           IconButton(
                             icon: const Icon(Icons.logout,
-                                color: Colors.white, size: 20),
+                                color: Color(0xFF8E2DE2), size: 20),
                             onPressed: () {
                               WaitingDialog.show(context,
                                   future: AuthController.I.logout());

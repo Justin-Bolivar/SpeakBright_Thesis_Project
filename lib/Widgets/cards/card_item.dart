@@ -10,7 +10,6 @@ class CardItem extends StatelessWidget {
   final int colorIndex;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-  final Function(String) onDelete;
 
   const CardItem({
     super.key,
@@ -18,7 +17,6 @@ class CardItem extends StatelessWidget {
     required this.colorIndex,
     required this.onTap,
     required this.onLongPress,
-    required this.onDelete,
   });
 
   @override
@@ -59,43 +57,8 @@ class CardItem extends StatelessWidget {
               ],
             ),
           ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.red),
-              onPressed: () => _showDeleteConfirmation(context),
-            ),
-          ),
         ],
       ),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm Deletion"),
-          content: const Text("Are you sure you want to remove the card?"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("No"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("Yes"),
-              onPressed: () {
-                onDelete(card.id);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 
