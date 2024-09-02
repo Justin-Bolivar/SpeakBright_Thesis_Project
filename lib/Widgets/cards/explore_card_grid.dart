@@ -5,8 +5,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<List<dynamic>> fetchRecommendations(String userId) async {
-  final url = Uri.parse('http://127.0.0.1:8000/recommendations/$userId');
+  final url = Uri.parse(
+      'https://speakbright-recommender-sys.onrender.com/recommendations/$userId');
   try {
+    print(userId);
     final response = await http.post(url);
 
     if (response.statusCode == 200) {
@@ -20,7 +22,6 @@ Future<List<dynamic>> fetchRecommendations(String userId) async {
     rethrow;
   }
 }
-
 
 class ExploreCardGrid extends StatefulWidget {
   final String userId;
@@ -43,51 +44,51 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
   bool isLoading = false;
 
   void fetchAndFilterRecommendations() async {
-  setState(() {
-    isLoading = true;
-  });
+    setState(() {
+      isLoading = true;
+    });
 
-  try {
-    List<dynamic> recommendationsData = await fetchRecommendations(widget.userId);
+    try {
+      List<dynamic> recommendationsData =
+          await fetchRecommendations(widget.userId);
 
-    // Check if the response contains the expected data structure
-    if (recommendationsData.isNotEmpty) {
-      // Cast each item in the list to Map<String, dynamic>
-      List<Map<String, dynamic>> recommendationsMap = 
-          recommendationsData.map((e) => e as Map<String, dynamic>).toList();
+      // Check if the response contains the expected data structure
+      if (recommendationsData.isNotEmpty) {
+        // Cast each item in the list to Map<String, dynamic>
+        List<Map<String, dynamic>> recommendationsMap =
+            recommendationsData.map((e) => e as Map<String, dynamic>).toList();
 
-      List recommendationTitles = recommendationsMap
-          .map((rec) => rec['title'])
-          .toList();
+        List recommendationTitles =
+            recommendationsMap.map((rec) => rec['title']).toList();
 
-      List<CardModel> allCards = widget.cards.where((card) =>
-              recommendationTitles.contains(card.title) ||
-              card.userId != widget.userId)
-          .toList();
+        List<CardModel> allCards = widget.cards
+            .where((card) =>
+                recommendationTitles.contains(card.title) ||
+                card.userId != widget.userId)
+            .toList();
 
+        setState(() {
+          isLoading = false;
+          recommendations = allCards;
+        });
+      } else {
+        // Handle case where recommendations are empty
+        List<CardModel> allCards =
+            widget.cards.where((card) => card.userId != widget.userId).toList();
+        setState(() {
+          isLoading = false;
+          recommendations = allCards;
+        });
+      }
+    } catch (e) {
+      print('Error fetching recommendations: $e');
       setState(() {
         isLoading = false;
-        recommendations = allCards;
-      });
-    } else {
-      // Handle case where recommendations are empty
-      List<CardModel> allCards = widget.cards.where((card) => card.userId != widget.userId).toList();
-      setState(() {
-        isLoading = false;
-        recommendations = allCards;
+        recommendations =
+            widget.cards.where((card) => card.userId != widget.userId).toList();
       });
     }
-  } catch (e) {
-    print('Error fetching recommendations: $e');
-    setState(() {
-      isLoading = false;
-      recommendations = widget.cards.where((card) => card.userId != widget.userId).toList();
-    });
   }
-}
-
-
-
 
   @override
   void initState() {
