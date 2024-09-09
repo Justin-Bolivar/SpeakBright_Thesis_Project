@@ -1,11 +1,11 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:speakbright_mobile/Screens/auth/auth_controller.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class CardItem extends StatelessWidget {
+class CardItem extends StatefulWidget {
   final CardModel card;
   final int colorIndex;
   final VoidCallback onTap;
@@ -22,53 +22,85 @@ class CardItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    Color itemColor = boxColors[colorIndex % boxColors.length];
+  State<CardItem> createState() => _CardItemState();
+}
 
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: kwhite,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: kblack.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 1,
-                  offset: const Offset(2, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                _buildImageContainer(itemColor),
-                const SizedBox(height: 10),
-                Center(
-                  child: Text(
-                    card.title,
-                    style: TextStyle(
-                      color: itemColor,
-                      fontSize: 15,
+class _CardItemState extends State<CardItem> {
+  Future<bool> isUserAGuardian(String? uid) async {
+    CollectionReference userGuardianCollection =
+        FirebaseFirestore.instance.collection('user_guardian');
+    final DocumentSnapshot userDocument =
+        await userGuardianCollection.doc(uid).get();
+
+    return userDocument.exists && userDocument.get('userType') == 'guardian';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color itemColor = boxColors[widget.colorIndex % boxColors.length];
+    Future<bool> isGuardian =
+        isUserAGuardian(AuthController.I.currentUser?.uid);
+
+    return FutureBuilder<bool>(
+      future: isGuardian,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        bool isCurrentGuardian = snapshot.data ?? false;
+
+        return GestureDetector(
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: kwhite,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kblack.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 1,
+                      offset: const Offset(2, 2),
                     ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildImageContainer(itemColor),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        widget.card.title,
+                        style: TextStyle(
+                          color: itemColor,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isCurrentGuardian)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: () => _showDeleteConfirmation(context),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.red),
-              onPressed: () => _showDeleteConfirmation(context),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -89,7 +121,7 @@ class CardItem extends StatelessWidget {
             TextButton(
               child: const Text("Yes"),
               onPressed: () {
-                onDelete(card.id);
+                widget.onDelete(widget.card.id);
                 Navigator.of(context).pop();
               },
             ),
@@ -136,7 +168,7 @@ class CardItem extends StatelessWidget {
   }
 
   Widget _buildImage(Color color) {
-    if (card.imageUrl.isEmpty) {
+    if (widget.card.imageUrl.isEmpty) {
       return Icon(Icons.image, color: color);
     }
 
@@ -146,7 +178,7 @@ class CardItem extends StatelessWidget {
         topRight: Radius.circular(20),
       ),
       child: CachedNetworkImage(
-        imageUrl: card.imageUrl,
+        imageUrl: widget.card.imageUrl,
         fit: BoxFit.cover,
         placeholder: (context, url) => Center(
           child: CircularProgressIndicator(
