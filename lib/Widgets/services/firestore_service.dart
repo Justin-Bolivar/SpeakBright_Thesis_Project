@@ -55,7 +55,7 @@ class FirestoreService {
     final QuerySnapshot querySnapshot = await sessionsCollection
         .where('sessionTime',
             isGreaterThan:
-                Timestamp.fromDate(now.subtract(const Duration(minutes: 5))))
+                Timestamp.fromDate(now.subtract(const Duration(minutes: 1))))
         .orderBy('sessionTime', descending: true)
         .limit(1)
         .get();
