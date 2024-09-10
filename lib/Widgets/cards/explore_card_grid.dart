@@ -6,16 +6,25 @@ import 'dart:convert';
 
 Future<List<dynamic>> fetchRecommendations(String userId) async {
   final url = Uri.parse(
-      'https://speakbright-recommender-sys.onrender.com/recommendations/$userId');
+      'https://speakbright-recommender-sys.onrender.com/recommendations/');
   try {
     print(userId);
-    final response = await http.post(url);
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}),
+    );
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
+      if (jsonData['error'] != null) {
+        throw Exception(jsonData['error']);
+      }
+      print('Raw response body: ${response.body}');
       return jsonData['recommendations'] ?? [];
     } else {
-      throw Exception('Failed to load recommendations');
+      throw Exception(
+          'Failed to load recommendations. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print(e.toString());
@@ -52,32 +61,46 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
       List<dynamic> recommendationsData =
           await fetchRecommendations(widget.userId);
 
-      // Check if the response contains the expected data structure
+      print('Received recommendations: $recommendationsData');
+      print('Length of recommendations: ${recommendationsData.length}');
+
       if (recommendationsData.isNotEmpty) {
-        // Cast each item in the list to Map<String, dynamic>
-        List<Map<String, dynamic>> recommendationsMap =
-            recommendationsData.map((e) => e as Map<String, dynamic>).toList();
-
-        List recommendationTitles =
-            recommendationsMap.map((rec) => rec['title']).toList();
-
-        List<CardModel> allCards = widget.cards
+        print("All cards: ${widget.cards.length}");
+        print("not empty");
+        
+        List<CardModel> recommendedCards = widget.cards
             .where((card) =>
-                recommendationTitles.contains(card.title) ||
+                recommendationsData.contains(card.title) &&
                 card.userId != widget.userId)
             .toList();
 
+        List<CardModel> otherCards = widget.cards
+            .where((card) =>
+                !recommendedCards.contains(card) &&
+                card.userId != widget.userId)
+            .toList();
+
+        Map<String, CardModel> uniqueCards = {};
+        for (var card in recommendedCards) {
+          uniqueCards[card.title] = card;
+        }
+        for (var card in otherCards) {
+          uniqueCards[card.title] = card;
+        }
+
+        List<CardModel> filteredCards = uniqueCards.values.toList();
+        print("Filtered cards count: ${filteredCards.length}");
         setState(() {
           isLoading = false;
-          recommendations = allCards;
+          recommendations = filteredCards;
         });
       } else {
-        // Handle case where recommendations are empty
-        List<CardModel> allCards =
-            widget.cards.where((card) => card.userId != widget.userId).toList();
+        print("Received empty recommendations");
         setState(() {
           isLoading = false;
-          recommendations = allCards;
+          recommendations = widget.cards
+              .where((card) => card.userId != widget.userId)
+              .toList();
         });
       }
     } catch (e) {
