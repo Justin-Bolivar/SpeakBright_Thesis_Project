@@ -5,17 +5,24 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<List<dynamic>> fetchRecommendations(String userId) async {
-  final url = Uri.parse(
-      'https://speakbright-recommender-sys.onrender.com/recommendations/$userId');
+  final url = Uri.parse('https://speakbright-recommender-sys.onrender.com/recommendations/');
   try {
     print(userId);
-    final response = await http.post(url);
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}),
+    );
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
+      if (jsonData['error'] != null) {
+        throw Exception(jsonData['error']);
+      }
+      print('Raw response body: ${response.body}');
       return jsonData['recommendations'] ?? [];
     } else {
-      throw Exception('Failed to load recommendations');
+      throw Exception('Failed to load recommendations. Status code: ${response.statusCode}');
     }
   } catch (e) {
     print(e.toString());
@@ -73,6 +80,7 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
         });
       } else {
         // Handle case where recommendations are empty
+        print("Returned Empty Reco");
         List<CardModel> allCards =
             widget.cards.where((card) => card.userId != widget.userId).toList();
         setState(() {
