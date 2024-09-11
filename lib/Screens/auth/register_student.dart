@@ -118,8 +118,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.max,
               children: [
-                Image.asset('assets/SpeakBright_P.png',
-                    height: 120),
+                Image.asset('assets/SpeakBright_P.png', height: 120),
                 const SizedBox(height: 8),
                 Flexible(
                   child: TextFormField(
@@ -300,6 +299,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
   Future<void> onSubmit() async {
     if (formKey.currentState?.validate() ?? false) {
       try {
+        // Show waiting dialog and create the user
         UserCredential? userCredential = await WaitingDialog.show(
           context,
           future: FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -310,6 +310,12 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
 
         if (userCredential?.user != null) {
           await storeStudentData();
+
+          await FirebaseAuth.instance.signOut();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Student Account Created')),
+          );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
