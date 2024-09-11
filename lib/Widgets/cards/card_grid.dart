@@ -48,7 +48,6 @@ class CardGrid extends StatelessWidget {
           colorIndex: index,
           onTap: () => onCardTap(filteredCards[index].title,
               filteredCards[index].category, filteredCards[index].id),
-          onDelete: onCardDelete,
           onLongPress: () => onCardLongPress(filteredCards[index].title),
         );
       },
