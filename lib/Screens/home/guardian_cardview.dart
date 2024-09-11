@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/addcard.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
@@ -28,7 +29,7 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<String> sentence = [];
-  List<String> categories = ['All'];
+  List<String> categories = [];
   int selectedCategory = -1;
 
   @override
@@ -203,6 +204,21 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
 
                   bool isSelected = selectedCategory == index;
 
+                  //temporary, to be added in firebase
+                List<IconData> icons = [
+                  Icons.category,
+                  MdiIcons.earth,
+                  MdiIcons.emoticonHappyOutline,
+                  MdiIcons.weightLifter,
+                  MdiIcons.sunglasses,
+                  MdiIcons.accountGroupOutline,
+                  MdiIcons.broom,
+                  MdiIcons.foodAppleOutline,
+                  MdiIcons.schoolOutline,
+                  MdiIcons.teddyBear,
+
+                ];
+
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -228,14 +244,25 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                                 ]
                               : [],
                         ),
-                        child: Text(
-                          category,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: kwhite,
+                        child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            category,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            icons[index % icons.length],
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ],
+                      ),
                       ),
                     ),
                   );
