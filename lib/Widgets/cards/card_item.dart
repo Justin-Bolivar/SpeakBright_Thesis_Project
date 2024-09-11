@@ -10,6 +10,7 @@ class CardItem extends StatefulWidget {
   final int colorIndex;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final Function(String) onDelete;
 
   const CardItem({
     super.key,
@@ -17,6 +18,7 @@ class CardItem extends StatefulWidget {
     required this.colorIndex,
     required this.onTap,
     required this.onLongPress,
+    required this.onDelete,
   });
 
   @override
