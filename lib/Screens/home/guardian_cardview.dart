@@ -28,7 +28,7 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<String> sentence = [];
-  List<String> categories = ['All'];
+  List<String> categories = [];
   int selectedCategory = -1;
 
   @override
