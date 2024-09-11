@@ -29,7 +29,7 @@ class AddCardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Card'),
+        title: const Text('Add New Card'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -84,7 +84,8 @@ class AddCardPage extends ConsumerWidget {
                         'Activities',
                         'Persons',
                         'Places',
-                        'Chores'
+                        'Chores',
+                        'Emotions',
                       ].map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -92,7 +93,8 @@ class AddCardPage extends ConsumerWidget {
                         );
                       }).toList(),
                       onChanged: (newValue) {
-                        ref.read(selectedCategoryProvider.notifier).state = newValue;
+                        ref.read(selectedCategoryProvider.notifier).state =
+                            newValue;
                       },
                     ),
                   ),
