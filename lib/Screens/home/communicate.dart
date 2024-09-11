@@ -11,6 +11,7 @@ import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class Communicate extends ConsumerStatefulWidget {
   const Communicate({super.key});
@@ -244,6 +245,20 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 int colorIndex = index % boxColors.length;
                 Color itemColor = boxColors[colorIndex];
 
+                //temporary, to be added in firebase
+                List<IconData> icons = [
+                  Icons.category,
+                  MdiIcons.earth,
+                  MdiIcons.emoticonHappyOutline,
+                  MdiIcons.weightLifter,
+                  MdiIcons.sunglasses,
+                  MdiIcons.accountGroupOutline,
+                  MdiIcons.broom,
+                  MdiIcons.foodAppleOutline,
+                  MdiIcons.schoolOutline,
+                  MdiIcons.teddyBear,
+
+                ];
                 bool isSelected = selectedCategory == index;
 
                 return GestureDetector(
@@ -271,13 +286,24 @@ class _CommunicateState extends ConsumerState<Communicate> {
                               ]
                             : [],
                       ),
-                      child: Text(
-                        category,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: kwhite,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            category,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            icons[index % icons.length],
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ],
                       ),
                     ),
                   ),
