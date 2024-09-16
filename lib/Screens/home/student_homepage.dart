@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
 import 'package:speakbright_mobile/Screens/home/explore.dart';
+import 'package:speakbright_mobile/Screens/home/play.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/header_container.dart';
 
@@ -65,7 +66,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           GlobalRouter.I.router.push(Explore.route);
                           break;
                         case 2:
-                          print('Card 3 tapped');
+                          GlobalRouter.I.router.push(Play.route);
                           break;
                         case 3:
                           print('Card 4 tapped');

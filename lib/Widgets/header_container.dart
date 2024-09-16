@@ -124,14 +124,31 @@ class _RainbowContainerState extends State<RainbowContainer> {
                                 Column(
                                   children: [
                                     Text(
-                                      "Hello $userName!",
+                                      "Hello,",
                                       style: TextStyle(
                                           fontSize: MediaQuery.of(context)
                                                   .size
                                                   .width *
                                               0.04,
-                                          fontWeight: FontWeight.w900,
+                                          fontWeight: FontWeight.w100,
+                                          fontFamily: 'Arial',
+                                          letterSpacing: 1.5,
                                           color: Colors.white),
+                                    ),
+                                    Text(
+                                      "$userName!",
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.05,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Roboto',
+                                          letterSpacing: 1.5,
+                                          color: Colors.white),
+                                    ),
+                                    const SizedBox(
+                                      height: 8,
                                     ),
                                     ElevatedButton(
                                       onPressed: () async {
