@@ -1,12 +1,15 @@
 // communicate.dart
 // ignore_for_file: avoid_print, use_build_context_synchronously
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/prompt_buttons/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
@@ -30,6 +33,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   List<String> sentence = [];
   List<String> categories = [];
+  int currentUserPhase = 1;
   int selectedCategory = -1;
 
   @override
@@ -40,11 +44,18 @@ class _CommunicateState extends ConsumerState<Communicate> {
         categories.addAll(value);
       });
     });
+    fetchPhase();
   }
 
   void _clearSentence() {
     setState(() {
       sentence.clear();
+
+      if (currentUserPhase == 2) {
+        sentence.add("I want");
+      } else if (currentUserPhase == 3) {
+        sentence.add("I feel");
+      }
     });
   }
 
@@ -61,8 +72,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String url =
-        'https://speakbright-api-fastapi.onrender.com/complete_sentence';
     String sentenceString = sentence.join(' ');
 
     showDialog(
@@ -79,28 +88,34 @@ class _CommunicateState extends ConsumerState<Communicate> {
     );
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{'text': sentenceString}),
-      );
+      if (currentUserPhase == 4) {
+        String url = 'http://192.168.1.21/complete_sentence';
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+        );
 
-        setState(() {
-          sentence.clear();
-          sentence.addAll(responseBody['completed_sentence'].split(' '));
-        });
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseBody = jsonDecode(response.body);
 
-        _firestoreService.storeSentence(sentence);
-        _ttsService.speak(sentence.join(' '));
-      } else {
-        print('Failed to create sentence: ${response.statusCode}');
-        print('Response body: ${response.body}');
+          setState(() {
+            sentence.clear();
+            sentence.addAll(responseBody['sentence'].split(' '));
+          });
+
+          sentenceString = sentence.join(' ');
+        } else {
+          print('Failed to create sentence: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
       }
+
+      _firestoreService.storeSentence(sentence);
+      _ttsService.speak(sentenceString);
     } catch (e) {
-      print('Error occurred while sending sentence: $e');
+      print('Error occurred: $e');
     } finally {
       // Hide the loading animation
       Navigator.of(context).pop();
@@ -110,6 +125,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
+    bool showSentenceWidget = currentUserPhase > 1;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -155,49 +171,57 @@ class _CommunicateState extends ConsumerState<Communicate> {
           ],
         ),
       ),
+      floatingActionButton: const Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 0),
+          child: PromptButton(),
+        ),
+      ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: DottedBorder(
-                color: dullpurple,
-                strokeWidth: 1,
-                dashPattern: const [6, 7],
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(20.0),
-                child: Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: kwhite,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: sentence.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: dullpurple.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Center(
-                          child: Text(
-                            sentence[index],
-                            style: const TextStyle(
-                                color: dullpurple, fontSize: 14.0),
+          if (showSentenceWidget)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: DottedBorder(
+                  color: dullpurple,
+                  strokeWidth: 1,
+                  dashPattern: const [6, 7],
+                  borderType: BorderType.RRect,
+                  radius: const Radius.circular(20.0),
+                  child: Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: kwhite,
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: sentence.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: dullpurple.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
-                        ),
-                      );
-                    },
+                          child: Center(
+                            child: Text(
+                              sentence[index],
+                              style: const TextStyle(
+                                  color: dullpurple, fontSize: 14.0),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           Row(
             children: [
               Padding(
@@ -257,7 +281,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   MdiIcons.foodAppleOutline,
                   MdiIcons.schoolOutline,
                   MdiIcons.teddyBear,
-
                 ];
                 bool isSelected = selectedCategory == index;
 
@@ -336,5 +359,34 @@ class _CommunicateState extends ConsumerState<Communicate> {
         ],
       ),
     );
+  }
+
+  Future<void> fetchPhase() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+    String userId = user.uid;
+
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(userId).get();
+
+    if (userDoc.exists) {
+      setState(() {
+        currentUserPhase = userDoc.get('phase');
+
+        // Add to sentence based on user phase
+        if (currentUserPhase == 2) {
+          sentence.clear();
+          sentence.add("I want");
+        } else if (currentUserPhase == 3) {
+          sentence.clear();
+          sentence.add("I feel");
+        }
+      });
+    } else {
+      print('User document not found.');
+    }
   }
 }
