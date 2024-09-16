@@ -54,7 +54,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
             child: SizedBox(
               width: screenWidth * 0.85,
               child: ListView.builder(
-                itemCount: 4,
+                itemCount: 3, // Changed from 4 to 3
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
@@ -67,9 +67,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           break;
                         case 2:
                           GlobalRouter.I.router.push(Play.route);
-                          break;
-                        case 3:
-                          print('Card 4 tapped');
                           break;
                         default:
                           print('Unknown card tapped');
@@ -93,7 +90,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                     'Communicate',
                                     'Explore',
                                     'Play a Game',
-                                    'Test'
                                   ][index],
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -104,7 +100,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                     'Tap on cards you want',
                                     'Discover new cards',
                                     'Enjoy learning',
-                                    'Let’s test what you know'
                                   ][index],
                                   style:
                                       TextStyle(fontSize: baseFontSize * 0.8),
@@ -116,7 +111,6 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                 'assets/communicate.png',
                                 'assets/train.png',
                                 'assets/play.png',
-                                'assets/test_books.png'
                               ][index],
                               height: imageHeight,
                               fit: BoxFit.cover,
