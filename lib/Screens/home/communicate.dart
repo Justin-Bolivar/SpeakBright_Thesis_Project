@@ -1,6 +1,8 @@
 // communicate.dart
 // ignore_for_file: avoid_print, use_build_context_synchronously
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +33,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   List<String> sentence = [];
   List<String> categories = [];
+  int currentUserPhase = 1;
   int selectedCategory = -1;
 
   @override
@@ -41,6 +44,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
         categories.addAll(value);
       });
     });
+    fetchPhase();
   }
 
   void _clearSentence() {
@@ -111,6 +115,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
+    bool showSentenceWidget = currentUserPhase > 1;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -165,47 +170,48 @@ class _CommunicateState extends ConsumerState<Communicate> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: DottedBorder(
-                color: dullpurple,
-                strokeWidth: 1,
-                dashPattern: const [6, 7],
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(20.0),
-                child: Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: kwhite,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: sentence.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: dullpurple.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Center(
-                          child: Text(
-                            sentence[index],
-                            style: const TextStyle(
-                                color: dullpurple, fontSize: 14.0),
+          if (showSentenceWidget)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: DottedBorder(
+                  color: dullpurple,
+                  strokeWidth: 1,
+                  dashPattern: const [6, 7],
+                  borderType: BorderType.RRect,
+                  radius: const Radius.circular(20.0),
+                  child: Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: kwhite,
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: sentence.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: dullpurple.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
-                        ),
-                      );
-                    },
+                          child: Center(
+                            child: Text(
+                              sentence[index],
+                              style: const TextStyle(
+                                  color: dullpurple, fontSize: 14.0),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           Row(
             children: [
               Padding(
@@ -265,7 +271,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   MdiIcons.foodAppleOutline,
                   MdiIcons.schoolOutline,
                   MdiIcons.teddyBear,
-
                 ];
                 bool isSelected = selectedCategory == index;
 
@@ -344,5 +349,23 @@ class _CommunicateState extends ConsumerState<Communicate> {
         ],
       ),
     );
+  }
+
+  Future<void> fetchPhase() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+    String userId = user.uid;
+
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(userId).get();
+
+    if (userDoc.exists) {
+      currentUserPhase = userDoc.get('phase');
+    } else {
+      print('User document not found.');
+    }
   }
 }
