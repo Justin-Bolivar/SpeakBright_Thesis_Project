@@ -272,15 +272,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 //temporary, to be added in firebase
                 List<IconData> icons = [
                   Icons.category,
-                  MdiIcons.earth,
+                  MdiIcons.foodAppleOutline,
+                  MdiIcons.teddyBear,
                   MdiIcons.emoticonHappyOutline,
+                  MdiIcons.schoolOutline,
                   MdiIcons.weightLifter,
+                  MdiIcons.broom,
                   MdiIcons.sunglasses,
                   MdiIcons.accountGroupOutline,
-                  MdiIcons.broom,
-                  MdiIcons.foodAppleOutline,
-                  MdiIcons.schoolOutline,
-                  MdiIcons.teddyBear,
+                  MdiIcons.earth,
                 ];
                 bool isSelected = selectedCategory == index;
 
