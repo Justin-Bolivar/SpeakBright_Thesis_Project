@@ -50,6 +50,12 @@ class _CommunicateState extends ConsumerState<Communicate> {
   void _clearSentence() {
     setState(() {
       sentence.clear();
+
+      if (currentUserPhase == 2) {
+        sentence.add("I want");
+      } else if (currentUserPhase == 3) {
+        sentence.add("I feel");
+      }
     });
   }
 
@@ -66,8 +72,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String url =
-        'https://speakbright-api-fastapi.onrender.com/complete_sentence';
     String sentenceString = sentence.join(' ');
 
     showDialog(
@@ -84,28 +88,34 @@ class _CommunicateState extends ConsumerState<Communicate> {
     );
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{'text': sentenceString}),
-      );
+      if (currentUserPhase == 4) {
+        String url = 'http://192.168.1.21/complete_sentence';
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+        );
 
-        setState(() {
-          sentence.clear();
-          sentence.addAll(responseBody['completed_sentence'].split(' '));
-        });
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseBody = jsonDecode(response.body);
 
-        _firestoreService.storeSentence(sentence);
-        _ttsService.speak(sentence.join(' '));
-      } else {
-        print('Failed to create sentence: ${response.statusCode}');
-        print('Response body: ${response.body}');
+          setState(() {
+            sentence.clear();
+            sentence.addAll(responseBody['sentence'].split(' '));
+          });
+
+          sentenceString = sentence.join(' ');
+        } else {
+          print('Failed to create sentence: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
       }
+
+      _firestoreService.storeSentence(sentence);
+      _ttsService.speak(sentenceString);
     } catch (e) {
-      print('Error occurred while sending sentence: $e');
+      print('Error occurred: $e');
     } finally {
       // Hide the loading animation
       Navigator.of(context).pop();
@@ -363,7 +373,18 @@ class _CommunicateState extends ConsumerState<Communicate> {
     DocumentSnapshot userDoc = await userRef.doc(userId).get();
 
     if (userDoc.exists) {
-      currentUserPhase = userDoc.get('phase');
+      setState(() {
+        currentUserPhase = userDoc.get('phase');
+
+        // Add to sentence based on user phase
+        if (currentUserPhase == 2) {
+          sentence.clear();
+          sentence.add("I want");
+        } else if (currentUserPhase == 3) {
+          sentence.clear();
+          sentence.add("I feel");
+        }
+      });
     } else {
       print('User document not found.');
     }
