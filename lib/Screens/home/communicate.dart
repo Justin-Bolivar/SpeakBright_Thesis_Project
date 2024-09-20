@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/prompt_buttons/prompt_button.dart';
+import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
@@ -160,7 +160,12 @@ class _CommunicateState extends ConsumerState<Communicate> {
         alignment: Alignment.bottomCenter,
         child: Padding(
           padding: EdgeInsets.only(bottom: 0),
-          child: PromptButton(),
+          child: Row(
+            children: [
+              SizedBox(width: 20,),
+              PromptButton(),
+            ],
+          ),
         ),
       ),
       body: Column(
