@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class StudentsGrid extends StatelessWidget {
   final List<Map<String, dynamic>> students;
@@ -20,16 +19,16 @@ class StudentsGrid extends StatelessWidget {
       itemCount: students.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 8.0,
-        mainAxisSpacing: 8.0,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
       ),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       itemBuilder: (BuildContext context, int index) {
         final student = students[index];
         BoxDecoration getCardDecoration(int index) {
           final colors = <Color>[
-            _getColorByIndex(index),
-            _getColorByIndex(index).withOpacity(0.3)
+            const Color.fromARGB(255, 202, 160, 255),
+            _getColorByIndex(index).withOpacity(0.5)
           ];
 
           return BoxDecoration(
@@ -55,17 +54,17 @@ class StudentsGrid extends StatelessWidget {
           child: Container(
             decoration: getCardDecoration(index),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(15.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
                     'assets/${_getImagePath(index)}.png',
-                    height: MediaQuery.of(context).size.width * 0.2,
+                    height: MediaQuery.of(context).size.width * 0.14,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 20),
                   Text(
                     student['name'],
                     textAlign: TextAlign.center,
@@ -78,7 +77,7 @@ class StudentsGrid extends StatelessWidget {
                   Text(
                     student['userID'],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 10, color: Colors.white54),
+                    style: const TextStyle(fontSize: 10, color: Color.fromARGB(218, 255, 255, 255)),
                   ),
                 ],
               ),
@@ -90,40 +89,34 @@ class StudentsGrid extends StatelessWidget {
   }
 
   Color _getColorByIndex(int index) {
-    switch (index % 7) {
+    switch (index % 6) {
       case 0:
-        return Colors.red;
+        return const Color.fromARGB(255, 235, 58, 58);
       case 1:
-        return Colors.orange;
+        return const Color.fromARGB(255, 249, 128, 41);
       case 2:
-        return const Color.fromARGB(255, 255, 209, 59);
+        return const Color.fromARGB(255, 231, 163, 33);
       case 3:
-        return Colors.green;
+        return const Color.fromARGB(255, 68, 163, 67);
       case 4:
-        return Colors.blue;
-      case 5:
-        return Colors.indigo;
+        return const Color.fromARGB(255,58, 150, 235);
       default:
-        return Colors.purple;
+        return const Color.fromARGB(255, 253, 139, 255);
     }
   }
 
   String _getImagePath(int index) {
-    switch (index % 7) {
+    switch (index % 5) {
       case 0:
-        return 'oct';
+        return 'studcard_dino';
       case 1:
-        return 'bear';
+        return 'studcard_kitty';
       case 2:
-        return 'chick';
+        return 'studcard_noodle';
       case 3:
-        return 'turtle';
-      case 4:
-        return 'whale';
-      case 5:
-        return 'pengu';
+        return 'studcard_bunny';
       default:
-        return 'capi';
+        return 'studcard_monster';
     }
   }
 

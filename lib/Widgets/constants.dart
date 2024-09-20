@@ -18,6 +18,8 @@ const kDarkPruple = Color(0xFF2B045C);
 const kLightPruple = Color.fromARGB(255, 197, 164, 237);
 const mainpurple = Color.fromARGB(255, 121, 3, 119); // hex: #790377
 const dullpurple = Color.fromARGB(255, 167, 110, 166); // A76EA6
+const gradientPurple = Color(0xFF8E2DE2);
+const softPink = Color.fromARGB(255, 222, 117, 224);
 
 // Self Explanatory Color uses
 const kwhite = Colors.white;
