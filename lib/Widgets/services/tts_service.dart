@@ -1,4 +1,4 @@
-// ignore_for_file: unrelated_type_equality_checks
+// ignore_for_file: unrelated_type_equality_checks, avoid_print
 
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -25,9 +25,22 @@ class TTSService {
     await _flutterTts.setPitch(1.0);
   }
 
+  bool _isSpeaking = false; // Add a flag to track if TTS is speaking
+
   Future<void> speak(String text) async {
-    await setDefaultVoice();
-    await _flutterTts.speak(text);
+    if (!_isSpeaking) {
+      // Check if TTS is not already speaking
+      _isSpeaking = true; // Set the flag to true when speaking starts
+      await setDefaultVoice();
+      await _flutterTts.speak(text);
+
+      // Wait until TTS finishes speaking
+      _flutterTts.setCompletionHandler(() {
+        _isSpeaking = false; // Reset the flag when speaking is finished
+      });
+    } else {
+      print("TTS is still speaking. Please wait.");
+    }
   }
 
   void stop() {
