@@ -141,9 +141,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
           ),
         ),
         elevation: 5,
-        title: Row(
+        title: const Row(
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(left: 20),
               child: Text(
                 "Communicate",
@@ -151,21 +151,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   color: kwhite,
                   fontSize: 20,
                 ),
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-              onPressed: _sendSentenceAndSpeak,
-              icon: const Icon(
-                Icons.volume_up,
-                color: kwhite,
-              ),
-            ),
-            IconButton(
-              onPressed: _clearSentence,
-              icon: const Icon(
-                Icons.delete_outline,
-                color: kwhite,
               ),
             ),
           ],
@@ -180,6 +165,25 @@ class _CommunicateState extends ConsumerState<Communicate> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, top: 10),
+            child: Container(
+              width: 70,
+              decoration: BoxDecoration(
+                color: mainpurple,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  'Phase $currentUserPhase',
+                  style: const TextStyle(
+                    color: kwhite,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
           if (showSentenceWidget)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -222,6 +226,42 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 ),
               ),
             ),
+          if (showSentenceWidget)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: mainpurple,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    onPressed: _sendSentenceAndSpeak,
+                    icon: const Icon(
+                      Icons.volume_up,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 30),
+                Container(
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: mainpurple,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    onPressed: _clearSentence,
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 20),
           Row(
             children: [
               Padding(
@@ -272,15 +312,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 //temporary, to be added in firebase
                 List<IconData> icons = [
                   Icons.category,
-                  MdiIcons.earth,
+                  MdiIcons.foodAppleOutline,
+                  MdiIcons.teddyBear,
                   MdiIcons.emoticonHappyOutline,
+                  MdiIcons.schoolOutline,
                   MdiIcons.weightLifter,
+                  MdiIcons.broom,
                   MdiIcons.sunglasses,
                   MdiIcons.accountGroupOutline,
-                  MdiIcons.broom,
-                  MdiIcons.foodAppleOutline,
-                  MdiIcons.schoolOutline,
-                  MdiIcons.teddyBear,
+                  MdiIcons.earth,
                 ];
                 bool isSelected = selectedCategory == index;
 
@@ -336,24 +376,34 @@ class _CommunicateState extends ConsumerState<Communicate> {
           ),
           Expanded(
             child: cardsAsyncValue.when(
-              data: (cards) => CardGrid(
-                cards: cards,
-                onCardTap: (String cardTitle, String category, String cardId) {
-                  _firestoreService.tapCountIncrement(cardId);
-                  _ttsService.speak(cardTitle);
-                  _firestoreService.storeTappedCards(cardTitle, category);
-                  print('title: $cardTitle, cat: $category');
-                },
-                onCardDelete: (String cardId) {
-                  ref.read(cardProvider.notifier).deleteCard(cardId);
-                },
-                onCardLongPress: _addCardTitleToSentence,
-                selectedCategory: selectedCategory == -1
-                    ? "All"
-                    : categories[selectedCategory],
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Text('Error: $err'),
+              data: (cards) {
+                print('Cards fetched successfully: ${cards.length}');
+                return CardGrid(
+                  cards: cards,
+                  onCardTap:
+                      (String cardTitle, String category, String cardId) {
+                    _firestoreService.tapCountIncrement(cardId);
+                    _ttsService.speak(cardTitle);
+                    _firestoreService.storeTappedCards(cardTitle, category);
+                    print('title: $cardTitle, cat: $category');
+                  },
+                  onCardDelete: (String cardId) {
+                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                  },
+                  onCardLongPress: _addCardTitleToSentence,
+                  selectedCategory: selectedCategory == -1
+                      ? "All"
+                      : categories[selectedCategory],
+                );
+              },
+              loading: () {
+                print('Loading cards...');
+                return const Center(child: CircularProgressIndicator());
+              },
+              error: (error, stack) {
+                print('Error fetching cards: $error');
+                return Center(child: Text('Error: $error'));
+              },
             ),
           ),
         ],
