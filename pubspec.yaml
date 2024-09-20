@@ -54,6 +54,7 @@ dependencies:
   dotted_border: ^2.0.0
   http: ^1.2.2
   material_design_icons_flutter: ^7.0.7296
+  percent_indicator: ^4.2.3
 
 
 dev_dependencies:
