@@ -1,5 +1,6 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math';
-import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ class PromptButton extends StatefulWidget {
   const PromptButton({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PromptButtonState createState() => _PromptButtonState();
 }
 
@@ -92,11 +94,9 @@ class _PromptButtonState extends State<PromptButton>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.of(context).size.width-20,
       child: Positioned(
         bottom: 0,
-        left: 0,
-        right: 0,
         child: AnimatedBuilder(
           animation: _controller,
           builder: (_, __) {
@@ -145,7 +145,7 @@ class _PromptButtonState extends State<PromptButton>
                               ),
                               Container(
                                 child: showLock
-                                    ? const SizedBox.shrink()
+                                    ? const SizedBox()
                                     : LockIcon(value: _controller.value),
                               )
                             ],
@@ -160,34 +160,40 @@ class _PromptButtonState extends State<PromptButton>
   }
 
   Widget _buildImageButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(
-        5,
-        (index) => GestureDetector(
-          onTap: () async {
-            try {
-              await _updatePromptField(index);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Prompt updated successfully')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error updating prompt: $e')),
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey[200],
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: AssetImage('assets/prompts/prompt_$index.png'),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(
+            5,
+            (index) => GestureDetector(
+              onTap: () async {
+                try {
+                  await _updatePromptField(index);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Prompt updated successfully')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error updating prompt: $e')),
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 6,
+                  height: MediaQuery.of(context).size.width / 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[200],
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage('assets/prompts/prompt_$index.png'),
+                    ),
+                  ),
                 ),
               ),
             ),

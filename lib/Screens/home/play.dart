@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakbright_mobile/Widgets/prompt_buttons/prompt_button.dart';
+import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 
 class Play extends ConsumerStatefulWidget {
   const Play({super.key});
