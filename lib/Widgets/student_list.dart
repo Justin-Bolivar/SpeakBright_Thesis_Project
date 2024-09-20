@@ -6,22 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/studentsgrid.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
-class StudentListPage extends ConsumerStatefulWidget {
-  const StudentListPage({super.key});
+class StudentList extends ConsumerStatefulWidget {
+  const StudentList({super.key});
 
-  static const String route = "/studentListPage";
-  static const String path = "/studentListPage";
+  static const String route = "/studentList";
+  static const String path = "/studentList";
   static const String name = "Student List";
 
   @override
-  ConsumerState<StudentListPage> createState() => _StudentListPageState();
+  ConsumerState<StudentList> createState() => _StudentListState();
 }
 
-class _StudentListPageState extends ConsumerState<StudentListPage> {
+class _StudentListState extends ConsumerState<StudentList> {
   late Future<List<Map<String, dynamic>>> studentsFuture;
   @override
   void initState() {
@@ -53,37 +52,7 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kwhite,
-      appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerRight,
-              end: Alignment.centerLeft,
-              colors: [Color(0xFF8E2DE2), mainpurple],
-            ),
-          ),
-        ),
-        elevation: 5,
-        title: const Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 20),
-              child: Text(
-                "Student List",
-                style: TextStyle(
-                  color: kwhite,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            Spacer(),
-          ],
-        ),
-      ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+    return FutureBuilder<List<Map<String, dynamic>>>(
         future: studentsFuture,
         builder: (BuildContext context,
             AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
@@ -101,7 +70,6 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
             );
           }
         },
-      ),
     );
   }
 }
