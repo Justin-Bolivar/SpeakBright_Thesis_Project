@@ -348,6 +348,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
       'birthday': birthdayTimestamp,
       'userID': userId,
       'userType': 'student',
+      'phase': 1
     };
     print(userId);
 

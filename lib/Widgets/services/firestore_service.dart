@@ -24,9 +24,28 @@ class FirestoreService {
     try {
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('categories').get();
-      return querySnapshot.docs
-          .map((doc) => doc['category'] as String)
-          .toList();
+
+      List<String> allCategories =
+          querySnapshot.docs.map((doc) => doc['category'] as String).toList();
+
+      final priorityCategories = ['All', 'Food', 'Toys', 'Emotions', 'School'];
+
+      allCategories.sort((a, b) {
+        final indexA = priorityCategories.indexOf(a);
+        final indexB = priorityCategories.indexOf(b);
+
+        if (indexA != -1 && indexB != -1) {
+          return indexA.compareTo(indexB);
+        } else if (indexA != -1) {
+          return -1;
+        } else if (indexB != -1) {
+          return 1;
+        } else {
+          return a.compareTo(b);
+        }
+      });
+
+      return allCategories;
     } catch (e) {
       throw Exception('Error fetching categories: $e');
     }
