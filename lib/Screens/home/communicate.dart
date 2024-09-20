@@ -170,25 +170,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 10, top: 10),
-            child: Container(
-              width: 70,
-              decoration: BoxDecoration(
-                color: mainpurple,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Text(
-                  'Phase $currentUserPhase',
-                  style: const TextStyle(
-                    color: kwhite,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-          ),
           if (showSentenceWidget)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -279,15 +260,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
                       width: 40,
                     ),
                     const SizedBox(width: 10),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Categories",
+                          "Phase $currentUserPhase",
                           textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 24, color: kblack),
+                          style: const TextStyle(fontSize: 24, color: kblack),
                         ),
-                        Text(
+                        const Text(
                           "Select a category and tap on cards you want",
                           textAlign: TextAlign.left,
                           style: TextStyle(fontSize: 12, color: kblack),
