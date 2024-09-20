@@ -84,4 +84,26 @@ class FirestoreService {
       'tapCount': FieldValue.increment(1),
     });
   }
+
+  Future<String?> getCurrentUserName() async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null || currentUser.uid.isEmpty) {
+    return null; 
+  }
+
+  try {
+    final docRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+    final docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      final userData = docSnap.data() as Map<String, dynamic>;
+      return userData['name'];
+    }
+  } catch (e) {
+    print("Error fetching user name: $e");
+  }
+
+  return null;
+}
+
 }
