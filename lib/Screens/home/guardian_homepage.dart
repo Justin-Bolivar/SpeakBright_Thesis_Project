@@ -1,14 +1,13 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
-
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speakbright_mobile/Screens/auth/auth_controller.dart';
 import 'package:speakbright_mobile/Screens/auth/register_student.dart';
 import 'package:speakbright_mobile/Widgets/student_list.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/header_container.dart';
-
+import 'package:dotted_border/dotted_border.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
+import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import '../../Routing/router.dart';
 
 class GuardianHomepage extends ConsumerStatefulWidget {
@@ -23,104 +22,217 @@ class GuardianHomepage extends ConsumerStatefulWidget {
 }
 
 class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
-  final FlutterTts flutterTts = FlutterTts();
-  final intro = "You have selected";
+  String? _userName;
+
   @override
   void initState() {
     super.initState();
+    _fetchUserName();
   }
+
+  Future<void> _fetchUserName() async {
+    final userName = await FirestoreService().getCurrentUserName();
+    setState(() {
+      _userName = userName ?? 'Unknown User';
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double baseFontSize = screenWidth * 0.045;
-    double imageHeight = screenWidth * 0.2;
     return Scaffold(
-      backgroundColor: kwhite,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: SizedBox(
-              height: max(screenHeight * 0.2, 240),
-              child: const RainbowContainer(),
+        body: Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                mainpurple,
+                gradientPurple,
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: SizedBox(
-              width: screenWidth * 0.85,
-              child: ListView.builder(
-                itemCount: 2,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () {
-                      switch (index) {
-                        case 0:
-                          GlobalRouter.I.router.push(RegistrationStudent.route);
-                          break;
-                        case 1:
-                        // student list??
-                          GlobalRouter.I.router.push(StudentListPage.route);
-                          break;
-
-                        default:
-                          print('Unknown card tapped');
-                          break;
-                      }
-                    },
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(25, 15, 25, 15.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  [
-                                    'Register Student',
-                                    'Student List',
-                                  ][index],
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: baseFontSize),
-                                ),
-                                Text(
-                                  [
-                                    'Add a student/child',
-                                    'Check students & add cards'
-                                  ][index],
-                                  style:
-                                      TextStyle(fontSize: baseFontSize * 0.8),
-                                ),
-                              ],
+        ),
+        SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 40),
+                    Image.asset(
+                      'assets/SpeakBright.png', 
+                      width: 200,
+                      fit: BoxFit.contain,
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.logout,
+                        color: kwhite,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        WaitingDialog.show(context,
+                            future: AuthController.I.logout());
+                      },
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(59),
+                    topRight: Radius.circular(59),
+                  ),
+                  child: Container(
+                    color: Colors.white,
+                    height: 200, // Adjust as needed
+                    child: const Center(
+                        child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 80, 8, 0),
+                      child: StudentList(),
+                    )),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          top: 120, 
+          left: (MediaQuery.of(context).size.width -
+                  (MediaQuery.of(context).size.width * 0.8)) /
+              2,
+          child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 120,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    kLightPruple,
+                    softPink,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: mainpurple,
+                    blurRadius: 16.5,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Theme(
+                data: ThemeData(fontFamily: 'Roboto'),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(30.0, 20, 20, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Welcome,",
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              color: kwhite,
+                              fontWeight: FontWeight.w100, 
+                              fontSize: 15,
                             ),
+                          ),
+                          Text(
+                            _userName!,
+                            style: const TextStyle(
+                              fontFamily: 'Roboto',
+                              color: kwhite,
+                              fontWeight: FontWeight.w100,
+                              fontSize: 22, 
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Row(children: [
                             Image.asset(
-                              [
-                                'assets/addStudent.png',
-                                'assets/list.png',
-                              ][index],
-                              height: imageHeight,
-                              fit: BoxFit.cover,
+                              'assets/idea.png', 
+                              width: 15,
+                              fit: BoxFit.contain,
                             ),
-                          ],
+                            const Text(
+                              "Currently, you have 100 students",
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100, 
+                                fontSize: 10, 
+                              ),
+                            ),
+                          ])
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 20, 30, 20),
+                      child: InkWell(
+                        onTap: () {
+                          GlobalRouter.I.router.push(RegistrationStudent.route);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.21,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(167, 110, 166, 0.3),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DottedBorder(
+                            dashPattern: const [10, 5],
+                            strokeWidth: 1,
+                            color: Colors.white,
+                            borderType: BorderType.RRect,
+                            radius: const Radius.circular(12),
+                            padding: const EdgeInsets.all(14),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Add Student",
+                                    style: TextStyle(
+                                        fontFamily: 'Roboto',
+                                        color: kwhite,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w200),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Image.asset('addCard.png',
+                                      height: 25, fit: BoxFit.contain),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                  ],
+                ),
+              )),
+        ),
+      ],
+    ));
   }
 }

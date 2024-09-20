@@ -147,13 +147,13 @@ class GlobalRouter {
               builder: (context, _) {
                 return const RegistrationStudent();
               }),
-          GoRoute(
-              parentNavigatorKey: _rootNavigatorKey,
-              path: StudentListPage.route,
-              name: StudentListPage.name,
-              builder: (context, _) {
-                return const StudentListPage();
-              }),
+          // GoRoute(
+          //     parentNavigatorKey: _rootNavigatorKey,
+          //     path: StudentListPage.route,
+          //     name: StudentListPage.name,
+          //     builder: (context, _) {
+          //       return const StudentListPage();
+          //     }),
 
               GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
