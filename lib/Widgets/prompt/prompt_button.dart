@@ -17,6 +17,7 @@ class PromptButton extends StatefulWidget {
 class _PromptButtonState extends State<PromptButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  // ignore: unused_field
   late Animation _animation;
 
   bool showLock = false;
