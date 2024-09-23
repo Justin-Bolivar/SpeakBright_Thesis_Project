@@ -19,6 +19,8 @@ class ExploreCardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color itemColor = boxColors[colorIndex % boxColors.length];
+    double screenWidth = MediaQuery.of(context).size.width;
+
 
     return GestureDetector(
       onTap: onTap,
@@ -39,7 +41,7 @@ class ExploreCardItem extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildImageContainer(itemColor),
+                _buildImageContainer(itemColor,screenWidth),
                 const SizedBox(height: 10),
                 Center(
                   child: Text(
@@ -58,13 +60,13 @@ class ExploreCardItem extends StatelessWidget {
     );
   }
 
-  Widget _buildImageContainer(Color color) {
+  Widget _buildImageContainer(Color color, double screenWidth) {
     return Stack(
       alignment: Alignment.topLeft,
       children: [
         Container(
           width: double.infinity,
-          height: 110,
+          height:screenWidth*0.35,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
