@@ -19,9 +19,10 @@ class _PromptButtonState extends State<PromptButton>
   late AnimationController _controller;
   // ignore: unused_field
   late Animation _animation;
-
   bool showLock = false;
   bool isAnimationCompleted = false;
+
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +92,7 @@ class _PromptButtonState extends State<PromptButton>
       'email': auth.currentUser?.email ?? '',
     }, SetOptions(merge: true));
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,9 +175,9 @@ class _PromptButtonState extends State<PromptButton>
               onTap: () async {
                 try {
                   await _updatePromptField(index);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Prompt updated successfully')),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('Prompt updated successfully')),
+                  // );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error updating prompt: $e')),
