@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class PromptButton extends StatefulWidget {
   const PromptButton({super.key});
@@ -175,9 +176,10 @@ class _PromptButtonState extends State<PromptButton>
               onTap: () async {
                 try {
                   await _updatePromptField(index);
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   const SnackBar(content: Text('Prompt updated successfully')),
-                  // );
+                  FlameAudio.play('assets/audio/chime_fast.mp3');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Prompt updated successfully')),
+                  );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error updating prompt: $e')),
