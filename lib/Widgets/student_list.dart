@@ -54,23 +54,24 @@ class _StudentListState extends ConsumerState<StudentList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Map<String, dynamic>>>(
-        future: studentsFuture,
-        builder: (BuildContext context,
-            AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return StudentsGrid(
-              students: snapshot.data!,
-              onStudentTap: (studentID) {
-                ref.read(studentIdProvider.notifier).state = studentID;
-                GlobalRouter.I.router.push(StudentProfile.route);
-              },
-            );
-          }
-        },
+      future: studentsFuture,
+      builder: (BuildContext context,
+          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return StudentsGrid(
+            students: snapshot.data!,
+            onStudentTap: (studentID) {
+              ref.read(studentIdProvider.notifier).state = studentID;
+              print(ref.read(studentIdProvider.notifier).state);
+              GlobalRouter.I.router.push(StudentProfile.route);
+            },
+          );
+        }
+      },
     );
   }
 }
