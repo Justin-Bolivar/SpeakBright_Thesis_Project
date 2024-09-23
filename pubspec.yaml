@@ -56,6 +56,7 @@ dependencies:
   material_design_icons_flutter: ^7.0.7296
   percent_indicator: ^4.2.3
   flame_audio: ^2.10.3
+  flutter_confetti: ^0.3.0
 
 
 dev_dependencies:
@@ -90,6 +91,7 @@ flutter:
   assets:
     - assets/
     - assets/prompts/
+    - assets/audio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
