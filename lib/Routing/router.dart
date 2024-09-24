@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/auth/register_student.dart";
+import "package:speakbright_mobile/Screens/guardian/student_profile.dart";
 import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_cardview.dart";
@@ -12,7 +13,6 @@ import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
 import "package:speakbright_mobile/Screens/home/play.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
-import "package:speakbright_mobile/Widgets/student_list.dart";
 import "../Screens/auth/auth_controller.dart";
 import "../Screens/auth/enum/enum.dart";
 import "../Screens/auth/login_screen.dart";
@@ -147,13 +147,13 @@ class GlobalRouter {
               builder: (context, _) {
                 return const RegistrationStudent();
               }),
-          // GoRoute(
-          //     parentNavigatorKey: _rootNavigatorKey,
-          //     path: StudentListPage.route,
-          //     name: StudentListPage.name,
-          //     builder: (context, _) {
-          //       return const StudentListPage();
-          //     }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: StudentProfile.route,
+              name: StudentProfile.name,
+              builder: (context, _) {
+                return const StudentProfile();
+              }),
 
               GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
