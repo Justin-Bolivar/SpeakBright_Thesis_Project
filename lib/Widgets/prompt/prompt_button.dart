@@ -5,7 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter_confetti/flutter_confetti.dart';
 class PromptButton extends StatefulWidget {
   const PromptButton({super.key});
 
@@ -17,10 +18,12 @@ class PromptButton extends StatefulWidget {
 class _PromptButtonState extends State<PromptButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  // ignore: unused_field
   late Animation _animation;
-
   bool showLock = false;
   bool isAnimationCompleted = false;
+
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +93,7 @@ class _PromptButtonState extends State<PromptButton>
       'email': auth.currentUser?.email ?? '',
     }, SetOptions(merge: true));
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -172,9 +176,17 @@ class _PromptButtonState extends State<PromptButton>
               onTap: () async {
                 try {
                   await _updatePromptField(index);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Prompt updated successfully')),
-                  );
+                  FlameAudio.play('chime_fast.mp3');
+                  if(index==4){
+                    Confetti.launch(
+                      context,
+                      options: const ConfettiOptions(
+                          particleCount: 100, spread: 70, y: 0.6),
+                    );
+                  };
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('Prompt updated successfully')),
+                  // );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error updating prompt: $e')),

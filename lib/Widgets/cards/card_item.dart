@@ -137,7 +137,7 @@ class _CardItemState extends State<CardItem> {
       children: [
         Container(
           width: double.infinity,
-          height: 110,
+          height: MediaQuery.of(context).size.width*0.35,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),

@@ -22,12 +22,14 @@ class GuardianHomepage extends ConsumerStatefulWidget {
 }
 
 class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
-  String? _userName;
+  late String _userName;
 
   @override
   void initState() {
     super.initState();
+    _userName = 'Unknown User';
     _fetchUserName();
+    
   }
 
   Future<void> _fetchUserName() async {
@@ -37,6 +39,28 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
     });
   }
 
+  Widget responsiveText(String text, BuildContext context,
+      {double fontSizeMax = 25, double fontSizeMin = 5}) {
+    return LayoutBuilder(builder: (context, constraints) {
+      double width = constraints.maxWidth;
+      double calculatedFontSize = fontSizeMin +
+          ((fontSizeMax - fontSizeMin) / 2) *
+              (width / (MediaQuery.of(context).size.width * 0.23));
+
+      calculatedFontSize = calculatedFontSize.clamp(fontSizeMin, fontSizeMax);
+
+      return Text(
+        text,
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          color: kwhite,
+          fontWeight: FontWeight.w200,
+          fontSize: calculatedFontSize,
+        ),
+        textAlign: TextAlign.center,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +92,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                   children: [
                     const SizedBox(width: 40),
                     Image.asset(
-                      'assets/SpeakBright.png', 
+                      'assets/SpeakBright.png',
                       width: 200,
                       fit: BoxFit.contain,
                     ),
@@ -86,7 +110,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
@@ -95,7 +119,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                   ),
                   child: Container(
                     color: Colors.white,
-                    height: 200, // Adjust as needed
+                    height: 180, // Adjust as needed
                     child: const Center(
                         child: Padding(
                       padding: EdgeInsets.fromLTRB(8, 80, 8, 0),
@@ -108,7 +132,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
           ),
         ),
         Positioned(
-          top: 120, 
+          top: 150,
           left: (MediaQuery.of(context).size.width -
                   (MediaQuery.of(context).size.width * 0.8)) /
               2,
@@ -138,7 +162,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                 child: Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(30.0, 20, 20, 20),
+                      padding: const EdgeInsets.fromLTRB(20.0, 20, 20, 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -147,17 +171,17 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                             style: TextStyle(
                               fontFamily: 'Roboto',
                               color: kwhite,
-                              fontWeight: FontWeight.w100, 
+                              fontWeight: FontWeight.w100,
                               fontSize: 15,
                             ),
                           ),
                           Text(
-                            _userName!,
+                            _userName,
                             style: const TextStyle(
                               fontFamily: 'Roboto',
                               color: kwhite,
                               fontWeight: FontWeight.w100,
-                              fontSize: 22, 
+                              fontSize: 22,
                             ),
                           ),
                           const SizedBox(
@@ -165,7 +189,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                           ),
                           Row(children: [
                             Image.asset(
-                              'assets/idea.png', 
+                              'assets/idea.png',
                               width: 15,
                               fit: BoxFit.contain,
                             ),
@@ -174,8 +198,8 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                               style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: kwhite,
-                                fontWeight: FontWeight.w100, 
-                                fontSize: 10, 
+                                fontWeight: FontWeight.w100,
+                                fontSize: 10,
                               ),
                             ),
                           ])
@@ -191,7 +215,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
-                          width: MediaQuery.of(context).size.width * 0.21,
+                          width: MediaQuery.of(context).size.width * 0.23,
                           height: 120,
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(167, 110, 166, 0.3),
@@ -209,17 +233,9 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text(
-                                    "Add Student",
-                                    style: TextStyle(
-                                        fontFamily: 'Roboto',
-                                        color: kwhite,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w200),
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  responsiveText("Add Student", context),
                                   const SizedBox(height: 5),
-                                  Image.asset('addCard.png',
+                                  Image.asset('assets/addCard.png',
                                       height: 25, fit: BoxFit.contain),
                                 ],
                               ),
