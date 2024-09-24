@@ -310,6 +310,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
 
         if (userCredential?.user != null) {
           await storeStudentData();
+          await initializePromptData();
 
           await FirebaseAuth.instance.signOut();
 
@@ -354,6 +355,30 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
 
     await users.doc(userId).set(studentData);
     await studentsRef.doc(userId).set(studentData);
+  }
+
+  Future<void> initializePromptData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+    String userId = user.uid;
+
+    CollectionReference prompt =
+        FirebaseFirestore.instance.collection('prompt');
+
+    Map<String, dynamic> promptData = {
+      'userID': userId,
+      'email': username.text.trim(),
+      'Physical': 0,
+      'Modelling': 0,
+      'Gestural': 0,
+      'Verbal': 0,
+      'Independent': 0,
+    };
+    print(userId);
+
+    await prompt.doc(userId).set(promptData);
   }
 
   final OutlineInputBorder _baseBorder = const OutlineInputBorder(

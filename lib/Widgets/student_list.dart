@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/guardian/student_profile.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/studentsgrid.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
@@ -53,23 +54,24 @@ class _StudentListState extends ConsumerState<StudentList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Map<String, dynamic>>>(
-        future: studentsFuture,
-        builder: (BuildContext context,
-            AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return StudentsGrid(
-              students: snapshot.data!,
-              onStudentTap: (studentID) {
-                ref.read(studentIdProvider.notifier).state = studentID;
-                GlobalRouter.I.router.push(GuardianCommunicate.route);
-              },
-            );
-          }
-        },
+      future: studentsFuture,
+      builder: (BuildContext context,
+          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return StudentsGrid(
+            students: snapshot.data!,
+            onStudentTap: (studentID) {
+              ref.read(studentIdProvider.notifier).state = studentID;
+              print(ref.read(studentIdProvider.notifier).state);
+              GlobalRouter.I.router.push(StudentProfile.route);
+            },
+          );
+        }
+      },
     );
   }
 }
