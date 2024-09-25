@@ -77,36 +77,19 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
             ),
           ),
           elevation: 5,
-          title: Row(
+          title: const Row(
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(left: 20),
                 child: Text(
-                  "Communicate",
+                  "Card View",
                   style: TextStyle(
                     color: kwhite,
                     fontSize: 20,
                   ),
                 ),
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: () {
-                  _firestoreService.storeSentence(sentence);
-                  _ttsService.speak(sentence.join(' '));
-                },
-                icon: const Icon(
-                  Icons.volume_up,
-                  color: kwhite,
-                ),
-              ),
-              IconButton(
-                onPressed: _clearSentence,
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: kwhite,
-                ),
-              ),
+              
             ],
           ),
         ),
