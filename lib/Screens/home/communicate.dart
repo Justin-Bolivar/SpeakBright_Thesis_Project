@@ -89,7 +89,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
     try {
       if (currentUserPhase == 4) {
-        String url = 'http://192.168.1.21/complete_sentence';
+        String url = 'http://192.168.1.21:5724/complete_sentence';
 
         final response = await http.post(
           Uri.parse(url),
@@ -114,6 +114,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
       _firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
+      _clearSentence();
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -162,7 +163,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
           padding: EdgeInsets.only(bottom: 0),
           child: Row(
             children: [
-              SizedBox(width: 20,),
+              SizedBox(
+                width: 20,
+              ),
               PromptButton(),
             ],
           ),
@@ -411,8 +414,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
     if (userDoc.exists) {
       setState(() {
         currentUserPhase = userDoc.get('phase');
-
-        // Add to sentence based on user phase
         if (currentUserPhase == 2) {
           sentence.clear();
           sentence.add("I want");
