@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/Widgets/prompt/prompt_progress.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 
 class Play extends ConsumerStatefulWidget {
@@ -19,9 +20,9 @@ class _PlayState extends ConsumerState<Play> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Floating Button Demo'),
+        title: const Text('for testing'),
       ),
-      body: const Center(child: Text('Tap the button below')),
+      body: const Center(child: PromptProgress()),
       floatingActionButton: const Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
