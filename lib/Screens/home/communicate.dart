@@ -107,8 +107,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
           sentenceString = sentence.join(' ');
         } else {
-          print('Failed to create sentence: ${response.statusCode}');
-          print('Response body: ${response.body}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create sentence: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() {
+            sentence.clear();
+          });
         }
       }
 
