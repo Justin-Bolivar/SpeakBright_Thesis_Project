@@ -89,7 +89,6 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                   ),
                 ),
               ),
-              
             ],
           ),
         ),
@@ -188,19 +187,18 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                   bool isSelected = selectedCategory == index;
 
                   //temporary, to be added in firebase
-                List<IconData> icons = [
-                  Icons.category,
-                  MdiIcons.earth,
-                  MdiIcons.emoticonHappyOutline,
-                  MdiIcons.weightLifter,
-                  MdiIcons.sunglasses,
-                  MdiIcons.accountGroupOutline,
-                  MdiIcons.broom,
-                  MdiIcons.foodAppleOutline,
-                  MdiIcons.schoolOutline,
-                  MdiIcons.teddyBear,
-
-                ];
+                  List<IconData> icons = [
+                    Icons.category,
+                    MdiIcons.earth,
+                    MdiIcons.emoticonHappyOutline,
+                    MdiIcons.weightLifter,
+                    MdiIcons.sunglasses,
+                    MdiIcons.accountGroupOutline,
+                    MdiIcons.broom,
+                    MdiIcons.foodAppleOutline,
+                    MdiIcons.schoolOutline,
+                    MdiIcons.teddyBear,
+                  ];
 
                   return GestureDetector(
                     onTap: () {
@@ -228,24 +226,24 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                               : [],
                         ),
                         child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            category,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              category,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            icons[index % icons.length],
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 6),
+                            Icon(
+                              icons[index % icons.length],
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -261,7 +259,6 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
-                  onCardLongPress: _addCardTitleToSentence,
                   selectedCategory: selectedCategory == -1
                       ? "All"
                       : categories[selectedCategory],

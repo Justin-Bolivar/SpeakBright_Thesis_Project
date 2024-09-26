@@ -9,7 +9,6 @@ class CardItem extends StatefulWidget {
   final CardModel card;
   final int colorIndex;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
   final Function(String) onDelete;
 
   const CardItem({
@@ -17,7 +16,6 @@ class CardItem extends StatefulWidget {
     required this.card,
     required this.colorIndex,
     required this.onTap,
-    required this.onLongPress,
     required this.onDelete,
   });
 
@@ -56,7 +54,6 @@ class _CardItemState extends State<CardItem> {
 
         return GestureDetector(
           onTap: widget.onTap,
-          onLongPress: widget.onLongPress,
           child: Stack(
             children: [
               Container(
@@ -137,7 +134,7 @@ class _CardItemState extends State<CardItem> {
       children: [
         Container(
           width: double.infinity,
-          height: MediaQuery.of(context).size.width*0.35,
+          height: MediaQuery.of(context).size.width * 0.35,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
