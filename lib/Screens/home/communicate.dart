@@ -371,15 +371,22 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _firestoreService.tapCountIncrement(cardId);
-                    _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(cardTitle, category);
-                    print('title: $cardTitle, cat: $category');
+                    if (currentUserPhase > 1) {
+                      _addCardTitleToSentence(cardTitle);
+                      _firestoreService.tapCountIncrement(cardId);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(cardTitle, category);
+                      print('title: $cardTitle, cat: $category');
+                    } else {
+                      _firestoreService.tapCountIncrement(cardId);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(cardTitle, category);
+                      print('title: $cardTitle, cat: $category');
+                    }
                   },
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
-                  onCardLongPress: _addCardTitleToSentence,
                   selectedCategory: selectedCategory == -1
                       ? "All"
                       : categories[selectedCategory],
