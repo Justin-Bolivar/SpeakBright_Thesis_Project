@@ -89,7 +89,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
     try {
       if (currentUserPhase == 4) {
-        String url = 'http://192.168.1.21:5724/complete_sentence';
+        String url =
+            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
         final response = await http.post(
           Uri.parse(url),
