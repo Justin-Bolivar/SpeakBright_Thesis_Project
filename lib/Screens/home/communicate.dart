@@ -61,7 +61,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   void _addCardTitleToSentence(String title) {
     setState(() {
-      sentence.add(title);
+      if (currentUserPhase == 2 || currentUserPhase == 3) {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+        } else {
+          sentence.add(title);
+        }
+      } else {
+        sentence.add(title);
+      }
     });
   }
 
@@ -89,7 +97,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
     try {
       if (currentUserPhase == 4) {
-        String url = 'http://192.168.1.21:5724/complete_sentence';
+        String url =
+            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
         final response = await http.post(
           Uri.parse(url),
