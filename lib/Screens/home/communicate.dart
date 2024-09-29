@@ -61,7 +61,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   void _addCardTitleToSentence(String title) {
     setState(() {
-      sentence.add(title);
+      if (currentUserPhase == 2 || currentUserPhase == 3) {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+        } else {
+          sentence.add(title);
+        }
+      } else {
+        sentence.add(title);
+      }
     });
   }
 
