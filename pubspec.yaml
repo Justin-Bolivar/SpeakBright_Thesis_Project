@@ -62,13 +62,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.0
+  flutter_launcher_icons: ^0.14.1
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/SpeakBright_1024.png"
-  min_sdk_android: 21
+  image_path: "assets/SB_S.png"
+  min_sdk_android: 23
+  adaptive_icon_background: "#00000000"
+  adaptive_icon_foreground: "assets/SB_S.png"
+  # dart run flutter_launcher_icons
+  # flutter pub run flutter_launcher_icons:main
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -92,6 +96,7 @@ flutter:
     - assets/
     - assets/prompts/
     - assets/audio/
+    - assets/SpeakBright_1024.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
