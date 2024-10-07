@@ -23,3 +23,4 @@ class PhaseNotifier extends StateNotifier<int> {
   }
 }
 
+final currentUserPhaseProvider = StateProvider<int>((ref) => 1);
