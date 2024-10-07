@@ -61,7 +61,15 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   void _addCardTitleToSentence(String title) {
     setState(() {
-      sentence.add(title);
+      if (currentUserPhase == 2 || currentUserPhase == 3) {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+        } else {
+          sentence.add(title);
+        }
+      } else {
+        sentence.add(title);
+      }
     });
   }
 
@@ -89,7 +97,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
     try {
       if (currentUserPhase == 4) {
-        String url = 'http://192.168.1.21/complete_sentence';
+        String url =
+            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
         final response = await http.post(
           Uri.parse(url),
@@ -107,13 +116,21 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
           sentenceString = sentence.join(' ');
         } else {
-          print('Failed to create sentence: ${response.statusCode}');
-          print('Response body: ${response.body}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create sentence: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() {
+            sentence.clear();
+          });
         }
       }
 
       _firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
+      _clearSentence();
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -162,7 +179,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
           padding: EdgeInsets.only(bottom: 0),
           child: Row(
             children: [
-              SizedBox(width: 20,),
+              SizedBox(
+                width: 20,
+              ),
               PromptButton(),
             ],
           ),
@@ -368,15 +387,22 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _firestoreService.tapCountIncrement(cardId);
-                    _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(cardTitle, category);
-                    print('title: $cardTitle, cat: $category');
+                    if (currentUserPhase > 1) {
+                      _addCardTitleToSentence(cardTitle);
+                      _firestoreService.tapCountIncrement(cardId);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(cardTitle, category);
+                      print('title: $cardTitle, cat: $category');
+                    } else {
+                      _firestoreService.tapCountIncrement(cardId);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(cardTitle, category);
+                      print('title: $cardTitle, cat: $category');
+                    }
                   },
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId);
                   },
-                  onCardLongPress: _addCardTitleToSentence,
                   selectedCategory: selectedCategory == -1
                       ? "All"
                       : categories[selectedCategory],
@@ -411,8 +437,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
     if (userDoc.exists) {
       setState(() {
         currentUserPhase = userDoc.get('phase');
-
-        // Add to sentence based on user phase
         if (currentUserPhase == 2) {
           sentence.clear();
           sentence.add("I want");

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
+
 class PromptButton extends StatefulWidget {
   const PromptButton({super.key});
 
@@ -22,7 +23,6 @@ class _PromptButtonState extends State<PromptButton>
   late Animation _animation;
   bool showLock = false;
   bool isAnimationCompleted = false;
-
 
   @override
   void initState() {
@@ -94,73 +94,78 @@ class _PromptButtonState extends State<PromptButton>
     }, SetOptions(merge: true));
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width-20,
-      child: Positioned(
-        bottom: 0,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (_, __) {
-            return showLock ? _buildImageButtons() : _buildPurpleContainer();
-          },
-        ),
+      width: MediaQuery.of(context).size.width - 20,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (_, __) {
+                return showLock
+                    ? _buildImageButtons()
+                    : _buildPurpleContainer();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildPurpleContainer() {
     return Align(
-          alignment: Alignment.bottomCenter,
-          child: Stack(
-            children: <Widget>[
-              GestureDetector(
-                onLongPressStart: _onLongPressStart,
-                onLongPressEnd: _onLongPressEnd,
-                child: AnimatedBuilder(
-                    animation: _controller,
-                    builder: (_, child) {
-                      return Transform.scale(
-                        scale: ((_controller.value * 0.2) + 1),
-                        child: Container(
-                          width: 60,
-                          padding: const EdgeInsets.all(10),
-                          height: 60,
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.purple[100]!,
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 0)),
-                            ],
-                            shape: BoxShape.circle,
-                            color: kwhite,
+      alignment: Alignment.bottomCenter,
+      child: Stack(
+        children: <Widget>[
+          GestureDetector(
+            onLongPressStart: _onLongPressStart,
+            onLongPressEnd: _onLongPressEnd,
+            child: AnimatedBuilder(
+                animation: _controller,
+                builder: (_, child) {
+                  return Transform.scale(
+                    scale: ((_controller.value * 0.2) + 1),
+                    child: Container(
+                      width: 60,
+                      padding: const EdgeInsets.all(10),
+                      height: 60,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.purple[100]!,
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 0)),
+                        ],
+                        shape: BoxShape.circle,
+                        color: kwhite,
+                      ),
+                      child: Stack(
+                        children: <Widget>[
+                          CustomPaint(
+                            foregroundPainter: CircularBar(
+                                offset: const Offset(20, 20),
+                                endAngle: (pi * 2 * _controller.value),
+                                radius: 30),
                           ),
-                          child: Stack(
-                            children: <Widget>[
-                              CustomPaint(
-                                foregroundPainter: CircularBar(
-                                    offset: const Offset(20, 20),
-                                    endAngle: (pi * 2 * _controller.value),
-                                    radius: 30),
-                              ),
-                              Container(
-                                child: showLock
-                                    ? const SizedBox()
-                                    : LockIcon(value: _controller.value),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ],
+                          Container(
+                            child: showLock
+                                ? const SizedBox()
+                                : LockIcon(value: _controller.value),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }),
           ),
-        );
+        ],
+      ),
+    );
   }
 
   Widget _buildImageButtons() {
