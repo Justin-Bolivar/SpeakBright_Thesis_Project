@@ -181,15 +181,16 @@ class _PromptButtonState extends State<PromptButton>
               onTap: () async {
                 try {
                   await _updatePromptField(index);
-                  FlameAudio.play('chime_fast.mp3');
-                  if (index == 4) {
+                  if(index==4){
+                    FlameAudio.play('bell_congrats.mp3');
                     Confetti.launch(
                       context,
                       options: const ConfettiOptions(
-                          particleCount: 100, spread: 70, y: 0.6),
+                          particleCount: 400, spread: 70, y: 0.6),
                     );
-                  }
-                  ;
+                  }else{
+                    FlameAudio.play('chime_fast.mp3');
+                  };
                   // ScaffoldMessenger.of(context).showSnackBar(
                   //   const SnackBar(content: Text('Prompt updated successfully')),
                   // );
