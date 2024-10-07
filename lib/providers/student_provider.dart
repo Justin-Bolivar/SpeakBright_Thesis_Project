@@ -21,3 +21,5 @@ class PhaseNotifier extends StateNotifier<int> {
     await _firestoreService.updateStudentPhase(studentID, state);
   }
 }
+
+final currentUserPhaseProvider = StateProvider<int>((ref) => 1);

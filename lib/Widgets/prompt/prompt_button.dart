@@ -99,6 +99,7 @@ class _PromptButtonState extends State<PromptButton>
     return SizedBox(
       width: MediaQuery.of(context).size.width - 20,
       child: Stack(
+        alignment: Alignment.center,
         children: [
           Positioned(
             bottom: 0,
