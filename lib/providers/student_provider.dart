@@ -2,9 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 
 final studentIdProvider = StateProvider<String>((ref) => '');
-final currentUserPhaseProvider = StateProvider<int>((ref) => 1);
 final firestoreServiceProvider = Provider((ref) => FirestoreService());
-
 
 final phaseProvider = StateNotifierProvider<PhaseNotifier, int>((ref) {
   return PhaseNotifier(ref.read(firestoreServiceProvider));
@@ -23,4 +21,3 @@ class PhaseNotifier extends StateNotifier<int> {
     await _firestoreService.updateStudentPhase(studentID, state);
   }
 }
-
