@@ -125,4 +125,10 @@ class FirestoreService {
   return null;
 }
 
+ Future<void> updateStudentPhase(String studentID, int phase) async {
+    await FirebaseFirestore.instance.collection('users').doc(studentID).update({
+      'phase': phase,
+    });
+  }
+
 }
