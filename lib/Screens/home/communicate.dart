@@ -209,27 +209,37 @@ class _CommunicateState extends ConsumerState<Communicate> {
                       color: kwhite,
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: sentence.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.fromLTRB(5, 30, 5, 30),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: dullpurple.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: Center(
+                    child: sentence.isEmpty
+                        ? Center(
                             child: Text(
-                              sentence[index],
-                              style: const TextStyle(
-                                  color: dullpurple, fontSize: 14.0),
+                              "Tap cards to Create a sentence",
+                              style: TextStyle(
+                                color: kLightPruple,
+                                fontSize: 24.0,
+                              ),
                             ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: sentence.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                margin: const EdgeInsets.fromLTRB(5, 20, 5, 20),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: kwhite,
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    sentence[index],
+                                    style: const TextStyle(
+                                        color: dullpurple, fontSize: 24.0),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ),
               ),
