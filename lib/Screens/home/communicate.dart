@@ -122,6 +122,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
               backgroundColor: Colors.red,
             ),
           );
+          Map<String, dynamic> errorResponse = jsonDecode(response.body);
+          String errorMessage =
+              errorResponse['detail'].replaceFirst('Error: ', '');
+          _ttsService.speak(errorMessage);
           setState(() {
             sentence.clear();
           });
@@ -134,7 +138,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
     } catch (e) {
       print('Error occurred: $e');
     } finally {
-      // Hide the loading animation
       Navigator.of(context).pop();
     }
   }
