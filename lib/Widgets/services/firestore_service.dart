@@ -53,6 +53,7 @@ class FirestoreService {
 
   Future<void> storeTappedCards(
       String cardTitle, String category, String cardId) async {
+    updateRecentCard(cardId);
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in.');
@@ -149,6 +150,45 @@ class FirestoreService {
     return null;
   }
 
+  Future<int> fetchPhase() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+    String userId = user.uid;
 
-  
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(userId).get();
+
+    if (userDoc.exists) {
+      return userDoc.get('phase');
+    } else {
+      print('User document not found.');
+    }
+    return 1;
+  }
+
+  Future<void> updateRecentCard(String cardId) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    String? userId = user?.uid;
+
+    if (userId == null) {
+      throw Exception('User is not logged in');
+    }
+
+    try {
+      DocumentReference docRef =
+          FirebaseFirestore.instance.collection('temp_recentCard').doc(userId);
+
+      await docRef.set({
+        'cardID': cardId,
+      }, SetOptions(merge: true));
+
+      print('Successfully updated recent card for user $userId');
+    } catch (e) {
+      print('Error updating recent card: $e');
+      rethrow; // Re-throw the exception to be handled by the caller
+    }
+  }
 }
