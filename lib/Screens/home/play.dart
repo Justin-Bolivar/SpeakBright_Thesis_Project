@@ -22,14 +22,16 @@ class _PlayState extends ConsumerState<Play> {
       appBar: AppBar(
         title: const Text('for testing'),
       ),
-      body: const Center(child: PromptProgress()),
-      floatingActionButton: const Align(
-        alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 16.0),
-          child: PromptButton(),
-        ),
-      ),
+      body: Center(
+        child: Text("To be developed")
+      )
+      // const Center(child: PromptProgress()),
+      // floatingActionButton: const Align(
+      //   alignment: Alignment.bottomCenter,
+      //   child: Padding(
+      //     padding: EdgeInsets.only(bottom: 16.0),
+      //   ),
+      // ),
     );
   }
 }

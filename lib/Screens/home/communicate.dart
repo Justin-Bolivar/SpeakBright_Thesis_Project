@@ -176,7 +176,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
           ],
         ),
       ),
-      floatingActionButton: const Align(
+      floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
           padding: EdgeInsets.only(bottom: 0),
@@ -185,7 +185,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
               SizedBox(
                 width: 20,
               ),
-              PromptButton(),
+              PromptButton(phaseCurrent: currentUserPhase),
             ],
           ),
         ),
