@@ -6,6 +6,7 @@ import '../../Widgets/constants.dart';
 import '../../Widgets/waiting_dialog.dart';
 import 'auth_controller.dart';
 import 'register_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String route = "/login";
@@ -190,11 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  onSubmit() {
+  void onSubmit() {
     if (formKey.currentState?.validate() ?? false) {
-      WaitingDialog.show(context,
-          future: AuthController.I
-              .login(username.text.trim(), password.text.trim()));
+      AuthController.I.login(username.text.trim(), password.text.trim());
     }
   }
 

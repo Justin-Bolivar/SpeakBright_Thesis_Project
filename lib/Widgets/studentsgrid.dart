@@ -75,9 +75,9 @@ class StudentsGrid extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    student['userID'],
+                    student['email'],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 10, color: Color.fromARGB(218, 255, 255, 255)),
+                    style: const TextStyle(fontSize: 13, color: Color.fromARGB(218, 255, 255, 255)),
                   ),
                 ],
               ),

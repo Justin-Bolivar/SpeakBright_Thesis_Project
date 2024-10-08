@@ -51,7 +51,9 @@ class FirestoreService {
     }
   }
 
-  Future<void> storeTappedCards(String cardTitle, String category) async {
+  Future<void> storeTappedCards(
+      String cardTitle, String category, String cardId) async {
+    updateRecentCard(cardId);
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in.');
@@ -105,30 +107,88 @@ class FirestoreService {
   }
 
   Future<String?> getCurrentUserName() async {
-  final currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser == null || currentUser.uid.isEmpty) {
-    return null; 
-  }
-
-  try {
-    final docRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-    final docSnap = await docRef.get();
-
-    if (docSnap.exists) {
-      final userData = docSnap.data() as Map<String, dynamic>;
-      return userData['name'];
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || currentUser.uid.isEmpty) {
+      return null;
     }
-  } catch (e) {
-    print("Error fetching user name: $e");
+
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+      final docSnap = await docRef.get();
+
+      if (docSnap.exists) {
+        final userData = docSnap.data() as Map<String, dynamic>;
+        return userData['name'];
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+
+    return null;
   }
 
-  return null;
-}
-
- Future<void> updateStudentPhase(String studentID, int phase) async {
+  Future<void> updateStudentPhase(String studentID, int phase) async {
     await FirebaseFirestore.instance.collection('users').doc(studentID).update({
       'phase': phase,
     });
   }
 
+  Future<String?> fetchStudentName(String studentID) async {
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('users').doc(studentID);
+      final docSnap = await docRef.get();
+
+      if (docSnap.exists) {
+        final userData = docSnap.data() as Map<String, dynamic>;
+        return userData['name'];
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+    return null;
+  }
+
+  Future<int> fetchPhase() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
+    }
+    String userId = user.uid;
+
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(userId).get();
+
+    if (userDoc.exists) {
+      return userDoc.get('phase');
+    } else {
+      print('User document not found.');
+    }
+    return 1;
+  }
+
+  Future<void> updateRecentCard(String cardId) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    String? userId = user?.uid;
+
+    if (userId == null) {
+      throw Exception('User is not logged in');
+    }
+
+    try {
+      DocumentReference docRef =
+          FirebaseFirestore.instance.collection('temp_recentCard').doc(userId);
+
+      await docRef.set({
+        'cardID': cardId,
+      }, SetOptions(merge: true));
+
+      print('Successfully updated recent card for user $userId');
+    } catch (e) {
+      print('Error updating recent card: $e');
+      rethrow; // Re-throw the exception to be handled by the caller
+    }
+  }
 }
