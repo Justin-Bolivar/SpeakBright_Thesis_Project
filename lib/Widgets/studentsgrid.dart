@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class StudentsGrid extends StatelessWidget {
   final List<Map<String, dynamic>> students;
@@ -77,7 +76,9 @@ class StudentsGrid extends StatelessWidget {
                   Text(
                     student['email'],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, color: Color.fromARGB(218, 255, 255, 255)),
+                    style: const TextStyle(
+                        fontSize: 13,
+                        color: Color.fromARGB(218, 255, 255, 255)),
                   ),
                 ],
               ),
@@ -99,7 +100,7 @@ class StudentsGrid extends StatelessWidget {
       case 3:
         return const Color.fromARGB(255, 68, 163, 67);
       case 4:
-        return const Color.fromARGB(255,58, 150, 235);
+        return const Color.fromARGB(255, 58, 150, 235);
       default:
         return const Color.fromARGB(255, 253, 139, 255);
     }
@@ -119,5 +120,4 @@ class StudentsGrid extends StatelessWidget {
         return 'studcard_monster';
     }
   }
-
 }
