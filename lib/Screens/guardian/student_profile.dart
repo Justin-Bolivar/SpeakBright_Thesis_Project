@@ -1,4 +1,5 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -20,21 +21,22 @@ class StudentProfile extends ConsumerStatefulWidget {
 }
 
 class _StudentProfileState extends ConsumerState<StudentProfile> {
-  String? _userName;
+  
   late String studentID;
+  final FirestoreService _firestoreService = FirestoreService();
+  int? _currentPhase;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserName();
     studentID = ref.read(studentIdProvider.notifier).state;
+    _loadInitialPhase();
   }
 
-  Future<void> _fetchUserName() async {
-    final userName = await FirestoreService().getCurrentUserName();
-
+  Future<void> _loadInitialPhase() async {
+    final phase = await fetchPhase();
     setState(() {
-      _userName = userName ?? 'Unknown User';
+      _currentPhase = phase;
     });
   }
 
@@ -42,82 +44,97 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     GlobalRouter.I.router.push(GuardianCommunicate.route);
   }
 
-  void _selectPhase(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Select Phase'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<int>(
-              title: Text('Phase 1'),
-              value: 1,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 2'),
-              value: 2,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 3'),
-              value: 3,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 4'),
-              value: 4,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            child: Text('Save'),
-            onPressed: () async {
-              await ref.read(phaseProvider.notifier).savePhase(studentID);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  void selectPhase(BuildContext context) async {
+    List<int> options = [1, 2, 3, 4];
+    int? _selectedValue = _currentPhase;
 
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            return AlertDialog(
+              title: Text(
+                'Edit Phase',
+                style: TextStyle(
+                    color: mainpurple,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w300),
+              ),
+              content: Row(
+                children: [
+                  Text("Student is in Phase  "),
+                  DropdownButton<int>(
+                    value: _selectedValue,
+                    icon: Icon(
+                      MdiIcons.triangleSmallDown,
+                      size: 18,
+                      color: kLightPruple,
+                    ),
+                    elevation: 16,
+                    style: const TextStyle(color: mainpurple, fontSize: 25),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.purple.withOpacity(0.5),
+                    ),
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        _selectedValue = newValue!;
+                      });
+                    },
+                    items: options.map((option) {
+                      return DropdownMenuItem<int>(
+                        value: option,
+                        child: Text(option.toString()),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                    foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.white),
+                  ),
+                ),
+                ElevatedButton(
+                  child: Text('Save'),
+                  onPressed: () async {
+                    await _updateAndCloseDialog(_selectedValue!, context);
+                  },
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all<Color>(Colors.green),
+                    foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _updateAndCloseDialog(
+      int selectedPhase, BuildContext context) async {
+    await _firestoreService.updateStudentPhase(studentID, selectedPhase);
+    setState(() {
+      _currentPhase = selectedPhase;
+    });
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final phase = ref.watch(phaseProvider);
 
     return Scaffold(
       body: Stack(
@@ -145,14 +162,42 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                   child: Theme(
                     data: ThemeData(fontFamily: 'Roboto'),
                     child: Column(children: [
-                      const Text(
-                        "Student Name",
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          color: kwhite,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 15,
-                        ),
+                      FutureBuilder<String?>(
+                        future: _firestoreService.fetchStudentName(studentID),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          } else {
+                            return Text(
+                              snapshot.data ?? 'Unknown Student',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          }
+                        },
                       ),
                       Text(
                         studentID,
@@ -199,7 +244,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                               Row(
                                 children: [
                                   Text(
-                                    'Phase ${phase}',
+                                    _currentPhase != null
+                                        ? 'Phase $_currentPhase'
+                                        : 'Loading...',
                                     style: const TextStyle(
                                       fontFamily: 'Roboto',
                                       color: mainpurple,
@@ -211,7 +258,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     width: 5,
                                   ),
                                   GestureDetector(
-                                    onTap: () => _selectPhase(context),
+                                    onTap: () => selectPhase(context),
                                     child: Icon(
                                       MdiIcons.pencil,
                                       size: 15,
@@ -297,5 +344,21 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         ],
       ),
     );
+  }
+
+  Future<int> fetchPhase() async {
+    String studID = ref.read(studentIdProvider.notifier).state;
+
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(studID).get();
+
+    if (userDoc.exists) {
+      int currentUserPhase = userDoc.get('phase');
+      return currentUserPhase;
+    } else {
+      print('User document not found.');
+      return 1;
+    }
   }
 }
