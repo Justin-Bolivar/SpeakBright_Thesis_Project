@@ -57,6 +57,7 @@ dependencies:
   percent_indicator: ^4.2.3
   flame_audio: ^2.10.3
   flutter_confetti: ^0.3.0
+  fluttertoast: ^8.2.8
 
 
 dev_dependencies:
