@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
@@ -21,7 +22,6 @@ class StudentProfile extends ConsumerStatefulWidget {
 }
 
 class _StudentProfileState extends ConsumerState<StudentProfile> {
-  
   late String studentID;
   final FirestoreService _firestoreService = FirestoreService();
   int? _currentPhase;
@@ -330,9 +330,90 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     child: Container(
                       color: Colors.white,
                       height: 50,
-                      child: const Center(
+                      child: Center(
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(8, 80, 8, 0),
+                          child: Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: Column(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Activity Log",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Colors.black),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: FutureBuilder<List<String>>(
+                                          future:
+                                              fetchDates(), // Ensure fetchDates() returns a List<String> after formatting dates
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return CircularProgressIndicator(); // Show loading indicator
+                                            } else if (snapshot.hasError) {
+                                              return Text(
+                                                  'Error: ${snapshot.error}'); // Display error message
+                                            } else if (!snapshot.hasData ||
+                                                snapshot.data!.isEmpty) {
+                                              return Text(
+                                                  'No dates available'); // Display message if no data
+                                            } else {
+                                              return Container(
+                                                height:
+                                                    200, // Set a height limit for scrollable content
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: snapshot.data!
+                                                        .map((date) {
+                                                      return Row(
+                                                        children: [
+                                                          Align(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: Text(
+                                                              date, // Display each fetched date here
+                                                              style: TextStyle(
+                                                                  fontSize: 20,
+                                                                  color: Colors
+                                                                      .black),
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            child: Container(
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      left:
+                                                                          10.0),
+                                                              height: 1,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )),
                         ),
                       ),
                     ),
@@ -344,6 +425,32 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         ],
       ),
     );
+  }
+
+  Future<List<String>> fetchDates() async {
+    String studID = ref.read(studentIdProvider.notifier).state;
+
+    CollectionReference sessionRef = FirebaseFirestore.instance
+        .collection('activity_log')
+        .doc(studID)
+        .collection('phase')
+        .doc(_currentPhase.toString())
+        .collection('session');
+
+    QuerySnapshot querySnapshot = await sessionRef.get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      List<String> dates = querySnapshot.docs.map((doc) {
+        // Convert Firestore Timestamp to DateTime
+        DateTime dateTime = (doc['timestamp'] as Timestamp).toDate();
+        // Format to "MM/dd/yyyy" or any preferred format
+        return DateFormat('MMMM d, yyyy').format(dateTime);
+      }).toList();
+      return dates;
+    } else {
+      print('No session documents found.');
+      return [];
+    }
   }
 
   Future<int> fetchPhase() async {
