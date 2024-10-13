@@ -26,6 +26,13 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
   late String studentID;
   final FirestoreService _firestoreService = FirestoreService();
   int? _currentPhase;
+  late FrequencyProvider frequencyProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    frequencyProvider = FrequencyProvider(ref);
+  }
 
   @override
   void initState() {
@@ -36,6 +43,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
 
   Future<void> _loadInitialPhase() async {
     final phase = await fetchPhase();
+
     setState(() {
       _currentPhase = phase;
     });
@@ -46,7 +54,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
   }
 
   void selectPhase(BuildContext context) async {
-    List<int> options = [1, 2, 3, 4];
+    List<int> options = [1, 2, 3, 4, 5];
     int? _selectedValue = _currentPhase;
 
     await showDialog(
@@ -55,13 +63,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         return StatefulBuilder(
           builder: (dialogContext, setState) {
             return AlertDialog(
-              title: Text(
-                'Edit Phase',
-                style: TextStyle(
-                    color: mainpurple,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w300),
-              ),
+              //change phase
               content: Row(
                 children: [
                   Text("Student is in Phase  "),
@@ -133,9 +135,30 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     Navigator.of(context).pop();
   }
 
+  Color _getPhaseColor(int? phase) {
+    switch (phase) {
+      case 1:
+        return Color(0xFF7CB342);
+      case 2:
+        return Color(0xFFE040FB);
+      case 3:
+        return Color(0xFF03A9F4);
+      case 4:
+        return Color(0xFF00897B);
+      case 5:
+        return Color(0xFFFFA000);
+      default:
+        return kwhite;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
+    String imagePath = _currentPhase != null
+        ? 'assets/phase/${_currentPhase}.png'
+        : 'assets/studcard_monster.png';
 
     return Scaffold(
       body: Stack(
@@ -223,6 +246,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     ),
                     child: Row(
                       children: [
+                        SizedBox(
+                          width: 5,
+                        ),
                         Image.asset(
                           'assets/medal.png',
                           height: 50,
@@ -231,85 +257,74 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                           data: ThemeData(fontFamily: 'Roboto'),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Text(
+                                'Phase',
+                                style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  color: _getPhaseColor(_currentPhase),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 23,
+                                ),
+                              ),
                               const Text(
                                 "Current Phase",
                                 style: TextStyle(
                                   fontFamily: 'Roboto',
-                                  color: Color(0xFF1E1E1E),
+                                  color: softGray,
                                   fontWeight: FontWeight.w100,
-                                  fontSize: 13,
+                                  fontSize: 10,
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Text(
-                                    _currentPhase != null
-                                        ? 'Phase $_currentPhase'
-                                        : 'Loading...',
-                                    style: const TextStyle(
-                                      fontFamily: 'Roboto',
-                                      color: mainpurple,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () => selectPhase(context),
-                                    child: Icon(
-                                      MdiIcons.pencil,
-                                      size: 15,
-                                      color: dullpurple,
-                                    ),
-                                  )
-                                ],
-                              )
                             ],
                           ),
+                        ),
+                        Image.asset(
+                          imagePath,
+                          height: 50,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Text('Error');
+                          },
                         ),
                         const Spacer(),
                         Padding(
                           padding: const EdgeInsets.only(right: 20),
                           child: InkWell(
-                            onTap: _handleTap,
+                            onTap: () => selectPhase(context),
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 gradient: const LinearGradient(
                                   colors: [
-                                    kLightPruple,
-                                    softPink,
+                                    ugRed,
+                                    ugYellow,
                                   ],
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                 ),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(10.0),
                                 child: Row(
                                   children: [
                                     Theme(
                                       data: ThemeData(fontFamily: 'Roboto'),
                                       child: const Text(
-                                        "View Card",
+                                        "Upgrade",
                                         style: TextStyle(
                                           fontFamily: 'Roboto',
                                           color: kwhite,
                                           fontWeight: FontWeight.w100,
-                                          fontSize: 10,
+                                          fontSize: 13,
                                         ),
                                       ),
                                     ),
                                     const SizedBox(width: 5),
-                                    Icon(
-                                      MdiIcons.eye,
-                                      color: kwhite,
-                                      size: 15,
+                                    Image.asset(
+                                      'assets/upgrade.png',
+                                      height: 18,
                                     )
                                   ],
                                 ),
@@ -335,218 +350,370 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(8, 20, 8, 0),
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
+                            padding: const EdgeInsets.all(15.0),
                             child: Column(
                               children: [
+                                SizedBox(
+                                  width: screenWidth * 0.7,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.15,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Color(0xFF729FF3)
+                                            // gradient: const LinearGradient(
+                                            //   colors: [
+                                            //     Color(0xFF7CB342),
+                                            //     Color.fromARGB(255, 103, 143, 60),
+                                            //   ],
+                                            // ),
+                                            ),
+                                        child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Row(
+                                              children: [
+                                                Spacer(),
+                                                Text(
+                                                  'Total Cards: ',
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w100,
+                                                      color: kwhite),
+                                                ),
+                                                Text(
+                                                  '24',
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: kwhite),
+                                                ),
+                                                // Spacer(),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 20, left: 30),
+                                                  child: InkWell(
+                                                    onTap: _handleTap,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          color: kwhite),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Row(
+                                                          children: [
+                                                            Theme(
+                                                              data: ThemeData(
+                                                                  fontFamily:
+                                                                      'Roboto'),
+                                                              child: const Text(
+                                                                "View Card",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  color: Color(
+                                                                      0xFF729FF3),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w200,
+                                                                  fontSize: 15,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                width: 5),
+                                                            Icon(
+                                                              MdiIcons.eye,
+                                                              color: Color(
+                                                                  0xFF729FF3),
+                                                              size: 15,
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )),
+                                      ),
+                                      Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Image.asset(
+                                          'assets/viewCard.png',
+                                          // fit: BoxFit.cover,
+                                          height: 110,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
                                     "Student Progress",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 20,
-                                        color: Colors.black),
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 18,
+                                        color: jblack),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
                                 Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.90,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.90,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0, 0),
+                                        ),
+                                      ],
+                                    ),
+                                    // You can add child widgets here if needed
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: List.generate(
+                                                5,
+                                                (index) => Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.15,
+                                                      // height: MediaQuery.of(context).size.width *0.30,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Image.asset(
+                                                              'assets/prompts/prompt_icon_$index.png',
+                                                              height: 40),
+                                                          SizedBox(
+                                                              height:
+                                                                  8), // Spacing between image and label
+                                                          Text(
+                                                            [
+                                                              'Independent',
+                                                              'Verbal',
+                                                              'Gestural',
+                                                              'Modeling',
+                                                              'Physical'
+                                                            ][index],
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                                fontSize: 12),
+                                                          ),
+                                                          SizedBox(
+                                                              height:
+                                                                  4), // Spacing between label and percentage
+                                                          FutureBuilder<List<double>>(
+                                                            future: frequencyProvider.frequencies,
+                                                            builder: (context, snapshot) {
+                                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                                return Container(
+                                                                  child: const Center(child: WaitingDialog()),
+                                                                );
+                                                              } else if (snapshot.hasData) {
+                                                                List<double>? frequencies = snapshot.data;
+                                                                if (frequencies == null || frequencies.isEmpty) {
+                                                                  return Text('No data available');
+                                                                }
+                                                                
+                                                                double totalFrequency = frequencies.reduce((a, b) => a + b);
+                                                                List<String> percentages = frequencies.map((freq) => 
+                                                                  ((freq / totalFrequency) * 100).toStringAsFixed(2) + '%'
+                                                                ).toList();
 
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: Offset(0, 0),
-                                      ),
-                                    ],
-                                  ),
-                                  // You can add child widgets here if needed
-                                  child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: List.generate(
-                                            5,
-                                            (index) => Container(
-                                                  width: MediaQuery.of(context).size.width *0.15,
-                                                  // height: MediaQuery.of(context).size.width *0.30,
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      Image.asset('assets/prompts/prompt_icon_$index.png', height: 40),
-                                                      SizedBox(height: 8), // Spacing between image and label
-                                                      Text(
-                                                        ['Independent', 'Verbal', 'Gestural', 'Modeling', 'Physical'][index],
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(fontSize: 12),
-                                                      ),
-                                                      SizedBox(height: 4), // Spacing between label and percentage
-                                                      RichText(
-                                                        textAlign: TextAlign.center,
-                                                        text: TextSpan(
-                                                          children: [
-                                                            TextSpan(
-                                                              text: [70, 60, 55, 50, 45][index].toString()+"%",
-                                                              style: TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight: FontWeight.bold,
-                                                                color: [
-                                                                  Color.fromARGB(255, 255, 85, 85),
-                                                                  Color.fromARGB(255, 255, 176, 85),
-                                                                  Color.fromARGB(255, 170, 225, 115),
-                                                                  Color.fromARGB(255, 108, 140, 255),
-                                                                  Color.fromARGB(255, 159, 124, 255)
-                                                                ][index],
-                                                              ),
-                                                            ),
-                                                            
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )),
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                                                return Text(
+                                                                  '${percentages[index]}',
+                                                                  textAlign: TextAlign.center,
+                                                                  style: TextStyle(
+                                                                    fontSize: 18,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: [
+                                                                      Color.fromARGB(255, 255, 85, 85),
+                                                                      Color.fromARGB(255, 255, 176, 85),
+                                                                      Color.fromARGB(255, 170, 225, 115),
+                                                                      Color.fromARGB(255, 108, 140, 255),
+                                                                      Color.fromARGB(255, 159, 124, 255)
+                                                                    ][index % 5], // Ensure index stays within bounds
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                return Text('An error occurred');
+                                                              }
+                                                            },
+                                                          ),
 
-                                ),
+                                                        ],
+                                                      ),
+                                                    )),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
                                 SizedBox(
-                                  height: 5,
+                                  height: 15,
                                 ),
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     "Activity Log",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 20,
-                                        color: Colors.black),
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 18,
+                                        color: jblack),
                                   ),
                                 ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: FutureBuilder<
-                                          List<Map<String, dynamic>>>(
-                                        future: fetchDatesWithCards(),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return WaitingDialog();
-                                          } else if (snapshot.hasError) {
-                                            return Text(
-                                                'Error: ${snapshot.error}');
-                                          } else if (!snapshot.hasData ||
-                                              snapshot.data!.isEmpty) {
-                                            return Text('No dates available');
-                                          } else {
-                                            return Container(
-                                              height: 200,
-                                              child: SingleChildScrollView(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: snapshot.data!
-                                                      .map((dateWithCards) {
-                                                    return Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Align(
-                                                              alignment: Alignment
-                                                                  .centerLeft,
-                                                              child: Text(
-                                                                dateWithCards[
-                                                                    'date'],
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        20,
-                                                                    color: Colors
-                                                                        .black),
-                                                              ),
-                                                            ),
-                                                            Expanded(
-                                                              child: Container(
-                                                                margin:
-                                                                    const EdgeInsets
-                                                                        .only(
-                                                                        left:
-                                                                            10.0),
-                                                                height: 1,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: 10),
-                                                        SingleChildScrollView(
-                                                          scrollDirection:
-                                                              Axis.horizontal,
-                                                          child: Row(
-                                                            children:
-                                                                dateWithCards[
-                                                                        'cards']
-                                                                    .map<Widget>(
-                                                                        (cardId) {
-                                                              return Container(
-                                                                margin: EdgeInsets
-                                                                    .only(
-                                                                        right:
-                                                                            10),
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .all(8),
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: Colors
-                                                                      .purple
-                                                                      .withOpacity(
-                                                                          0.1),
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              10),
-                                                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: FutureBuilder<
+                                              List<Map<String, dynamic>>>(
+                                            future: fetchDatesWithCards(),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return WaitingDialog();
+                                              } else if (snapshot.hasError) {
+                                                return Text(
+                                                    'Error: ${snapshot.error}');
+                                              } else if (!snapshot.hasData ||
+                                                  snapshot.data!.isEmpty) {
+                                                return Text(
+                                                    'No dates available');
+                                              } else {
+                                                return SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: snapshot.data!
+                                                        .map((dateWithCards) {
+                                                      return Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Align(
+                                                                alignment: Alignment
+                                                                    .centerLeft,
                                                                 child: Text(
-                                                                  cardId,
+                                                                  dateWithCards[
+                                                                      'date'],
                                                                   style: TextStyle(
                                                                       fontSize:
-                                                                          16,
-                                                                      color: Colors
-                                                                          .black),
+                                                                          13,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w300,
+                                                                      color:
+                                                                          jblack),
                                                                 ),
-                                                              );
-                                                            }).toList(),
+                                                              ),
+                                                              Expanded(
+                                                                child:
+                                                                    Container(
+                                                                  margin: const EdgeInsets
+                                                                      .only(
+                                                                      left:
+                                                                          10.0),
+                                                                  height: 1,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ),
-                                                        SizedBox(height: 20),
-                                                      ],
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      ),
+                                                          SizedBox(height: 10),
+                                                          SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: Row(
+                                                              children: dateWithCards[
+                                                                      'cards']
+                                                                  .map<Widget>(
+                                                                      (cardId) {
+                                                                return Container(
+                                                                  margin: EdgeInsets
+                                                                      .only(
+                                                                          right:
+                                                                              10),
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                              8),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .purple
+                                                                        .withOpacity(
+                                                                            0.1),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                  ),
+                                                                  child: Text(
+                                                                    cardId,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        color:
+                                                                            jblack),
+                                                                  ),
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 20),
+                                                        ],
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 )
                               ],
                             ),
