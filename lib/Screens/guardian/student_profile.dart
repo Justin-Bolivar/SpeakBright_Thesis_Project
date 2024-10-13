@@ -476,9 +476,10 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     );
   }
 
-  Future<List<String>> fetchSessionCardsForDate(String date) async {
+  Future<List<String>> fetchSessionCardTitlesForDate(String date) async {
     String studID = ref.read(studentIdProvider.notifier).state;
 
+    // Reference to the session collection
     CollectionReference cardsRef = FirebaseFirestore.instance
         .collection('activity_log')
         .doc(studID)
@@ -488,13 +489,29 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         .doc(date)
         .collection('trialPrompt');
 
-    QuerySnapshot querySnapshot = await cardsRef.get();
+    // Fetch the session documents for the date
+    QuerySnapshot sessionQuerySnapshot = await cardsRef.get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      List<String> cardIds = querySnapshot.docs.map((doc) {
+    if (sessionQuerySnapshot.docs.isNotEmpty) {
+      // Extract the card IDs from the session documents
+      List<String> cardIds = sessionQuerySnapshot.docs.map((doc) {
         return doc['cardID'] as String;
       }).toList();
-      return cardIds;
+
+      // Fetch the titles of cards where cardID matches
+      List<String> titles = [];
+      for (String cardId in cardIds) {
+        DocumentSnapshot cardSnapshot = await FirebaseFirestore.instance
+            .collection('cards')
+            .doc(cardId)
+            .get();
+
+        if (cardSnapshot.exists) {
+          titles.add(cardSnapshot['title']);
+        }
+      }
+
+      return titles;
     } else {
       print('No session documents found for date $date.');
       return [];
@@ -518,7 +535,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     for (var dateDoc in datesSnapshot.docs) {
       DateTime timestamp = (dateDoc['timestamp'] as Timestamp).toDate();
       String formattedDate = DateFormat('MMMM d, yyyy').format(timestamp);
-      List<String> cardIds = await fetchSessionCardsForDate(dateDoc.id);
+      List<String> cardIds = await fetchSessionCardTitlesForDate(dateDoc.id);
       datesWithCards.add({'date': formattedDate, 'cards': cardIds});
     }
 
