@@ -8,6 +8,7 @@ import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
 class StudentProfile extends ConsumerStatefulWidget {
@@ -324,25 +325,112 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(59),
-                      topRight: Radius.circular(59),
+                      topLeft: Radius.circular(14),
+                      topRight: Radius.circular(14),
                     ),
                     child: Container(
                       color: Colors.white,
                       height: 50,
                       child: Center(
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(8, 80, 8, 0),
+                          padding: EdgeInsets.fromLTRB(8, 20, 8, 0),
                           child: Padding(
                             padding: const EdgeInsets.only(left: 16.0),
                             child: Column(
                               children: [
                                 Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    "Student Progress",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 20,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.90,
+
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 0),
+                                      ),
+                                    ],
+                                  ),
+                                  // You can add child widgets here if needed
+                                  child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: List.generate(
+                                            5,
+                                            (index) => Container(
+                                                  width: MediaQuery.of(context).size.width *0.15,
+                                                  // height: MediaQuery.of(context).size.width *0.30,
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Image.asset('assets/prompts/prompt_icon_$index.png', height: 40),
+                                                      SizedBox(height: 8), // Spacing between image and label
+                                                      Text(
+                                                        ['Independent', 'Verbal', 'Gestural', 'Modeling', 'Physical'][index],
+                                                        textAlign: TextAlign.center,
+                                                        style: TextStyle(fontSize: 12),
+                                                      ),
+                                                      SizedBox(height: 4), // Spacing between label and percentage
+                                                      RichText(
+                                                        textAlign: TextAlign.center,
+                                                        text: TextSpan(
+                                                          children: [
+                                                            TextSpan(
+                                                              text: [70, 60, 55, 50, 45][index].toString()+"%",
+                                                              style: TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight: FontWeight.bold,
+                                                                color: [
+                                                                  Color.fromARGB(255, 255, 85, 85),
+                                                                  Color.fromARGB(255, 255, 176, 85),
+                                                                  Color.fromARGB(255, 170, 225, 115),
+                                                                  Color.fromARGB(255, 108, 140, 255),
+                                                                  Color.fromARGB(255, 159, 124, 255)
+                                                                ][index],
+                                                              ),
+                                                            ),
+                                                            
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )),
+                                      ),
+                                    ],
+                                  ),
+                                )
+
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     "Activity Log",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                         fontSize: 20,
                                         color: Colors.black),
                                   ),
@@ -356,7 +444,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
-                                            return CircularProgressIndicator();
+                                            return WaitingDialog();
                                           } else if (snapshot.hasError) {
                                             return Text(
                                                 'Error: ${snapshot.error}');
