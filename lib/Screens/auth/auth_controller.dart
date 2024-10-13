@@ -1,5 +1,6 @@
 // ignore_for_file: unused_local_variable
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
@@ -42,6 +43,15 @@ class AuthController with ChangeNotifier {
           .signInWithEmailAndPassword(email: email, password: password);
       print(FirebaseAuth.instance.currentUser);
     } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Invalid credentials",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
       print(e.toString());
     }
   }
@@ -55,7 +65,7 @@ class AuthController with ChangeNotifier {
     }
   }
 
-Future<void> logout() async {
+  Future<void> logout() async {
     // return FirebaseAuth.instance.signOut();
     await FirebaseAuth.instance.signOut();
   }
