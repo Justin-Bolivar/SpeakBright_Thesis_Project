@@ -42,18 +42,6 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
     });
   }
 
-  void _clearSentence() {
-    setState(() {
-      sentence.clear();
-    });
-  }
-
-  void _addCardTitleToSentence(String title) {
-    setState(() {
-      sentence.add(title);
-    });
-  }
-
   @override
   void dispose() {
     _ttsService.stop();
