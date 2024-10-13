@@ -59,8 +59,8 @@ class WaitingDialog extends StatelessWidget {
               height: 16,
             ),
             Text(
-              prompt ?? "Please wait . . .",
-              style: TextStyle(color: color ?? Colors.white),
+              prompt ?? "Loading. . .",
+              style: TextStyle(color: color ?? kLightPruple),
             )
           ],
         ),
