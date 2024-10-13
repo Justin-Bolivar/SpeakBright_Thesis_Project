@@ -9,6 +9,7 @@ import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 
@@ -251,7 +252,7 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                       ? "All"
                       : categories[selectedCategory],
                 ),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: WaitingDialog()),
                 error: (error, stack) => Center(child: Text('Error: $error')),
               ),
             ),

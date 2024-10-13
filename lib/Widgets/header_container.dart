@@ -220,7 +220,7 @@ class _RainbowContainerState extends State<RainbowContainer> {
           );
         } else {
           // While waiting for the future to complete
-          return const CircularProgressIndicator(); // Or a similar loading indicator
+          return const WaitingDialog(); // Or a similar loading indicator
         }
       },
     );
