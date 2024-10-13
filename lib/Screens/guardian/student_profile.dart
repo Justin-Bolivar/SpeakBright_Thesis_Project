@@ -1,6 +1,8 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
@@ -20,21 +22,21 @@ class StudentProfile extends ConsumerStatefulWidget {
 }
 
 class _StudentProfileState extends ConsumerState<StudentProfile> {
-  String? _userName;
   late String studentID;
+  final FirestoreService _firestoreService = FirestoreService();
+  int? _currentPhase;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserName();
     studentID = ref.read(studentIdProvider.notifier).state;
+    _loadInitialPhase();
   }
 
-  Future<void> _fetchUserName() async {
-    final userName = await FirestoreService().getCurrentUserName();
-
+  Future<void> _loadInitialPhase() async {
+    final phase = await fetchPhase();
     setState(() {
-      _userName = userName ?? 'Unknown User';
+      _currentPhase = phase;
     });
   }
 
@@ -42,82 +44,97 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     GlobalRouter.I.router.push(GuardianCommunicate.route);
   }
 
-  void _selectPhase(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Select Phase'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<int>(
-              title: Text('Phase 1'),
-              value: 1,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 2'),
-              value: 2,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 3'),
-              value: 3,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-            RadioListTile<int>(
-              title: Text('Phase 4'),
-              value: 4,
-              groupValue: ref.watch(phaseProvider),
-              onChanged: (int? value) {
-                if (value != null) {
-                  ref.read(phaseProvider.notifier).update(value);
-                }
-              },
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            child: Text('Save'),
-            onPressed: () async {
-              await ref.read(phaseProvider.notifier).savePhase(studentID);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  void selectPhase(BuildContext context) async {
+    List<int> options = [1, 2, 3, 4];
+    int? _selectedValue = _currentPhase;
 
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            return AlertDialog(
+              title: Text(
+                'Edit Phase',
+                style: TextStyle(
+                    color: mainpurple,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w300),
+              ),
+              content: Row(
+                children: [
+                  Text("Student is in Phase  "),
+                  DropdownButton<int>(
+                    value: _selectedValue,
+                    icon: Icon(
+                      MdiIcons.triangleSmallDown,
+                      size: 18,
+                      color: kLightPruple,
+                    ),
+                    elevation: 16,
+                    style: const TextStyle(color: mainpurple, fontSize: 25),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.purple.withOpacity(0.5),
+                    ),
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        _selectedValue = newValue!;
+                      });
+                    },
+                    items: options.map((option) {
+                      return DropdownMenuItem<int>(
+                        value: option,
+                        child: Text(option.toString()),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                    foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.white),
+                  ),
+                ),
+                ElevatedButton(
+                  child: Text('Save'),
+                  onPressed: () async {
+                    await _updateAndCloseDialog(_selectedValue!, context);
+                  },
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all<Color>(Colors.green),
+                    foregroundColor:
+                        WidgetStateProperty.all<Color>(Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _updateAndCloseDialog(
+      int selectedPhase, BuildContext context) async {
+    await _firestoreService.updateStudentPhase(studentID, selectedPhase);
+    setState(() {
+      _currentPhase = selectedPhase;
+    });
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final phase = ref.watch(phaseProvider);
 
     return Scaffold(
       body: Stack(
@@ -145,14 +162,42 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                   child: Theme(
                     data: ThemeData(fontFamily: 'Roboto'),
                     child: Column(children: [
-                      const Text(
-                        "Student Name",
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          color: kwhite,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 15,
-                        ),
+                      FutureBuilder<String?>(
+                        future: _firestoreService.fetchStudentName(studentID),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          } else {
+                            return Text(
+                              snapshot.data ?? 'Unknown Student',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: kwhite,
+                                fontWeight: FontWeight.w100,
+                                fontSize: 25,
+                              ),
+                            );
+                          }
+                        },
                       ),
                       Text(
                         studentID,
@@ -199,7 +244,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                               Row(
                                 children: [
                                   Text(
-                                    'Phase ${phase}',
+                                    _currentPhase != null
+                                        ? 'Phase $_currentPhase'
+                                        : 'Loading...',
                                     style: const TextStyle(
                                       fontFamily: 'Roboto',
                                       color: mainpurple,
@@ -211,7 +258,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     width: 5,
                                   ),
                                   GestureDetector(
-                                    onTap: () => _selectPhase(context),
+                                    onTap: () => selectPhase(context),
                                     child: Icon(
                                       MdiIcons.pencil,
                                       size: 15,
@@ -283,9 +330,139 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     child: Container(
                       color: Colors.white,
                       height: 50,
-                      child: const Center(
+                      child: Center(
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(8, 80, 8, 0),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16.0),
+                            child: Column(
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "Activity Log",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: FutureBuilder<
+                                          List<Map<String, dynamic>>>(
+                                        future: fetchDatesWithCards(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return CircularProgressIndicator();
+                                          } else if (snapshot.hasError) {
+                                            return Text(
+                                                'Error: ${snapshot.error}');
+                                          } else if (!snapshot.hasData ||
+                                              snapshot.data!.isEmpty) {
+                                            return Text('No dates available');
+                                          } else {
+                                            return Container(
+                                              height: 200,
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: snapshot.data!
+                                                      .map((dateWithCards) {
+                                                    return Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Align(
+                                                              alignment: Alignment
+                                                                  .centerLeft,
+                                                              child: Text(
+                                                                dateWithCards[
+                                                                    'date'],
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        20,
+                                                                    color: Colors
+                                                                        .black),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              child: Container(
+                                                                margin:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            10.0),
+                                                                height: 1,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 10),
+                                                        SingleChildScrollView(
+                                                          scrollDirection:
+                                                              Axis.horizontal,
+                                                          child: Row(
+                                                            children:
+                                                                dateWithCards[
+                                                                        'cards']
+                                                                    .map<Widget>(
+                                                                        (cardId) {
+                                                              return Container(
+                                                                margin: EdgeInsets
+                                                                    .only(
+                                                                        right:
+                                                                            10),
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(8),
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: Colors
+                                                                      .purple
+                                                                      .withOpacity(
+                                                                          0.1),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
+                                                                ),
+                                                                child: Text(
+                                                                  cardId,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: Colors
+                                                                          .black),
+                                                                ),
+                                                              );
+                                                            }).toList(),
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 20),
+                                                      ],
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -297,5 +474,87 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         ],
       ),
     );
+  }
+
+  Future<List<String>> fetchSessionCardTitlesForDate(String date) async {
+    String studID = ref.read(studentIdProvider.notifier).state;
+
+    // Reference to the session collection
+    CollectionReference cardsRef = FirebaseFirestore.instance
+        .collection('activity_log')
+        .doc(studID)
+        .collection('phase')
+        .doc(_currentPhase.toString())
+        .collection('session')
+        .doc(date)
+        .collection('trialPrompt');
+
+    // Fetch the session documents for the date
+    QuerySnapshot sessionQuerySnapshot = await cardsRef.get();
+
+    if (sessionQuerySnapshot.docs.isNotEmpty) {
+      // Extract the card IDs from the session documents
+      List<String> cardIds = sessionQuerySnapshot.docs.map((doc) {
+        return doc['cardID'] as String;
+      }).toList();
+
+      // Fetch the titles of cards where cardID matches
+      List<String> titles = [];
+      for (String cardId in cardIds) {
+        DocumentSnapshot cardSnapshot = await FirebaseFirestore.instance
+            .collection('cards')
+            .doc(cardId)
+            .get();
+
+        if (cardSnapshot.exists) {
+          titles.add(cardSnapshot['title']);
+        }
+      }
+
+      return titles;
+    } else {
+      print('No session documents found for date $date.');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchDatesWithCards() async {
+    String studID = ref.read(studentIdProvider.notifier).state;
+
+    CollectionReference datesRef = FirebaseFirestore.instance
+        .collection('activity_log')
+        .doc(studID)
+        .collection('phase')
+        .doc(_currentPhase.toString())
+        .collection('session');
+
+    QuerySnapshot datesSnapshot = await datesRef.get();
+
+    List<Map<String, dynamic>> datesWithCards = [];
+
+    for (var dateDoc in datesSnapshot.docs) {
+      DateTime timestamp = (dateDoc['timestamp'] as Timestamp).toDate();
+      String formattedDate = DateFormat('MMMM d, yyyy').format(timestamp);
+      List<String> cardIds = await fetchSessionCardTitlesForDate(dateDoc.id);
+      datesWithCards.add({'date': formattedDate, 'cards': cardIds});
+    }
+
+    return datesWithCards;
+  }
+
+  Future<int> fetchPhase() async {
+    String studID = ref.read(studentIdProvider.notifier).state;
+
+    CollectionReference userRef =
+        FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot userDoc = await userRef.doc(studID).get();
+
+    if (userDoc.exists) {
+      int currentUserPhase = userDoc.get('phase');
+      return currentUserPhase;
+    } else {
+      print('User document not found.');
+      return 1;
+    }
   }
 }
