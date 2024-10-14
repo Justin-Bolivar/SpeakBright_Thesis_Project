@@ -371,7 +371,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
       'userID': userId,
       'email': username.text.trim(),
       'Physical': 0,
-      'Modelling': 0,
+      'Modeling': 0,
       'Gestural': 0,
       'Verbal': 0,
       'Independent': 0,

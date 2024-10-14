@@ -12,6 +12,7 @@ import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -97,11 +98,46 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
     try {
       if (currentUserPhase == 4) {
-        String url =
+        String url_phase4 =
             'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
         final response = await http.post(
-          Uri.parse(url),
+          Uri.parse(url_phase4),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+        );
+
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+          setState(() {
+            sentence.clear();
+            sentence.addAll(responseBody['sentence'].split(' '));
+          });
+
+          sentenceString = sentence.join(' ');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create sentence: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          Map<String, dynamic> errorResponse = jsonDecode(response.body);
+          String errorMessage =
+              errorResponse['detail'].replaceFirst('Error: ', '');
+          _ttsService.speak(errorMessage);
+          setState(() {
+            sentence.clear();
+          });
+        }
+      }
+      if (currentUserPhase == 5) {
+        String url_phase5 =
+            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence/5';
+
+        final response = await http.post(
+          Uri.parse(url_phase5),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode(<String, dynamic>{'text': sentenceString}),
         );
@@ -208,7 +244,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                       radius: const Radius.circular(20.0),
                       child: Container(
                         height: 100,
-                        width: MediaQuery.of(context).size.width*.8,
+                        width: MediaQuery.of(context).size.width * .8,
                         decoration: BoxDecoration(
                           color: kwhite,
                           borderRadius: BorderRadius.circular(20.0),
@@ -249,7 +285,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
                     ),
                     if (showSentenceWidget)
                       Container(
-                        
                         child: Column(
                           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -417,12 +452,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
                       _addCardTitleToSentence(cardTitle);
                       _firestoreService.tapCountIncrement(cardId);
                       _ttsService.speak(cardTitle);
-                      _firestoreService.storeTappedCards(cardTitle, category, cardId);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
                       print('title: $cardTitle, cat: $category');
                     } else {
                       _firestoreService.tapCountIncrement(cardId);
                       _ttsService.speak(cardTitle);
-                      _firestoreService.storeTappedCards(cardTitle, category, cardId);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
                       print('title: $cardTitle, cat: $category');
                     }
                   },
@@ -436,7 +473,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
               },
               loading: () {
                 print('Loading cards...');
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: WaitingDialog());
               },
               error: (error, stack) {
                 print('Error fetching cards: $error');
