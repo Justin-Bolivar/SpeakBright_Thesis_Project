@@ -87,11 +87,11 @@ class _PromptButtonState extends State<PromptButton>
     }
 
     Map<int, String> fieldsToUpdate = {
-      0: 'physical',
-      1: 'modeling',
-      2: 'gestural',
-      3: 'verbal',
-      4: 'independent'
+      0: 'Physical',
+      1: 'Modeling',
+      2: 'Gestural',
+      3: 'Verbal',
+      4: 'Independent'
     };
 
     String fieldToUpdate = fieldsToUpdate[index] ?? '';

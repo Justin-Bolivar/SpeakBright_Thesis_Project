@@ -4,6 +4,7 @@ import 'package:speakbright_mobile/Screens/auth/auth_controller.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 
 class CardItem extends StatefulWidget {
   final CardModel card;
@@ -43,7 +44,7 @@ class _CardItemState extends State<CardItem> {
       future: isGuardian,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: WaitingDialog());
         }
 
         if (snapshot.hasError) {
@@ -178,7 +179,7 @@ class _CardItemState extends State<CardItem> {
         imageUrl: widget.card.imageUrl,
         fit: BoxFit.cover,
         placeholder: (context, url) => Center(
-          child: CircularProgressIndicator(
+          child: WaitingDialog(
             color: color,
           ),
         ),
