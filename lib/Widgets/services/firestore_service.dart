@@ -198,11 +198,11 @@ class FirestoreService {
   
   try {
     Map<String, int> frequencies = {
-    'independent': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('independent') ?? 0),
-    'verbal': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('verbal') ?? 0),
-    'gestural': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('gestural') ?? 0),
-    'modeling': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('modeling') ?? 0),
-    'physical': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('physical') ?? 0),
+    'Independent': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Independent') ?? 0),
+    'Verbal': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Verbal') ?? 0),
+    'Gestural': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Gestural') ?? 0),
+    'Modeling': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Modeling') ?? 0),
+    'Physical': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Physical') ?? 0),
   };
 
   return frequencies;

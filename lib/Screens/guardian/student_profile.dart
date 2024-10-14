@@ -10,6 +10,8 @@ import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class StudentProfile extends ConsumerStatefulWidget {
   const StudentProfile({super.key});
@@ -53,6 +55,21 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     GlobalRouter.I.router.push(GuardianCommunicate.route);
   }
 
+  Future<String?> getStudentReadiness(String studentID, int? phaseNumber) async {
+    var url = Uri.parse('https://phase-progression-analysis.onrender.com/student_readiness/$studentID/$phaseNumber');
+
+  var response = await http.get(url);
+  
+  if (response.statusCode == 200) {
+    var jsonResponse = json.decode(response.body);
+    return jsonResponse['readiness_level'].toString();
+  } else {
+    print('Failed to load student readiness: ${response.statusCode}');
+    return null;
+  }
+}
+
+
   void selectPhase(BuildContext context) async {
     List<int> options = [1, 2, 3, 4, 5];
     int? _selectedValue = _currentPhase;
@@ -64,35 +81,72 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
           builder: (dialogContext, setState) {
             return AlertDialog(
               //change phase
-              content: Row(
-                children: [
-                  Text("Student is in Phase  "),
-                  DropdownButton<int>(
-                    value: _selectedValue,
-                    icon: Icon(
-                      MdiIcons.triangleSmallDown,
-                      size: 18,
-                      color: kLightPruple,
-                    ),
-                    elevation: 16,
-                    style: const TextStyle(color: mainpurple, fontSize: 25),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.purple.withOpacity(0.5),
-                    ),
-                    onChanged: (int? newValue) {
-                      setState(() {
-                        _selectedValue = newValue!;
-                      });
-                    },
-                    items: options.map((option) {
-                      return DropdownMenuItem<int>(
-                        value: option,
-                        child: Text(option.toString()),
-                      );
-                    }).toList(),
+              content: SizedBox(
+                height: MediaQuery.of(context).size.height*0.3,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("How ready is ", style: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20),),
+                          buildFutureWidget(_firestoreService.fetchStudentName(studentID), 'Failed to fetch student name', 
+                          textStyle: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20)),
+                          Text(" for next phase?", style: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20),)
+                        ],
+                      ),
+                      SizedBox(height: 25,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                        Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
+                        // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
+                        buildFutureWidget(getStudentReadiness(studentID,_currentPhase), 'Failed to fetch readiness', 
+                        textStyle: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600)),
+                      ],),
+                      Text("StudentName needs more time in the current phase, student is not not quiet ready for next phase",
+                        style: TextStyle(fontStyle: FontStyle.italic, fontFamily: 'Roboto',color: lGray, ),),
+                      
+                      Padding(
+                        padding: const EdgeInsets.only(top: 50.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("MOVE TO PHASE  ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: lGray),),
+                            DropdownButton<int>(
+                              value: _selectedValue,
+                              icon: Icon(
+                                MdiIcons.triangleSmallDown,
+                                size: 18,
+                                color: kLightPruple,
+                              ),
+                              elevation: 16,
+                              style: const TextStyle(color: mainpurple, fontSize: 21,fontWeight: FontWeight.w800),
+                              underline: Container(
+                                height: 2,
+                                color: Colors.purple.withOpacity(0.5),
+                              ),
+                              onChanged: (int? newValue) {
+                                setState(() {
+                                  _selectedValue = newValue!;
+                                });
+                              },
+                              items: options.map((option) {
+                                return DropdownMenuItem<int>(
+                                  value: option,
+                                  child: Text(option.toString()),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
               actions: [
                 ElevatedButton(
@@ -152,6 +206,46 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     }
   }
 
+  Widget buildFutureWidget<T>(Future<T> future, String errorMessage, {TextStyle? textStyle}) {
+  return FutureBuilder<T>(
+    future: future,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text(
+          'Loading...',
+          style: textStyle ?? TextStyle(
+            fontFamily: 'Roboto',
+            color: Colors.white,
+            fontWeight: FontWeight.w100,
+            fontSize: 25,
+          ),
+        );
+      } else if (snapshot.hasError) {
+        return Text(
+          'Error: ${snapshot.error}',
+          style: textStyle ?? TextStyle(
+            fontFamily: 'Roboto',
+            color: Colors.white,
+            fontWeight: FontWeight.w100,
+            fontSize: 25,
+          ),
+        );
+      } else {
+        return Text(
+          snapshot.data?.toString() ?? 'Unknown',
+          style: textStyle ?? TextStyle(
+            fontFamily: 'Roboto',
+            color: Colors.white,
+            fontWeight: FontWeight.w100,
+            fontSize: 25,
+          ),
+        );
+      }
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -186,43 +280,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                   child: Theme(
                     data: ThemeData(fontFamily: 'Roboto'),
                     child: Column(children: [
-                      FutureBuilder<String?>(
-                        future: _firestoreService.fetchStudentName(studentID),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Text(
-                              'Loading...',
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: kwhite,
-                                fontWeight: FontWeight.w100,
-                                fontSize: 25,
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Text(
-                              'Error: ${snapshot.error}',
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: kwhite,
-                                fontWeight: FontWeight.w100,
-                                fontSize: 25,
-                              ),
-                            );
-                          } else {
-                            return Text(
-                              snapshot.data ?? 'Unknown Student',
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: kwhite,
-                                fontWeight: FontWeight.w100,
-                                fontSize: 25,
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      buildFutureWidget(_firestoreService.fetchStudentName(studentID), 
+                      'Failed to fetch student name'),
+
                       Text(
                         studentID,
                         style: const TextStyle(
@@ -545,13 +605,24 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                                               } else if (snapshot.hasData) {
                                                                 List<double>? frequencies = snapshot.data;
                                                                 if (frequencies == null || frequencies.isEmpty) {
-                                                                  return Text('No data available');
+                                                                  return Text('NA');
                                                                 }
-                                                                
+
                                                                 double totalFrequency = frequencies.reduce((a, b) => a + b);
-                                                                List<String> percentages = frequencies.map((freq) => 
-                                                                  ((freq / totalFrequency) * 100).toStringAsFixed(2) + '%'
-                                                                ).toList();
+
+                                                                List<String> percentages = frequencies.map((freq) {
+                                                                  if (freq == 0) {
+                                                                    return '0.00%';
+                                                                  }
+                                                                  double percentage = (freq / totalFrequency) * 100;
+                                                                  return percentage.toStringAsFixed(2) + '%';
+                                                                }).toList();
+
+                                                                // If all frequencies are 0, replace all percentages with '0.00%'
+                                                                if (totalFrequency == 0) {
+                                                                  percentages = List.generate(frequencies.length, (_) => '0.00%');
+                                                                }
+
 
                                                                 return Text(
                                                                   '${percentages[index]}',
