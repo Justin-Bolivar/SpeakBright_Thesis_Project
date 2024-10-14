@@ -12,6 +12,7 @@ import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -472,7 +473,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
               },
               loading: () {
                 print('Loading cards...');
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: WaitingDialog());
               },
               error: (error, stack) {
                 print('Error fetching cards: $error');
