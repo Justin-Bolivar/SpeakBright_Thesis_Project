@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_homepage.dart';
 import 'package:speakbright_mobile/Screens/home/student_homepage.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import '../auth/auth_controller.dart';
 
 class Home extends ConsumerStatefulWidget {
@@ -45,7 +46,7 @@ class _HomeState extends ConsumerState<Home> {
               return const StudentHomepage();
             }
           } else {
-            return const CircularProgressIndicator();
+            return const WaitingDialog();
           }
         },
       ),

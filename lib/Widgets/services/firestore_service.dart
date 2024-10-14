@@ -191,4 +191,24 @@ class FirestoreService {
       rethrow; // Re-throw the exception to be handled by the caller
     }
   }
+
+ Future<Map<String, int>> getPromptFrequencies(String selectedStudentId) async {
+    
+  final FirebaseFirestore  db = FirebaseFirestore.instance;
+  
+  try {
+    Map<String, int> frequencies = {
+    'Independent': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Independent') ?? 0),
+    'Verbal': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Verbal') ?? 0),
+    'Gestural': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Gestural') ?? 0),
+    'Modeling': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Modeling') ?? 0),
+    'Physical': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Physical') ?? 0),
+  };
+
+  return frequencies;
+    } catch (e) {
+      print('Error fetching prompt frequencies: $e');
+      rethrow; 
+    }
+ }
 }
