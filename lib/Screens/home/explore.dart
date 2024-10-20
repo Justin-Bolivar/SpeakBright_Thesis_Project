@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Widgets/cards/explore_card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 
 class Explore extends ConsumerStatefulWidget {
@@ -108,7 +109,7 @@ class _ExploreState extends ConsumerState<Explore> {
                 cards: cards,
                 onCardTap: _ttsService.speak,
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: WaitingDialog()),
               error: (error, stack) => Center(child: Text('Error: $error')),
             ),
           ),
