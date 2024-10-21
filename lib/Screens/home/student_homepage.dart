@@ -6,12 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
 import 'package:speakbright_mobile/Screens/home/explore.dart';
+import 'package:speakbright_mobile/Screens/home/learn.dart';
 import 'package:speakbright_mobile/Screens/home/play.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/header_container.dart';
 
 import '../../Routing/router.dart';
 
+// Updated StudentHomepage widget
 class StudentHomepage extends ConsumerStatefulWidget {
   const StudentHomepage({super.key});
 
@@ -54,7 +56,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
             child: SizedBox(
               width: screenWidth * 0.85,
               child: ListView.builder(
-                itemCount: 3, // Changed from 4 to 3
+                itemCount: 4,
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
@@ -67,6 +69,9 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           break;
                         case 2:
                           GlobalRouter.I.router.push(Play.route);
+                          break;
+                        case 3:
+                          GlobalRouter.I.router.push(Learn.route);
                           break;
                         default:
                           print('Unknown card tapped');
@@ -90,6 +95,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                     'Communicate',
                                     'Explore',
                                     'Play a Game',
+                                    'Learn',
                                   ][index],
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -100,6 +106,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                     'Tap on cards you want',
                                     'Discover new cards',
                                     'Enjoy learning',
+                                    'Learn new things',
                                   ][index],
                                   style:
                                       TextStyle(fontSize: baseFontSize * 0.8),
@@ -111,6 +118,7 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                                 'assets/communicate.png',
                                 'assets/train.png',
                                 'assets/play.png',
+                                'assets/learn.png',
                               ][index],
                               height: imageHeight,
                               fit: BoxFit.cover,
