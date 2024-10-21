@@ -212,20 +212,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
           ],
         ),
       ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 0),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 20,
-              ),
-              PromptButton(phaseCurrent: currentUserPhase),
-            ],
-          ),
-        ),
-      ),
       body: Column(
         children: [
           if (showSentenceWidget)
