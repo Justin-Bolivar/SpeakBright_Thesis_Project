@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import '../../Routing/router.dart';
 import '../../Widgets/constants.dart';
-import '../../Widgets/waiting_dialog.dart';
 import 'auth_controller.dart';
 import 'register_screen.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String route = "/login";
