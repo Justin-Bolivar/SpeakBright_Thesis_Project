@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
@@ -27,7 +24,6 @@ class _Learn1State extends ConsumerState<Learn1> {
   final TTSService _ttsService = TTSService();
   final FirestoreService _firestoreService = FirestoreService();
 
-  List<String> sentence = [];
   List<String> categories = [];
   int currentUserPhase = 1;
   int selectedCategory = -1;
@@ -43,7 +39,6 @@ class _Learn1State extends ConsumerState<Learn1> {
         categories.addAll(value);
       });
     });
-    fetchPhase();
   }
 
   @override
@@ -93,20 +88,6 @@ class _Learn1State extends ConsumerState<Learn1> {
           ],
         ),
       ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 0),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 20,
-              ),
-              PromptButton(phaseCurrent: currentUserPhase),
-            ],
-          ),
-        ),
-      ),
       body: cardsAsyncValue.when(
         data: (cards) {
           List<String> availableCards =
@@ -117,16 +98,17 @@ class _Learn1State extends ConsumerState<Learn1> {
                 .where((card) => card.title == _selectedTargetCard)
                 .toList();
           }
-          return Row(
+          return Column(
             children: [
               if (!_isMenuCollapsed)
                 Container(
-                  width: 200,
-                  color: Colors.grey[200],
+                  color: kwhite,
                   child: Column(
                     children: [
-                      Expanded(
+                      SizedBox(
+                        height: 50,
                         child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
                           itemBuilder: (context, index) {
                             final category = categories[index];
@@ -260,48 +242,19 @@ class _Learn1State extends ConsumerState<Learn1> {
               Expanded(
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20, bottom: 5),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/Diversity.png',
-                                height: 40,
-                                width: 40,
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Phase $currentUserPhase",
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(
-                                        fontSize: 24, color: kblack),
-                                  ),
-                                  const Text(
-                                    "Select a category and tap on cards you want",
-                                    textAlign: TextAlign.left,
-                                    style:
-                                        TextStyle(fontSize: 12, color: kblack),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer()
-                      ],
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, bottom: 5, top: 10),
+                      child: Image.asset(
+                        'assets/phase/phase1.png',
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Expanded(
                       child: CardList(
                         cards: filteredCards,
                         onCardTap:
                             (String cardTitle, String category, String cardId) {
-                          _firestoreService.tapCountIncrement(cardId);
                           _ttsService.speak(cardTitle);
                           _firestoreService.storeTappedCards(
                               cardTitle, category, cardId);
@@ -331,32 +284,5 @@ class _Learn1State extends ConsumerState<Learn1> {
         },
       ),
     );
-  }
-
-  Future<void> fetchPhase() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw Exception('No user is currently signed in.');
-    }
-    String userId = user.uid;
-
-    CollectionReference userRef =
-        FirebaseFirestore.instance.collection('users');
-    DocumentSnapshot userDoc = await userRef.doc(userId).get();
-
-    if (userDoc.exists) {
-      setState(() {
-        currentUserPhase = userDoc.get('phase');
-        if (currentUserPhase == 2) {
-          sentence.clear();
-          sentence.add("I want");
-        } else if (currentUserPhase == 3) {
-          sentence.clear();
-          sentence.add("I feel");
-        }
-      });
-    } else {
-      print('User document not found.');
-    }
   }
 }
