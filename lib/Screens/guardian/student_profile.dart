@@ -55,20 +55,22 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     GlobalRouter.I.router.push(GuardianCommunicate.route);
   }
 
-  Future<String?> getStudentReadiness(String studentID, int? phaseNumber) async {
-    var url = Uri.parse('https://phase-progression-analysis.onrender.com/student_readiness/$studentID/$phaseNumber');
+  Future<String?> getStudentReadiness(
+      String studentID, int? phaseNumber) async {
+    var url = Uri.parse(
+        'https://phase-progression-analysis.onrender.com/student_readiness/$studentID/$phaseNumber');
 
-  var response = await http.get(url);
-  
-  if (response.statusCode == 200) {
-    var jsonResponse = json.decode(response.body);
-    return jsonResponse['readiness_level'].toString();
-  } else {
-    print('Failed to load student readiness: ${response.statusCode}');
-    return null;
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body);
+      print(jsonResponse['readiness_status']);
+      return jsonResponse['readiness_status'];
+    } else {
+      print('Failed to load student readiness: ${response.statusCode}');
+      return null;
+    }
   }
-}
-
 
   void selectPhase(BuildContext context) async {
     List<int> options = [1, 2, 3, 4, 5];
@@ -82,7 +84,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
             return AlertDialog(
               //change phase
               content: SizedBox(
-                height: MediaQuery.of(context).size.height*0.3,
+                height: MediaQuery.of(context).size.height * 0.3,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -92,30 +94,70 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("How ready is ", style: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20),),
-                          buildFutureWidget(_firestoreService.fetchStudentName(studentID), 'Failed to fetch student name', 
-                          textStyle: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20)),
-                          Text(" for next phase?", style: TextStyle(fontFamily: 'Roboto', color: jblack, fontWeight: FontWeight.w600, fontSize: 20),)
+                          Text(
+                            "How ready is ",
+                            style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: jblack,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20),
+                          ),
+                          buildFutureWidget(
+                              _firestoreService.fetchStudentName(studentID),
+                              'Failed to fetch student name',
+                              textStyle: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  color: jblack,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20)),
+                          Text(
+                            " for next phase?",
+                            style: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: jblack,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20),
+                          )
                         ],
                       ),
-                      SizedBox(height: 25,),
+                      SizedBox(
+                        height: 25,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                        Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
-                        // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
-                        buildFutureWidget(getStudentReadiness(studentID,_currentPhase), 'Failed to fetch readiness', 
-                        textStyle: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600)),
-                      ],),
-                      Text("StudentName needs more time in the current phase, student is not not quiet ready for next phase",
-                        style: TextStyle(fontStyle: FontStyle.italic, fontFamily: 'Roboto',color: lGray, ),),
-                      
+                          // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
+                          // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
+                          buildFutureWidget(
+                              getStudentReadiness(studentID, _currentPhase),
+                              'Failed to fetch readiness',
+                              textStyle: TextStyle(
+                                  color: scoreYellow,
+                                  fontFamily: 'Roboto',
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                      Text(
+                        "Student needs more time in the current phase (sample)",
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontFamily: 'Roboto',
+                          color: lGray,
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 50.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("MOVE TO PHASE  ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: lGray),),
+                            Text(
+                              "MOVE TO PHASE  ",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  color: lGray),
+                            ),
                             DropdownButton<int>(
                               value: _selectedValue,
                               icon: Icon(
@@ -124,7 +166,10 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                 color: kLightPruple,
                               ),
                               elevation: 16,
-                              style: const TextStyle(color: mainpurple, fontSize: 21,fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                  color: mainpurple,
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w800),
                               underline: Container(
                                 height: 2,
                                 color: Colors.purple.withOpacity(0.5),
@@ -206,45 +251,58 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     }
   }
 
-  Widget buildFutureWidget<T>(Future<T> future, String errorMessage, {TextStyle? textStyle}) {
-  return FutureBuilder<T>(
-    future: future,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Text(
-          'Loading...',
-          style: textStyle ?? TextStyle(
-            fontFamily: 'Roboto',
-            color: Colors.white,
-            fontWeight: FontWeight.w100,
-            fontSize: 25,
-          ),
-        );
-      } else if (snapshot.hasError) {
-        return Text(
-          'Error: ${snapshot.error}',
-          style: textStyle ?? TextStyle(
-            fontFamily: 'Roboto',
-            color: Colors.white,
-            fontWeight: FontWeight.w100,
-            fontSize: 25,
-          ),
-        );
-      } else {
-        return Text(
-          snapshot.data?.toString() ?? 'Unknown',
-          style: textStyle ?? TextStyle(
-            fontFamily: 'Roboto',
-            color: Colors.white,
-            fontWeight: FontWeight.w100,
-            fontSize: 25,
-          ),
-        );
-      }
-    },
-  );
-}
+  Widget buildReadinessText(String readiness) {
+    String textMessage = readiness == "Ready"
+        ? "Student is proficient enough in the current phase"
+        : readiness == "Almost Ready"
+            ? "Student is close to being proficient in current phase!"
+            : "Student needs more time in the current phase";
 
+    return Text(textMessage);
+  }
+
+  Widget buildFutureWidget<T>(Future<T> future, String errorMessage,
+      {TextStyle? textStyle}) {
+    return FutureBuilder<T>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text(
+            'Loading...',
+            style: textStyle ??
+                TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.white,
+                  fontWeight: FontWeight.w100,
+                  fontSize: 25,
+                ),
+          );
+        } else if (snapshot.hasError) {
+          return Text(
+            'Error: ${snapshot.error}',
+            style: textStyle ??
+                TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.white,
+                  fontWeight: FontWeight.w100,
+                  fontSize: 25,
+                ),
+          );
+        } else {
+          return Text(
+            snapshot.data?.toString() ?? 'Unknown',
+            style: textStyle ??
+                TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.white,
+                  fontWeight: FontWeight.w100,
+                  fontSize: 25,
+                ),
+          );
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,9 +338,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                   child: Theme(
                     data: ThemeData(fontFamily: 'Roboto'),
                     child: Column(children: [
-                      buildFutureWidget(_firestoreService.fetchStudentName(studentID), 
-                      'Failed to fetch student name'),
-
+                      buildFutureWidget(
+                          _firestoreService.fetchStudentName(studentID),
+                          'Failed to fetch student name'),
                       Text(
                         studentID,
                         style: const TextStyle(
@@ -595,56 +653,120 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                                           SizedBox(
                                                               height:
                                                                   4), // Spacing between label and percentage
-                                                          FutureBuilder<List<double>>(
-                                                            future: frequencyProvider.frequencies,
-                                                            builder: (context, snapshot) {
-                                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                          FutureBuilder<
+                                                              List<double>>(
+                                                            future:
+                                                                frequencyProvider
+                                                                    .frequencies,
+                                                            builder: (context,
+                                                                snapshot) {
+                                                              if (snapshot
+                                                                      .connectionState ==
+                                                                  ConnectionState
+                                                                      .waiting) {
                                                                 return Container(
-                                                                  child: const Center(child: WaitingDialog()),
+                                                                  child: const Center(
+                                                                      child:
+                                                                          WaitingDialog()),
                                                                 );
-                                                              } else if (snapshot.hasData) {
-                                                                List<double>? frequencies = snapshot.data;
-                                                                if (frequencies == null || frequencies.isEmpty) {
-                                                                  return Text('NA');
+                                                              } else if (snapshot
+                                                                  .hasData) {
+                                                                List<double>?
+                                                                    frequencies =
+                                                                    snapshot
+                                                                        .data;
+                                                                if (frequencies ==
+                                                                        null ||
+                                                                    frequencies
+                                                                        .isEmpty) {
+                                                                  return Text(
+                                                                      'NA');
                                                                 }
 
-                                                                double totalFrequency = frequencies.reduce((a, b) => a + b);
+                                                                double
+                                                                    totalFrequency =
+                                                                    frequencies
+                                                                        .reduce((a,
+                                                                                b) =>
+                                                                            a +
+                                                                            b);
 
-                                                                List<String> percentages = frequencies.map((freq) {
-                                                                  if (freq == 0) {
+                                                                List<String>
+                                                                    percentages =
+                                                                    frequencies.map(
+                                                                        (freq) {
+                                                                  if (freq ==
+                                                                      0) {
                                                                     return '0.00%';
                                                                   }
-                                                                  double percentage = (freq / totalFrequency) * 100;
-                                                                  return percentage.toStringAsFixed(2) + '%';
+                                                                  double
+                                                                      percentage =
+                                                                      (freq / totalFrequency) *
+                                                                          100;
+                                                                  return percentage
+                                                                          .toStringAsFixed(
+                                                                              2) +
+                                                                      '%';
                                                                 }).toList();
 
                                                                 // If all frequencies are 0, replace all percentages with '0.00%'
-                                                                if (totalFrequency == 0) {
-                                                                  percentages = List.generate(frequencies.length, (_) => '0.00%');
+                                                                if (totalFrequency ==
+                                                                    0) {
+                                                                  percentages = List.generate(
+                                                                      frequencies
+                                                                          .length,
+                                                                      (_) =>
+                                                                          '0.00%');
                                                                 }
-
 
                                                                 return Text(
                                                                   '${percentages[index]}',
-                                                                  textAlign: TextAlign.center,
-                                                                  style: TextStyle(
-                                                                    fontSize: 18,
-                                                                    fontWeight: FontWeight.bold,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
                                                                     color: [
-                                                                      Color.fromARGB(255, 255, 85, 85),
-                                                                      Color.fromARGB(255, 255, 176, 85),
-                                                                      Color.fromARGB(255, 170, 225, 115),
-                                                                      Color.fromARGB(255, 108, 140, 255),
-                                                                      Color.fromARGB(255, 159, 124, 255)
-                                                                    ][index % 5], // Ensure index stays within bounds
+                                                                      Color.fromARGB(
+                                                                          255,
+                                                                          255,
+                                                                          85,
+                                                                          85),
+                                                                      Color.fromARGB(
+                                                                          255,
+                                                                          255,
+                                                                          176,
+                                                                          85),
+                                                                      Color.fromARGB(
+                                                                          255,
+                                                                          170,
+                                                                          225,
+                                                                          115),
+                                                                      Color.fromARGB(
+                                                                          255,
+                                                                          108,
+                                                                          140,
+                                                                          255),
+                                                                      Color.fromARGB(
+                                                                          255,
+                                                                          159,
+                                                                          124,
+                                                                          255)
+                                                                    ][index %
+                                                                        5], // Ensure index stays within bounds
                                                                   ),
                                                                 );
                                                               } else {
-                                                                return Text('An error occurred');
+                                                                return Text(
+                                                                    'An error occurred');
                                                               }
                                                             },
                                                           ),
-
                                                         ],
                                                       ),
                                                     )),
