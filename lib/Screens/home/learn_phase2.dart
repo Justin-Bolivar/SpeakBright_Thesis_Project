@@ -17,18 +17,18 @@ import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-class Learn extends ConsumerStatefulWidget {
-  const Learn({super.key});
+class Learn2 extends ConsumerStatefulWidget {
+  const Learn2({super.key});
 
-  static const String route = "/learn";
-  static const String path = "/learn";
-  static const String name = "Learn";
+  static const String route = "/learn2";
+  static const String path = "/learn2";
+  static const String name = "Learn2";
 
   @override
-  ConsumerState<Learn> createState() => _LearnState();
+  ConsumerState<Learn2> createState() => _Learn2State();
 }
 
-class _LearnState extends ConsumerState<Learn> {
+class _Learn2State extends ConsumerState<Learn2> {
   final TTSService _ttsService = TTSService();
   final FirestoreService _firestoreService = FirestoreService();
 
