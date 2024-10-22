@@ -3,7 +3,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
@@ -92,32 +91,20 @@ final cardsListProviderPhase4 =
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
 
-  final phase2Stream = FirebaseFirestore.instance
+  return FirebaseFirestore.instance
       .collection('favorites')
       .doc(user.uid)
       .collection('cards')
       .orderBy('rank')
       .where('phase2_independence', isEqualTo: true)
-      .snapshots();
-
-  final phase3Stream = FirebaseFirestore.instance
-      .collection('favorites')
-      .doc(user.uid)
-      .collection('cards')
-      .orderBy('rank')
       .where('phase3_independence', isEqualTo: true)
-      .snapshots();
-  return Rx.combineLatest2(phase2Stream, phase3Stream,
-      (QuerySnapshot phase2Snapshot, QuerySnapshot phase3Snapshot) {
-    final combinedDocs =
-        {...phase2Snapshot.docs, ...phase3Snapshot.docs}.toList();
-
-    print("Fetched ${combinedDocs.length} cards");
-
-    return combinedDocs.map((doc) => CardModel.fromFirestore(doc)).toList();
-  }).handleError((error) {
+      .snapshots()
+      .handleError((error) {
     print("Error fetching cards: $error");
-    return [];
+    return Stream.value([]);
+  }).map((snapshot) {
+    print("Fetched ${snapshot.docs.length} cards");
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
   });
 });
 
