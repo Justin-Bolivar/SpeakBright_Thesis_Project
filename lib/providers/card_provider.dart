@@ -54,6 +54,7 @@ final cardsListProviderPhase2 =
       .collection('cards')
       .orderBy('rank')
       .where('phase1_independence', isEqualTo: true)
+      .where('category', isNotEqualTo: 'Emotions')
       .snapshots()
       .handleError((error) {
     print("Error fetching cards: $error");
