@@ -11,7 +11,7 @@ import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_cardview.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
-import "package:speakbright_mobile/Screens/home/learn.dart";
+import "package:speakbright_mobile/Screens/home/learn_phase1.dart";
 import "package:speakbright_mobile/Screens/home/play.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
 import "../Screens/auth/auth_controller.dart";
@@ -119,10 +119,10 @@ class GlobalRouter {
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
-              path: Learn.route,
-              name: Learn.name,
+              path: Learn1.route,
+              name: Learn1.name,
               builder: (context, _) {
-                return const Learn();
+                return const Learn1();
               }),
           GoRoute(
               //only for testing remove later

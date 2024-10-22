@@ -26,6 +26,22 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
+final cardsListProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('favorites')
+      .doc(user.uid)
+      .collection('cards')
+      .orderBy('rank')
+      .snapshots()
+      .handleError((error) {
+    return Stream.value([]);
+  }).map((snapshot) =>
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+});
+
 final cardsExploreProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
@@ -36,7 +52,7 @@ final cardsExploreProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
 });
 
 final cardsGuardianProvider =
-  StreamProvider.autoDispose<List<CardModel>>((ref) {
+    StreamProvider.autoDispose<List<CardModel>>((ref) {
   String studentId = ref.read(studentIdProvider);
   print("Fetching cards for student $studentId");
 
