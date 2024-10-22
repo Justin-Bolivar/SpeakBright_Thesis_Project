@@ -58,6 +58,7 @@ dependencies:
   flame_audio: ^2.10.3
   flutter_confetti: ^0.3.0
   fluttertoast: ^8.2.8
+  google_fonts: ^6.2.1
 
 
 dev_dependencies:
@@ -99,6 +100,7 @@ flutter:
     - assets/audio/
     - assets/SpeakBright_1024.png
     - assets/phase/
+    - assets/google_fonts/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

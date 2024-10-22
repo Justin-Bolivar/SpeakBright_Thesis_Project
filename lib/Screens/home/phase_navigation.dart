@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:speakbright_mobile/Widgets/cards/explore_card_grid.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/prompt/prompt_progress.dart';
-import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
-import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 
-class Play extends ConsumerStatefulWidget {
-  const Play({super.key});
+class PhaseNav extends ConsumerStatefulWidget {
+  const PhaseNav({super.key});
 
-  static const String route = "/play";
-  static const String path = "/play";
-  static const String name = "Play";
+  static const String route = "/phasenav";
+  static const String path = "/phasenav";
+  static const String name = "Phase Nav";
 
   @override
-  ConsumerState<Play> createState() => _PlayState();
+  ConsumerState<PhaseNav> createState() => _PhaseNavState();
 }
 
-class _PlayState extends ConsumerState<Play> {
-  late final Future<int> _currentPhaseFuture;
+class _PhaseNavState extends ConsumerState<PhaseNav> {
+ late final Future<int> _currentPhaseFuture;
 
   @override
   void initState() {
