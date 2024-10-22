@@ -127,9 +127,9 @@ class _PromptButtonState extends State<PromptButton>
         'userID': user.uid,
       }, SetOptions(merge: true));
 
-      int currentPhase = widget.phaseCurrent;
+      int currentPhase = widget.phaseCurrent; //to be changed to a provider
 
-      // Reference to phase document
+      // phase document
       DocumentReference phaseRef =
           activityLogRef.collection('phase').doc(currentPhase.toString());
 
@@ -186,73 +186,59 @@ class _PromptButtonState extends State<PromptButton>
       if (tempRecentCardSnapshot.exists) {
         String cardID = tempRecentCardSnapshot.get('cardID');
         DocumentReference trialPromptRef =
-            trialRef.collection('trialPrompt').doc(cardID);
+          trialRef.collection('trialPrompt').doc();
 
-        // Set the trial prompt document with cardID if not already created
-        await trialPromptRef.set({
-          'Independent': FieldValue.increment(0), 
-          'Verbal': FieldValue.increment(0), 
-          'Gestural': FieldValue.increment(0), 
-          'Modeling': FieldValue.increment(0), 
-          'Physical': FieldValue.increment(0), 
-          'cardID': cardID,
-        }, SetOptions(merge: true));
+      // Determine the prompt type based on index
+      String promptType;
+      switch (index) {
+        case 0:
+          promptType = 'Physical';
+          break;
+        case 1:
+          promptType = 'Modeling';
+          break;
+        case 2:
+          promptType = 'Gestural';
+          break;
+        case 3:
+          promptType = 'Verbal';
+          break;
+        case 4:
+          promptType = 'Independent';
+          break;
+        default:
+          throw Exception("Invalid index");
+      }
 
-        String totalField;
-        String trialPromptField;
+      // Firestore transaction to increment the total field and add a new trial prompt document
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot phaseSnapshot = await transaction.get(phaseRef);
 
-        // Determine which field to update based on index
-        switch (index) {
-          case 0:
-            totalField = 'totalPhysical';
-            trialPromptField = 'Physical';
-            break;
-          case 1:
-            totalField = 'totalModeling';
-            trialPromptField = 'Modeling';
-            break;
-          case 2:
-            totalField = 'totalGestural';
-            trialPromptField = 'Gestural';
-            break;
-          case 3:
-            totalField = 'totalVerbal';
-            trialPromptField = 'Verbal';
-            break;
-          case 4:
-            totalField = 'totalIndependent';
-            trialPromptField = 'Independent';
-            break;
-          default:
-            throw Exception("Invalid index");
+        if (!phaseSnapshot.exists) {
+          throw Exception("Required document does not exist!");
         }
 
-        // Firestore transaction to increment both the total and trial prompt fields
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          DocumentSnapshot phaseSnapshot = await transaction.get(phaseRef);
-          DocumentSnapshot trialPromptSnapshot =
-              await transaction.get(trialPromptRef);
+        // Add a new document to the trialPrompt collection
+        transaction.set(
+          trialPromptRef,
+          {
+            'prompt': promptType,
+            'cardID': cardID,
+            'timestamp': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
 
-          if (!phaseSnapshot.exists || !trialPromptSnapshot.exists) {
-            throw Exception("Required document does not exist!");
-          }
+        transaction.delete(tempRecentCardSnapshot.reference);
 
-          // Increment the relevant total field (e.g., totalPhysical) without resetting
-          transaction.update(phaseRef, {
-            totalField: FieldValue.increment(1),
-          });
+      });
 
-          // Increment the specific trial prompt field (e.g., Physical)
-          transaction.update(trialPromptRef, {
-            trialPromptField: FieldValue.increment(1),
-          });
-        });
-
-        print("$totalField and $trialPromptField incremented successfully.");
+      print("update log successfully.");
       } else {
         print("Tap on a card first");
         throw Exception("Tap on a card first");
       }
+      
     }
   }
 
