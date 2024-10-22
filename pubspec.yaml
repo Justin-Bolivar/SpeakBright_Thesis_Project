@@ -59,6 +59,7 @@ dependencies:
   flutter_confetti: ^0.3.0
   fluttertoast: ^8.2.8
   google_fonts: ^6.2.1
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:
