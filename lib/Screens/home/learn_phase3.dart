@@ -10,7 +10,6 @@ import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class Learn3 extends ConsumerStatefulWidget {
   const Learn3({super.key});
@@ -38,6 +37,7 @@ class _Learn3State extends ConsumerState<Learn3> {
     _firestoreService.fetchCategories().then((value) {
       setState(() {
         categories.addAll(value);
+        sentence.add("I feel");
       });
     });
   }
@@ -45,7 +45,7 @@ class _Learn3State extends ConsumerState<Learn3> {
   void _clearSentence() {
     setState(() {
       sentence.clear();
-      sentence.add("I want");
+      sentence.add("I feel");
     });
   }
 
