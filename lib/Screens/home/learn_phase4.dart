@@ -34,7 +34,6 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   List<String> sentence = [];
   List<String> categories = [];
-  int currentUserPhase = 1;
   int selectedCategory = -1;
 
   @override
@@ -55,7 +54,9 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void _addCardTitleToSentence(String title) {
     setState(() {
-      sentence.add(title);
+      if (sentence.length < 2) {
+        sentence.add(title);
+      }
     });
   }
 
@@ -66,7 +67,7 @@ class _Learn4State extends ConsumerState<Learn4> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = sentence.join(' ');
+    String sentenceString = "I " + sentence.join(' ');
 
     showDialog(
       context: context,
@@ -82,40 +83,38 @@ class _Learn4State extends ConsumerState<Learn4> {
     );
 
     try {
-      if (currentUserPhase == 4) {
-        String url_phase4 =
-            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+      String url_phase4 =
+          'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
-        final response = await http.post(
-          Uri.parse(url_phase4),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+      final response = await http.post(
+        Uri.parse(url_phase4),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        setState(() {
+          sentence.clear();
+          sentence.addAll(responseBody['sentence'].split(' '));
+        });
+
+        sentenceString = sentence.join(' ');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create sentence: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          setState(() {
-            sentence.clear();
-            sentence.addAll(responseBody['sentence'].split(' '));
-          });
-
-          sentenceString = sentence.join(' ');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create sentence: ${response.body}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Map<String, dynamic> errorResponse = jsonDecode(response.body);
-          String errorMessage =
-              errorResponse['detail'].replaceFirst('Error: ', '');
-          _ttsService.speak(errorMessage);
-          setState(() {
-            sentence.clear();
-          });
-        }
+        Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        String errorMessage =
+            errorResponse['detail'].replaceFirst('Error: ', '');
+        _ttsService.speak(errorMessage);
+        setState(() {
+          sentence.clear();
+        });
       }
       _firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
@@ -163,34 +162,21 @@ class _Learn4State extends ConsumerState<Learn4> {
                       child: sentence.isEmpty
                           ? Center(
                               child: Text(
-                                "TAP CARDS TO CREATE A SENTENCE",
+                                "I feel ______, I want ______",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             )
-                          : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: sentence.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.fromLTRB(5, 20, 5, 20),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: kwhite,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      sentence[index],
-                                      style: const TextStyle(
-                                          color: dullpurple, fontSize: 24.0),
-                                    ),
-                                  ),
-                                );
-                              },
+                          : Center(
+                              child: Text(
+                                "I feel ${sentence.length > 0 ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                style: TextStyle(
+                                    color: kLightPruple,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
                             ),
                     ),
                   ),
