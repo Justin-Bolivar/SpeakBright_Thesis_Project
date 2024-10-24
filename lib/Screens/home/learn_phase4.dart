@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
@@ -317,7 +318,7 @@ class _Learn4State extends ConsumerState<Learn4> {
             child: cardsAsyncValue.when(
               data: (cards) {
                 print('Cards fetched successfully: ${cards.length}');
-                return CardList(
+                return CardGrid(
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
