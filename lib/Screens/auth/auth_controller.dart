@@ -65,6 +65,29 @@ class AuthController with ChangeNotifier {
     }
   }
 
+  Future<void> registerStudent(String email, String password) async {
+    try {
+      UserCredential? userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        // Sign out the newly created user
+        await FirebaseAuth.instance.signOut();
+
+        // Update the controller with the current user (facilitator)
+        handleUserChanges(FirebaseAuth.instance.currentUser);
+
+        Fluttertoast.showToast(msg: "Student Registered Successfully!");
+      }
+    } catch (e) {
+      print(e.toString());
+      Fluttertoast.showToast(msg: "Registration failed: ${e.toString()}");
+    }
+  }
+
   Future<void> logout() async {
     // return FirebaseAuth.instance.signOut();
     await FirebaseAuth.instance.signOut();
@@ -76,6 +99,8 @@ class AuthController with ChangeNotifier {
     User? user = FirebaseAuth.instance.currentUser;
     handleUserChanges(user);
   }
+
+  
 
   ///https://pub.dev/packages/flutter_secure_storage or any caching dependency of your choice like localstorage, hive, or a db
 }

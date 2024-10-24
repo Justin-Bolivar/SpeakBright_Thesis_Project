@@ -25,7 +25,7 @@ const jblack = Color(0xFF1E1E1E);
 const lGray = Color(0xFF444444); 
 const scoreYellow = Color(0xFFE7A321);
 const dullWhite = Color(0xFFD9D9D9);
-
+const addGreen = Color(0xFF7CB342);
 
 const ugRed = Color(0xFFFD3C4F);
 const ugYellow = Color(0xFFFFCE29);
