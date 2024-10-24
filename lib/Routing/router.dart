@@ -11,7 +11,11 @@ import "package:speakbright_mobile/Screens/home/communicate.dart";
 import "package:speakbright_mobile/Screens/home/guardian_cardview.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
-import "package:speakbright_mobile/Screens/home/learn.dart";
+import "package:speakbright_mobile/Screens/home/learn_phase1.dart";
+import "package:speakbright_mobile/Screens/home/learn_phase2.dart";
+import "package:speakbright_mobile/Screens/home/learn_phase3.dart";
+import "package:speakbright_mobile/Screens/home/learn_phase4.dart";
+import "package:speakbright_mobile/Screens/home/phase_navigation.dart";
 import "package:speakbright_mobile/Screens/home/play.dart";
 import "package:speakbright_mobile/Screens/home/student_homepage.dart";
 import "../Screens/auth/auth_controller.dart";
@@ -119,10 +123,38 @@ class GlobalRouter {
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
-              path: Learn.route,
-              name: Learn.name,
+              path: PhaseNav.route,
+              name: PhaseNav.name,
               builder: (context, _) {
-                return const Learn();
+                return const PhaseNav();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Learn1.route,
+              name: Learn1.name,
+              builder: (context, _) {
+                return const Learn1();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Learn2.route,
+              name: Learn2.name,
+              builder: (context, _) {
+                return const Learn2();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Learn3.route,
+              name: Learn3.name,
+              builder: (context, _) {
+                return const Learn3();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Learn4.route,
+              name: Learn4.name,
+              builder: (context, _) {
+                return const Learn4();
               }),
           GoRoute(
               //only for testing remove later
