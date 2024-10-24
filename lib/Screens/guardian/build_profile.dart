@@ -7,22 +7,21 @@ import 'package:image_picker/image_picker.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/student_profile.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-class Play extends ConsumerStatefulWidget {
-  const Play({super.key});
+class BuildProfile extends ConsumerStatefulWidget {
+  const BuildProfile({super.key});
 
-  static const String route = "/play";
-  static const String path = "/play";
-  static const String name = "Play";
+  static const String route = "/BuildProfile";
+  static const String path = "/BuildProfile";
+  static const String name = "BuildProfile";
 
   @override
-  ConsumerState<Play> createState() => _PlayState();
+  ConsumerState<BuildProfile> createState() => _BuildProfileState();
 }
 
-class _PlayState extends ConsumerState<Play> {
+class _BuildProfileState extends ConsumerState<BuildProfile> {
   final newCardTitleProvider = StateProvider<String>((ref) => '');
   final selectedCategoryProvider = StateProvider<String?>((ref) => null);
   final imageUrlProvider = StateProvider<String?>((ref) => null);
@@ -306,7 +305,9 @@ class _PlayState extends ConsumerState<Play> {
                   )),
             )
           ],
-        ));
+        )
+        
+        );
   }
 
   Future<void> _pickImage(ImageSource source, WidgetRef ref1) async {

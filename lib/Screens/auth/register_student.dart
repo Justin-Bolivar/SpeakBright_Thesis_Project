@@ -5,22 +5,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:speakbright_mobile/Screens/auth/auth_controller.dart';
+import 'package:speakbright_mobile/Screens/guardian/build_profile.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/providers/student_provider.dart';
 import '../../Widgets/waiting_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RegistrationStudent extends StatefulWidget {
+class RegistrationStudent extends ConsumerStatefulWidget {
   static const String route = "/registerstudent";
   static const String name = "Student Registration";
   const RegistrationStudent({super.key});
 
   @override
-  State<RegistrationStudent> createState() => _RegistrationStudentState();
+  ConsumerState<RegistrationStudent> createState() =>
+      _RegistrationStudentState();
 }
 
-class _RegistrationStudentState extends State<RegistrationStudent> {
+class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
   late GlobalKey<FormState> formKey;
-  late TextEditingController username, password, password2, name, birthday;
-  late FocusNode usernameFn, passwordFn, password2Fn, nameFn, birthdayFn;
+  late TextEditingController email, password, password2, name, birthday;
+  late FocusNode emailFn, passwordFn, password2Fn, nameFn, birthdayFn;
   DateTime? selectedBirthday;
   String? userType;
   String? guardianID;
@@ -31,8 +36,8 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
   void initState() {
     super.initState();
     formKey = GlobalKey<FormState>();
-    username = TextEditingController();
-    usernameFn = FocusNode();
+    email = TextEditingController();
+    emailFn = FocusNode();
     password = TextEditingController();
     passwordFn = FocusNode();
     password2 = TextEditingController();
@@ -57,8 +62,8 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
   @override
   void dispose() {
     super.dispose();
-    username.dispose();
-    usernameFn.dispose();
+    email.dispose();
+    emailFn.dispose();
     password.dispose();
     passwordFn.dispose();
     password2.dispose();
@@ -181,14 +186,13 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
                           Icons.person,
                           color: mainpurple,
                         )),
-                    focusNode: usernameFn,
-                    controller: username,
+                    focusNode: emailFn,
+                    controller: email,
                     onEditingComplete: () {
                       passwordFn.requestFocus();
                     },
                     validator: MultiValidator([
-                      RequiredValidator(
-                          errorText: 'Please fill out the username'),
+                      RequiredValidator(errorText: 'Please fill out the email'),
                       EmailValidator(errorText: "Please select a valid email"),
                     ]).call,
                   ),
@@ -288,6 +292,17 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
                         }
                       }),
                 ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Assuming you want to navigate to BuildProfile
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const BuildProfile()),
+                    );
+                  },
+                  child: const Text('Register and Go to Build Profile'),
+                ),
               ],
             ),
           ),
@@ -299,23 +314,88 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
   Future<void> onSubmit() async {
     if (formKey.currentState?.validate() ?? false) {
       try {
-        // Show waiting dialog and create the user
+        // Ask for facilitator password
+        String? facilitatorPassword =
+            await showFacilitatorPasswordDialog(context);
+
+        if (facilitatorPassword == null || facilitatorPassword.isEmpty) {
+          // If no password was entered or dialog was canceled
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Facilitator password is required')),
+          );
+          return;
+        }
+
+        // Get facilitator's credentials (email)
+        User? currentUser = FirebaseAuth.instance.currentUser;
+        String? facilitatorEmail = currentUser?.email;
+
+        if (facilitatorEmail == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Facilitator is not logged in')),
+          );
+          return;
+        }
+
+        // Re-authenticate the facilitator with their password
+        AuthCredential credential = EmailAuthProvider.credential(
+          email: facilitatorEmail,
+          password: facilitatorPassword,
+        );
+
+        try {
+          await currentUser?.reauthenticateWithCredential(credential);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid facilitator password')),
+          );
+          return; // Stop the registration process if re-authentication fails
+        }
+
+        // Proceed with student registration if re-authentication is successful
         UserCredential? userCredential = await WaitingDialog.show(
           context,
           future: FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: username.text.trim(),
+            email: email.text.trim(),
             password: password.text.trim(),
           ),
         );
 
         if (userCredential?.user != null) {
-          await storeStudentData();
-          await initializePromptData();
+          String? studentID = userCredential?.user?.uid;
+          if (studentID != null) {
+            await storeStudentData();
+            await initializePromptData();
 
-          await FirebaseAuth.instance.signOut();
+            // Ensure studentID is not null before assigning
+            ref.read(studentIdProvider.notifier).state =
+                studentID; // studentID is guaranteed to be non-null here
 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BuildProfile()),
+            );
+
+            // Sign out the student account
+            await FirebaseAuth.instance.signOut();
+
+            // Re-sign in the facilitator
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: facilitatorEmail,
+              password: facilitatorPassword,
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Student Account Created')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error: Student ID is null')),
+            );
+          }
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Student Account Created')),
+            const SnackBar(content: Text('Error: Failed to create user')),
           );
         }
       } catch (e) {
@@ -345,7 +425,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
 
     Map<String, dynamic> studentData = {
       'name': name.text.trim(),
-      'email': username.text.trim(),
+      'email': email.text.trim(),
       'birthday': birthdayTimestamp,
       'userID': userId,
       'userType': 'student',
@@ -369,7 +449,7 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
 
     Map<String, dynamic> promptData = {
       'userID': userId,
-      'email': username.text.trim(),
+      'email': email.text.trim(),
       'Physical': 0,
       'Modeling': 0,
       'Gestural': 0,
@@ -385,6 +465,59 @@ class _RegistrationStudentState extends State<RegistrationStudent> {
     borderSide: BorderSide(color: kLightPruple),
     borderRadius: BorderRadius.all(Radius.circular(10)),
   );
+
+  Future<String?> showFacilitatorPasswordDialog(BuildContext context) async {
+    String? facilitatorPassword;
+    bool obfuscate = true; // Controls the visibility of the password
+    TextEditingController passwordController = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Facilitator Password'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return TextFormField(
+                controller: passwordController,
+                obscureText: obfuscate,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.password, color: mainpurple),
+                  suffixIcon: IconButton(
+                    color: mainpurple,
+                    onPressed: () {
+                      setState(() {
+                        obfuscate = !obfuscate;
+                      });
+                    },
+                    icon: Icon(obfuscate
+                        ? Icons.remove_red_eye_rounded
+                        : CupertinoIcons.eye_slash),
+                  ),
+                ),
+                validator: RequiredValidator(errorText: 'Password is required'),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, null), // Cancel the dialog
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                facilitatorPassword = passwordController.text;
+                Navigator.pop(context, facilitatorPassword);
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   InputDecoration get decoration => InputDecoration(
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
