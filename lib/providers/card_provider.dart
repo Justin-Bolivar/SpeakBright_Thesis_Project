@@ -26,6 +26,88 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
+final cardsListProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('favorites')
+      .doc(user.uid)
+      .collection('cards')
+      .orderBy('rank')
+      .snapshots()
+      .handleError((error) {
+    return Stream.value([]);
+  }).map((snapshot) =>
+          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+});
+
+final cardsListProviderPhase2 =
+    StreamProvider.autoDispose<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('favorites')
+      .doc(user.uid)
+      .collection('cards')
+      .orderBy('rank')
+      .where('phase1_independence', isEqualTo: true)
+      .where('category', isNotEqualTo: 'Emotions')
+      .snapshots()
+      .handleError((error) {
+    print("Error fetching cards: $error");
+    return Stream.value([]);
+  }).map((snapshot) {
+    print("Fetched ${snapshot.docs.length} cards");
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+  });
+});
+
+final cardsListProviderPhase3 =
+    StreamProvider.autoDispose<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('favorites')
+      .doc(user.uid)
+      .collection('cards')
+      .orderBy('rank')
+      .where('category', isEqualTo: 'Emotions')
+      .where('phase1_independence', isEqualTo: true)
+      .snapshots()
+      .handleError((error) {
+    print("Error fetching cards: $error");
+    return Stream.value([]);
+  }).map((snapshot) {
+    print("Fetched ${snapshot.docs.length} cards");
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+  });
+});
+
+final cardsListProviderPhase4 =
+    StreamProvider.autoDispose<List<CardModel>>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return FirebaseFirestore.instance
+      .collection('favorites')
+      .doc(user.uid)
+      .collection('cards')
+      .orderBy('rank')
+      .where('phase2_independence', isEqualTo: true)
+      .where('phase3_independence', isEqualTo: true)
+      .snapshots()
+      .handleError((error) {
+    print("Error fetching cards: $error");
+    return Stream.value([]);
+  }).map((snapshot) {
+    print("Fetched ${snapshot.docs.length} cards");
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+  });
+});
+
 final cardsExploreProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
@@ -36,7 +118,7 @@ final cardsExploreProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
 });
 
 final cardsGuardianProvider =
-  StreamProvider.autoDispose<List<CardModel>>((ref) {
+    StreamProvider.autoDispose<List<CardModel>>((ref) {
   String studentId = ref.read(studentIdProvider);
   print("Fetching cards for student $studentId");
 
