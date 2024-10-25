@@ -328,7 +328,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"

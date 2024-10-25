@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,10 +12,17 @@ import 'package:speakbright_mobile/providers/student_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class BuildProfile extends ConsumerStatefulWidget {
-  const BuildProfile({super.key});
+  const BuildProfile({
+    super.key,
+    required this.facilitatorEmail,
+    required this.facilitatorPassword,
+  });
 
-  static const String route = "/BuildProfile";
-  static const String path = "/BuildProfile";
+  final String facilitatorEmail;
+  final String facilitatorPassword;
+
+  static const String route = "/buildprofile";
+  static const String path = "/buildprofile";
   static const String name = "BuildProfile";
 
   @override
@@ -32,6 +40,9 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
   Widget build(BuildContext context) {
     String? imageUrl = ref.watch(imageUrlProvider);
     String? selectedCategory = ref.watch(selectedCategoryProvider);
+
+    String facilitatorEmail = widget.facilitatorEmail;
+    String facilitatorPassword = widget.facilitatorPassword;
 
     int addedCardCount = ref.watch(addedCardCountProvider);
     return Scaffold(
@@ -257,10 +268,11 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                       ),
                       // if (imageUrl != null) Image.network(imageUrl),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.04,
+                        height: MediaQuery.of(context).size.height * 0.03,
                       ),
                       ElevatedButton(
-                          onPressed: () => _submitCard(context, ref),
+                          onPressed: () => _submitCard(context, ref,
+                              facilitatorEmail, facilitatorPassword),
                           child: Text(
                             'Add +',
                             style: GoogleFonts.rubikSprayPaint(
@@ -271,22 +283,30 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                           )),
 
                       //skip button
-                      if (addedCardCount >= 3)
-                        Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: TextButton(
-                            onPressed: () {
-                              GlobalRouter.I.router.push(StudentProfile.route);
-                            },
-                            child: Text('Skip', style: GoogleFonts.roboto(
-                              color: Color(0xFF55ADFF),
-                              fontSize: 10
-                            ),),
-                          ),
-                        ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.03,
-                      ),
+                      (addedCardCount >= 3)
+                          ? TextButton(
+                              onPressed: () async {
+                                // Sign out the student account
+                                await FirebaseAuth.instance.signOut();
+
+                                // Re-sign in the facilitator
+                                await FirebaseAuth.instance
+                                    .signInWithEmailAndPassword(
+                                  email: facilitatorEmail,
+                                  password: facilitatorPassword,
+                                );
+                                GlobalRouter.I.router
+                                    .push(StudentProfile.route);
+                              },
+                              child: Text(
+                                'Add more later',
+                                style: GoogleFonts.roboto(
+                                    color: Color(0xFF55ADFF), fontSize: 15),
+                              ),
+                            )
+                          : SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.03,
+                            ),
                     ],
                   ),
                 ),
@@ -305,9 +325,7 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                   )),
             )
           ],
-        )
-        
-        );
+        ));
   }
 
   Future<void> _pickImage(ImageSource source, WidgetRef ref1) async {
@@ -329,74 +347,103 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
     }
   }
 
-  void _submitCard(BuildContext context, WidgetRef ref) {
+  void _submitCard(
+    BuildContext context,
+    WidgetRef ref,
+    String facilitatorEmail,
+    String facilitatorPassword,
+  ) async {
     String newCardTitle = ref.read(newCardTitleProvider);
     String? imageUrl = ref.watch(imageUrlProvider);
     String? selectedCategory = ref.read(selectedCategoryProvider);
 
     if (newCardTitle.isNotEmpty && imageUrl != null) {
       String studentID = ref.watch(studentIdProvider);
-      if (studentID != '') {
-        print('Selected Category: $selectedCategory'); // for debugging
+      if (studentID.isNotEmpty) {
+        print('Selected Category: $selectedCategory');
 
-        // Add card to 'cards' collection
         FirebaseFirestore.instance.collection('cards').add({
           'title': newCardTitle,
           'userId': studentID,
           'imageUrl': imageUrl,
           'category': selectedCategory,
           'tapCount': 0,
-          'isFavorite': true, 
+          'isFavorite': true,
           'phase1_independence': false,
           'phase2_independence': false,
           'phase3_independence': false,
-        }).then((cardRef) {
+        }).then((cardRef) async {
           String newCardID = cardRef.id;
 
-          // Increment the card counter
           int currentCount = ref.read(addedCardCountProvider.notifier).state;
           if (currentCount < 9) {
             ref.read(addedCardCountProvider.notifier).state = currentCount + 1;
           } else {
+            // Sign out the student account
+            await FirebaseAuth.instance.signOut();
+
+            // Re-sign in the facilitator
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: facilitatorEmail,
+              password: facilitatorPassword,
+            );
+
             GlobalRouter.I.router.push(StudentProfile.route);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('All cards added successfully')),
             );
           }
 
-          // Check if the card is marked as favorite
           FirebaseFirestore.instance
               .collection('cards')
               .doc(newCardID)
               .get()
               .then((cardDoc) async {
             if (cardDoc.exists && cardDoc['isFavorite'] == true) {
-              // Get the favorites collection for the student
               CollectionReference favoritesCollection = FirebaseFirestore
                   .instance
                   .collection('favorites')
                   .doc(studentID)
                   .collection('cards');
 
-              // Get the highest rank value
-              QuerySnapshot querySnapshot = await favoritesCollection
-                  .orderBy('rank', descending: true)
-                  .limit(1)
-                  .get();
+              FirebaseFirestore.instance.runTransaction((transaction) async {
+                DocumentReference favoritesDoc =
+                    favoritesCollection.doc(newCardID);
+                // DocumentSnapshot favoritesSnapshot =
+                //     await transaction.get(favoritesDoc);
+                DocumentReference studentFavoritesDoc = FirebaseFirestore
+                    .instance
+                    .collection('favorites')
+                    .doc(studentID);
 
-              int newRank = 1; // Default rank if no cards exist
-              if (querySnapshot.docs.isNotEmpty) {
-                int highestRank = querySnapshot.docs.first['rank'];
-                newRank =
-                    highestRank + 1; // New rank is one higher than highest
-              }
+                DocumentSnapshot studentFavoritesSnapshot =
+                    await transaction.get(studentFavoritesDoc);
 
-              // Add the card to the 'favorites' collection
-              favoritesCollection.doc(newCardID).set({
-                'cardID': newCardID,
-                'title': newCardTitle,
-                'category': selectedCategory,
-                'rank': newRank,
+                if (!studentFavoritesSnapshot.exists) {
+                  transaction.set(studentFavoritesDoc, {
+                    'studentID': studentID,
+                  });
+                }
+
+                QuerySnapshot querySnapshot = await favoritesCollection
+                    .orderBy('rank', descending: true)
+                    .limit(1)
+                    .get();
+
+                int newRank = 1;
+                if (querySnapshot.docs.isNotEmpty) {
+                  int highestRank = querySnapshot.docs.first['rank'];
+                  newRank = highestRank + 1;
+                }
+
+                transaction.set(favoritesDoc, {
+                  'cardID': newCardID,
+                  'title': newCardTitle,
+                  'imageUrl': imageUrl,
+                  'category': selectedCategory,
+                  'rank': newRank,
+                  'addDistractor': false,
+                });
               }).then((_) {
                 print('Card added to favorites');
               }).catchError((e) {
