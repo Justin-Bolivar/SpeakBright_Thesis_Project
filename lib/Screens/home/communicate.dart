@@ -449,7 +449,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                     }
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"
