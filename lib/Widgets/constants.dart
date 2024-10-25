@@ -27,6 +27,12 @@ const scoreYellow = Color(0xFFE7A321);
 const dullWhite = Color(0xFFD9D9D9);
 const addGreen = Color(0xFF7CB342);
 
+//phases color
+const phase1Color = Color(0xFF7CB342);
+const phase2Color = Color(0xFFE040FB);
+const phase3Color = Color(0xFF03A9F4);
+const phase4Color = Color(0xFF00897B);
+
 const ugRed = Color(0xFFFD3C4F);
 const ugYellow = Color(0xFFFFCE29);
 
