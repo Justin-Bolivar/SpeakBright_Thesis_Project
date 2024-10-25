@@ -136,11 +136,65 @@ final cardsGuardianProvider =
 class CardNotifier extends StateNotifier<List<CardModel>> {
   CardNotifier() : super([]);
 
-  Future<void> deleteCard(String cardId) async {
-    try {
+  Future<void> deleteCard(String cardId, String studentID) async {
+  try {
+    DocumentSnapshot cardSnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .doc(cardId)
+        .get();
+
+    if (cardSnapshot.exists) {
+      bool isFavorite = cardSnapshot.get('isFavorite');
+
       await FirebaseFirestore.instance.collection('cards').doc(cardId).delete();
-    } catch (e) {
-      print('Error deleting card: $e');
+      
+      if (isFavorite) {
+        await _deleteFavoriteAndAdjustRanks(cardId, studentID);
+      }
     }
+  } catch (e) {
+    print('Error deleting card: $e');
   }
 }
+
+}
+
+Future<void> _deleteFavoriteAndAdjustRanks(String cardId, String studentID) async {
+  try {
+    
+    CollectionReference favoritesCollection = FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(studentID)
+        .collection('cards');
+
+    
+    DocumentSnapshot cardSnapshot = await favoritesCollection.doc(cardId).get();
+    if (!cardSnapshot.exists) return;
+
+    int deletedCardRank = cardSnapshot.get('rank');
+
+    
+    await favoritesCollection.doc(cardId).delete();
+
+    
+    QuerySnapshot querySnapshot = await favoritesCollection
+        .where('rank', isGreaterThan: deletedCardRank)
+        .orderBy('rank')
+        .get();
+
+    
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      int currentRank = doc.get('rank');
+      batch.update(doc.reference, {'rank': currentRank - 1});
+    }
+
+    
+    await batch.commit();
+
+    print('Successfully adjusted ranks after deleting card with rank $deletedCardRank');
+  } catch (e) {
+    print('Error adjusting ranks: $e');
+  }
+}
+
