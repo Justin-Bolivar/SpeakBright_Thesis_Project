@@ -11,6 +11,7 @@ import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
+import 'package:speakbright_mobile/providers/student_provider.dart';
 
 class GuardianCommunicate extends ConsumerStatefulWidget {
   const GuardianCommunicate({super.key});
@@ -50,6 +51,7 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
 
   @override
   Widget build(BuildContext context) {
+    String studentID = ref.watch(studentIdProvider);
     final cardsAsyncValue = ref.watch(cardsGuardianProvider);
     return Scaffold(
         backgroundColor: kwhite,
@@ -246,7 +248,7 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                   onCardTap:
                       (String cardTitle, String category, String cardId) {},
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                    ref.read(cardProvider.notifier).deleteCard(cardId, studentID);
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"

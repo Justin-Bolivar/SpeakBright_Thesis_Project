@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
+import 'package:speakbright_mobile/Screens/home/guardian_homepage.dart';
+import 'package:speakbright_mobile/Screens/home/home.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
@@ -313,6 +315,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         : 'assets/studcard_monster.png';
 
     return Scaffold(
+      
       body: Stack(
         children: [
           Container(

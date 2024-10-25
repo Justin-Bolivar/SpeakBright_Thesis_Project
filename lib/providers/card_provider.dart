@@ -3,7 +3,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
@@ -54,6 +53,7 @@ final cardsListProviderPhase2 =
       .collection('cards')
       .orderBy('rank')
       .where('phase1_independence', isEqualTo: true)
+      .where('category', isNotEqualTo: 'Emotions')
       .snapshots()
       .handleError((error) {
     print("Error fetching cards: $error");
@@ -91,32 +91,20 @@ final cardsListProviderPhase4 =
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return Stream.value([]);
 
-  final phase2Stream = FirebaseFirestore.instance
+  return FirebaseFirestore.instance
       .collection('favorites')
       .doc(user.uid)
       .collection('cards')
       .orderBy('rank')
       .where('phase2_independence', isEqualTo: true)
-      .snapshots();
-
-  final phase3Stream = FirebaseFirestore.instance
-      .collection('favorites')
-      .doc(user.uid)
-      .collection('cards')
-      .orderBy('rank')
       .where('phase3_independence', isEqualTo: true)
-      .snapshots();
-  return Rx.combineLatest2(phase2Stream, phase3Stream,
-      (QuerySnapshot phase2Snapshot, QuerySnapshot phase3Snapshot) {
-    final combinedDocs =
-        {...phase2Snapshot.docs, ...phase3Snapshot.docs}.toList();
-
-    print("Fetched ${combinedDocs.length} cards");
-
-    return combinedDocs.map((doc) => CardModel.fromFirestore(doc)).toList();
-  }).handleError((error) {
+      .snapshots()
+      .handleError((error) {
     print("Error fetching cards: $error");
-    return [];
+    return Stream.value([]);
+  }).map((snapshot) {
+    print("Fetched ${snapshot.docs.length} cards");
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
   });
 });
 
@@ -148,11 +136,65 @@ final cardsGuardianProvider =
 class CardNotifier extends StateNotifier<List<CardModel>> {
   CardNotifier() : super([]);
 
-  Future<void> deleteCard(String cardId) async {
-    try {
+  Future<void> deleteCard(String cardId, String studentID) async {
+  try {
+    DocumentSnapshot cardSnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .doc(cardId)
+        .get();
+
+    if (cardSnapshot.exists) {
+      bool isFavorite = cardSnapshot.get('isFavorite');
+
       await FirebaseFirestore.instance.collection('cards').doc(cardId).delete();
-    } catch (e) {
-      print('Error deleting card: $e');
+      
+      if (isFavorite) {
+        await _deleteFavoriteAndAdjustRanks(cardId, studentID);
+      }
     }
+  } catch (e) {
+    print('Error deleting card: $e');
   }
 }
+
+}
+
+Future<void> _deleteFavoriteAndAdjustRanks(String cardId, String studentID) async {
+  try {
+    
+    CollectionReference favoritesCollection = FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(studentID)
+        .collection('cards');
+
+    
+    DocumentSnapshot cardSnapshot = await favoritesCollection.doc(cardId).get();
+    if (!cardSnapshot.exists) return;
+
+    int deletedCardRank = cardSnapshot.get('rank');
+
+    
+    await favoritesCollection.doc(cardId).delete();
+
+    
+    QuerySnapshot querySnapshot = await favoritesCollection
+        .where('rank', isGreaterThan: deletedCardRank)
+        .orderBy('rank')
+        .get();
+
+    
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      int currentRank = doc.get('rank');
+      batch.update(doc.reference, {'rank': currentRank - 1});
+    }
+
+    
+    await batch.commit();
+
+    print('Successfully adjusted ranks after deleting card with rank $deletedCardRank');
+  } catch (e) {
+    print('Error adjusting ranks: $e');
+  }
+}
+
