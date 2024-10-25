@@ -293,7 +293,7 @@ class _Learn2State extends ConsumerState<Learn2> {
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId);
+                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"

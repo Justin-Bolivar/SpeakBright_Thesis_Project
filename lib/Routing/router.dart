@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/auth/register_student.dart";
+import "package:speakbright_mobile/Screens/guardian/build_profile.dart";
 import "package:speakbright_mobile/Screens/guardian/student_profile.dart";
 import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
@@ -185,6 +186,23 @@ class GlobalRouter {
               builder: (context, _) {
                 return const RegistrationStudent();
               }),
+              
+          GoRoute(
+            parentNavigatorKey: _rootNavigatorKey,
+            path: BuildProfile.route,
+            name: BuildProfile.name,
+            builder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>;
+              final facilitatorEmail = extra['facilitatorEmail'] as String;
+              final facilitatorPassword =
+                  extra['facilitatorPassword'] as String;
+
+              return BuildProfile(
+                facilitatorEmail: facilitatorEmail,
+                facilitatorPassword: facilitatorPassword,
+              );
+            },
+          ),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
               path: StudentProfile.route,
