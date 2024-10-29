@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/learn_phase1.dart';
+import 'package:speakbright_mobile/Screens/home/learn_phase2.dart';
+import 'package:speakbright_mobile/Screens/home/learn_phase3.dart';
+import 'package:speakbright_mobile/Screens/home/learn_phase4.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 
@@ -69,7 +74,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
               bottom: 80,
               right: 110,
               child: InkWell(
-                onTap: () => context.go('/Learn1'),
+                onTap: () => GlobalRouter.I.router.push(Learn1.route),
                 child: Image.asset('assets/phase/P1.png', height: 115),
               ),
             ),
@@ -84,19 +89,19 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                         bottom: 260,
                         left: 100,
                         child: _buildPhaseButton(
-                            currentPhase, 2, 'P2', 'P2-lock', '/Learn2'),
+                            currentPhase, 2, 'P2', 'P2-lock', Learn2.route),
                       ),
                       Positioned(
                         bottom: 440,
                         right: 80,
                         child: _buildPhaseButton(
-                            currentPhase, 3, 'P3', 'P3-lock', '/Learn3'),
+                            currentPhase, 3, 'P3', 'P3-lock', Learn3.route),
                       ),
                       Positioned(
                         top: 235,
                         left: 80,
                         child: _buildPhaseButton(
-                            currentPhase, 4, 'P4', 'P4-lock', '/Learn4'),
+                            currentPhase, 4, 'P4', 'P4-lock', Learn4.route),
                       ),
                     ],
                   );
@@ -118,7 +123,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
     return InkWell(
       onTap: isLocked
           ? () => Fluttertoast.showToast(msg: "Oops Phase locked")
-          : () => context.go(routeName),
+          : () => GlobalRouter.I.router.push(routeName),
       child: Image.asset(
           isLocked
               ? 'assets/phase/$lockedAsset.png'
