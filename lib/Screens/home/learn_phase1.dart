@@ -57,27 +57,12 @@ class _Learn1State extends ConsumerState<Learn1> {
     final cardsAsyncValue = ref.watch(cardsListProvider);
 
     return Scaffold(
-      
       appBar: AppBar(
-                  shadowColor: lGray,
-                  backgroundColor: phase1Color,
-                  elevation: 5,
-                  title: const Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Text(
-                          "Learn",
-                          style: TextStyle(
-                            color: kblack,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-      backgroundColor: phase1Color,
+        leading: const BackButton(color: phase1Color),
+        // shadowColor: kblack,
+        backgroundColor: learn1bg,
+      ),
+      backgroundColor: learn1bg,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -97,7 +82,7 @@ class _Learn1State extends ConsumerState<Learn1> {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/bg-6.png',
+              'assets/bg-1.1.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -111,7 +96,6 @@ class _Learn1State extends ConsumerState<Learn1> {
           Positioned.fill(
             child: Column(
               children: [
-                
                 Expanded(
                   child: cardsAsyncValue.when(
                     data: (cards) {
@@ -586,8 +570,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return Center(
-                                          child: WaitingDialog());
+                                      return Center(child: WaitingDialog());
                                     }
 
                                     if (snapshot.hasError) {
@@ -617,9 +600,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                         if (distractorSnapshot
                                                 .connectionState ==
                                             ConnectionState.waiting) {
-                                          return Center(
-                                              child:
-                                                  WaitingDialog());
+                                          return Center(child: WaitingDialog());
                                         }
 
                                         if (distractorSnapshot.hasError) {
