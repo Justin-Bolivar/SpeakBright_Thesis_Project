@@ -57,33 +57,27 @@ class _Learn1State extends ConsumerState<Learn1> {
     final cardsAsyncValue = ref.watch(cardsListProvider);
 
     return Scaffold(
-      backgroundColor: kwhite,
-      // appBar: AppBar(
-      //   flexibleSpace: Container(
-      //     decoration: const BoxDecoration(
-      //       gradient: LinearGradient(
-      //         begin: Alignment.centerRight,
-      //         end: Alignment.centerLeft,
-      //         colors: [Color(0xFF8E2DE2), mainpurple],
-      //       ),
-      //     ),
-      //   ),
-      //   elevation: 5,
-      //   title: const Row(
-      //     children: [
-      //       Padding(
-      //         padding: EdgeInsets.only(left: 20),
-      //         child: Text(
-      //           "Learn",
-      //           style: TextStyle(
-      //             color: kwhite,
-      //             fontSize: 20,
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      
+      appBar: AppBar(
+                  shadowColor: lGray,
+                  backgroundColor: phase1Color,
+                  elevation: 5,
+                  title: const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 20),
+                        child: Text(
+                          "Learn",
+                          style: TextStyle(
+                            color: kblack,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+      backgroundColor: phase1Color,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -103,47 +97,21 @@ class _Learn1State extends ConsumerState<Learn1> {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/bg-1.png',
+              'assets/bg-6.png',
               fit: BoxFit.cover,
             ),
           ),
           // Overlay if you need it
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.5), // Adjust opacity as needed
+              color: Colors.black.withOpacity(0.7), // Adjust opacity as needed
             ),
           ),
 
           Positioned.fill(
             child: Column(
               children: [
-                AppBar(
-                  shadowColor: lGray,
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                        colors: [Color(0xFF8E2DE2), mainpurple],
-                      ),
-                    ),
-                  ),
-                  elevation: 5,
-                  title: const Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Text(
-                          "Learn",
-                          style: TextStyle(
-                            color: kblack,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                
                 Expanded(
                   child: cardsAsyncValue.when(
                     data: (cards) {
@@ -669,6 +637,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                               ? Column(
                                                   children: [
                                                     Phase1Card(
+                                                      fontSize: 20,
                                                       card: topFavoriteCard,
                                                       onTap: () {
                                                         final cardTitle =
