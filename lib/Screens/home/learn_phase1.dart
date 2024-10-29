@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -618,8 +616,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return Center(
-                                          child: WaitingDialog());
+                                      return Center(child: WaitingDialog());
                                     }
 
                                     if (snapshot.hasError) {
@@ -649,9 +646,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                         if (distractorSnapshot
                                                 .connectionState ==
                                             ConnectionState.waiting) {
-                                          return Center(
-                                              child:
-                                                  WaitingDialog());
+                                          return Center(child: WaitingDialog());
                                         }
 
                                         if (distractorSnapshot.hasError) {

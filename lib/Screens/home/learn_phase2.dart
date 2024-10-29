@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
@@ -97,6 +97,20 @@ class _Learn2State extends ConsumerState<Learn2> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase2);
     return Scaffold(
       backgroundColor: kwhite,
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              PromptButton(phaseCurrent: currentUserPhase),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -294,7 +308,7 @@ class _Learn2State extends ConsumerState<Learn2> {
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
+                    ref.read(cardProvider.notifier).deleteCard(cardId, '0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"
