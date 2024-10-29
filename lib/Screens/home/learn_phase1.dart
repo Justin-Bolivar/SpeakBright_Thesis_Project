@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -57,33 +55,12 @@ class _Learn1State extends ConsumerState<Learn1> {
     final cardsAsyncValue = ref.watch(cardsListProvider);
 
     return Scaffold(
-      backgroundColor: kwhite,
-      // appBar: AppBar(
-      //   flexibleSpace: Container(
-      //     decoration: const BoxDecoration(
-      //       gradient: LinearGradient(
-      //         begin: Alignment.centerRight,
-      //         end: Alignment.centerLeft,
-      //         colors: [Color(0xFF8E2DE2), mainpurple],
-      //       ),
-      //     ),
-      //   ),
-      //   elevation: 5,
-      //   title: const Row(
-      //     children: [
-      //       Padding(
-      //         padding: EdgeInsets.only(left: 20),
-      //         child: Text(
-      //           "Learn",
-      //           style: TextStyle(
-      //             color: kwhite,
-      //             fontSize: 20,
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      appBar: AppBar(
+        leading: const BackButton(color: phase1Color),
+        // shadowColor: kblack,
+        backgroundColor: learn1bg,
+      ),
+      backgroundColor: learn1bg,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -103,47 +80,20 @@ class _Learn1State extends ConsumerState<Learn1> {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/bg-1.png',
+              'assets/bg-1.1.png',
               fit: BoxFit.cover,
             ),
           ),
           // Overlay if you need it
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.5), // Adjust opacity as needed
+              color: Colors.black.withOpacity(0.7), // Adjust opacity as needed
             ),
           ),
 
           Positioned.fill(
             child: Column(
               children: [
-                AppBar(
-                  shadowColor: lGray,
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                        colors: [Color(0xFF8E2DE2), mainpurple],
-                      ),
-                    ),
-                  ),
-                  elevation: 5,
-                  title: const Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Text(
-                          "Learn",
-                          style: TextStyle(
-                            color: kblack,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Expanded(
                   child: cardsAsyncValue.when(
                     data: (cards) {
@@ -618,8 +568,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      return Center(
-                                          child: WaitingDialog());
+                                      return Center(child: WaitingDialog());
                                     }
 
                                     if (snapshot.hasError) {
@@ -649,9 +598,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                         if (distractorSnapshot
                                                 .connectionState ==
                                             ConnectionState.waiting) {
-                                          return Center(
-                                              child:
-                                                  WaitingDialog());
+                                          return Center(child: WaitingDialog());
                                         }
 
                                         if (distractorSnapshot.hasError) {
@@ -669,6 +616,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                               ? Column(
                                                   children: [
                                                     Phase1Card(
+                                                      fontSize: 20,
                                                       card: topFavoriteCard,
                                                       onTap: () {
                                                         final cardTitle =
