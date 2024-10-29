@@ -407,8 +407,7 @@ class AddCardPage extends ConsumerWidget {
                   'title': newCardTitle,
                   'imageUrl': imageUrl,
                   'category': selectedCategory,
-                  'rank': newRank,
-                  'addDistractor': false,
+                  'rank': newRank
                 });
               }).then((_) {
                 print('Card added to favorites');
