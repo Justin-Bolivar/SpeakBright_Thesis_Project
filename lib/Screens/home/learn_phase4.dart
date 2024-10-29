@@ -1,13 +1,9 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
@@ -34,6 +30,7 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   List<String> sentence = [];
   List<String> categories = [];
+  int currentUserPhase = 4;
   int selectedCategory = -1;
 
   @override
@@ -131,6 +128,20 @@ class _Learn4State extends ConsumerState<Learn4> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase4);
     return Scaffold(
       backgroundColor: kwhite,
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              PromptButton(phaseCurrent: currentUserPhase),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -315,7 +326,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
+                    ref.read(cardProvider.notifier).deleteCard(cardId, '0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"
