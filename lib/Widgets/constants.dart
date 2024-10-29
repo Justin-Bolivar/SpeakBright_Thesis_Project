@@ -26,7 +26,7 @@ const lGray = Color(0xFF444444);
 const scoreYellow = Color(0xFFE7A321);
 const dullWhite = Color(0xFFD9D9D9);
 const addGreen = Color(0xFF7CB342);
-
+const sky = Color(0xFF0C89B5);
 //phases color
 const phase1Color = Color(0xFF7CB342);
 const phase2Color = Color(0xFFE040FB);
