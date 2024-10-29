@@ -28,13 +28,13 @@ class Phase1Card extends StatelessWidget {
         width: MediaQuery.of(context).size.width * widthFactor,
         height: MediaQuery.of(context).size.height * heightFactor,
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 254, 251, 238),
+          color: Color.fromARGB(255, 255, 246, 206),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 5,
+              color: Colors.black.withOpacity(0.9),
+              spreadRadius: 5,
+              blurRadius: 9,
               offset: const Offset(0, 2),
             ),
           ],
@@ -53,6 +53,7 @@ class Phase1Card extends StatelessWidget {
                   style: TextStyle(
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 106, 75, 45),
                   ),
                 ),
               ),
