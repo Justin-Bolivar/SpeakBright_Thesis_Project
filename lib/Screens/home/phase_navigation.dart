@@ -34,6 +34,8 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(backgroundColor: sky, shadowColor: lGray,),
+      backgroundColor: sky,
       body: SafeArea(
         child: Stack(
           children: [
