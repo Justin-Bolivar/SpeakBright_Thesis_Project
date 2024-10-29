@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 
 class Phase1Card extends StatelessWidget {
   final CardModel card;
   final VoidCallback onTap;
+  final double widthFactor; 
+  final double heightFactor; 
+  final double fontSize; 
 
   const Phase1Card({
     Key? key,
     required this.card,
     required this.onTap,
+    this.widthFactor = 0.5,  // Default 
+    this.heightFactor = 0.5,
+    this.fontSize = 18,
   }) : super(key: key);
 
   @override
@@ -18,8 +25,8 @@ class Phase1Card extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.5,
-        height: MediaQuery.of(context).size.height * 0.5,
+        width: MediaQuery.of(context).size.width * widthFactor,
+        height: MediaQuery.of(context).size.height * heightFactor,
         decoration: BoxDecoration(
           color: Color.fromARGB(255, 254, 251, 238),
           borderRadius: BorderRadius.circular(20),
@@ -35,15 +42,16 @@ class Phase1Card extends StatelessWidget {
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildImage(context),
+              
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.only(bottom: 30.0),
                 child: Text(
                   card.title,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -64,31 +72,28 @@ class Phase1Card extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(20),
+        topRight: Radius.circular(20),
+      ),
+      child: CachedNetworkImage(
+        imageUrl: card.imageUrl,
+        
+        fit: BoxFit.fill,
+        placeholder: (context, url) => Center(
+          child: const WaitingDialog(),
         ),
-        child: CachedNetworkImage(
-          imageUrl: card.imageUrl,
-          height: MediaQuery.of(context).size.height * 0.4,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Center(
-            child: const WaitingDialog(),
+        errorWidget: (context, url, error) => Container(
+          height: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.grey[200],
           ),
-          errorWidget: (context, url, error) => Container(
-            height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.grey[200],
-            ),
-            child: const Icon(
-              Icons.image_not_supported,
-              color: Colors.grey,
-              size: 50,
-            ),
+          child: const Icon(
+            Icons.image_not_supported,
+            color: Colors.grey,
+            size: 50,
           ),
         ),
       ),

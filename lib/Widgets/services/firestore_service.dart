@@ -192,23 +192,112 @@ class FirestoreService {
     }
   }
 
- Future<Map<String, int>> getPromptFrequencies(String selectedStudentId) async {
-    
-  final FirebaseFirestore  db = FirebaseFirestore.instance;
-  
-  try {
-    Map<String, int> frequencies = {
-    'Independent': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Independent') ?? 0),
-    'Verbal': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Verbal') ?? 0),
-    'Gestural': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Gestural') ?? 0),
-    'Modeling': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Modeling') ?? 0),
-    'Physical': await db.collection('prompt').doc(selectedStudentId).get().then((value) => value.get('Physical') ?? 0),
-  };
+  Future<Map<String, int>> getPromptFrequencies(
+      String selectedStudentId) async {
+    final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  return frequencies;
+    try {
+      Map<String, int> frequencies = {
+        'Independent': await db
+            .collection('prompt')
+            .doc(selectedStudentId)
+            .get()
+            .then((value) => value.get('Independent') ?? 0),
+        'Verbal': await db
+            .collection('prompt')
+            .doc(selectedStudentId)
+            .get()
+            .then((value) => value.get('Verbal') ?? 0),
+        'Gestural': await db
+            .collection('prompt')
+            .doc(selectedStudentId)
+            .get()
+            .then((value) => value.get('Gestural') ?? 0),
+        'Modeling': await db
+            .collection('prompt')
+            .doc(selectedStudentId)
+            .get()
+            .then((value) => value.get('Modeling') ?? 0),
+        'Physical': await db
+            .collection('prompt')
+            .doc(selectedStudentId)
+            .get()
+            .then((value) => value.get('Physical') ?? 0),
+      };
+
+      return frequencies;
     } catch (e) {
       print('Error fetching prompt frequencies: $e');
-      rethrow; 
+      rethrow;
     }
- }
+  }
+
+  //distractor???
+  Future<bool> showDistractor(String cardID) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String uid = auth.currentUser?.uid ?? '';
+    if (uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
+
+    // Reference to the user's activity log
+    DocumentReference activityLogRef =
+        firestore.collection('activity_log').doc(uid);
+
+    // Fetch recent sessions containing the target cardID in trialPrompt
+    QuerySnapshot sessionSnapshot = await activityLogRef
+        .collection('phase')
+        .doc('1')
+        .collection('session')
+        .orderBy('timestamp', descending: true)
+        .limit(10) // Limit to recent 10 sessions for efficiency
+        .get();
+
+    // Track the sessions that meet the criteria
+    List<QueryDocumentSnapshot> relevantSessions = [];
+
+    // Iterate through sessions to find ones where cardID is frequently tapped
+    for (var sessionDoc in sessionSnapshot.docs) {
+      QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
+          .collection('trialPrompt')
+          .where('cardID', isEqualTo: cardID)
+          .get();
+
+      int cardIDTapCount = trialPromptsSnapshot.size;
+      int totalTapCount =
+          (await sessionDoc.reference.collection('trialPrompt').get()).size;
+
+      // Check if cardID was tapped in more than half of the total taps
+      if (cardIDTapCount > totalTapCount / 2) {
+        relevantSessions.add(sessionDoc);
+        if (relevantSessions.length == 3) break;
+      }
+    }
+
+    // If less than 3 sessions met the criteria, return false
+    if (relevantSessions.length < 3) return false;
+
+    // Calculate proficiency in the recent 3 sessions
+    int independentCount = 0;
+    int totalTapCount = 0;
+
+    for (var sessionDoc in relevantSessions) {
+      QuerySnapshot trialPromptsSnapshot =
+          await sessionDoc.reference.collection('trialPrompt').get();
+
+      for (var trialPromptDoc in trialPromptsSnapshot.docs) {
+        totalTapCount++;
+        if (trialPromptDoc['prompt'] == 'Independent') {
+          independentCount++;
+        }
+      }
+    }
+
+    // Calculate proficiency percentage
+    double proficiency = (independentCount / totalTapCount) * 100;
+    print(proficiency);
+    return proficiency >= 70;
+  }
 }
