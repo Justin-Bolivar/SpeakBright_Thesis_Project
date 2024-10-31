@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 
 class Phase1Card extends StatelessWidget {
   final CardModel card;
   final VoidCallback onTap;
-  final double widthFactor; 
-  final double heightFactor; 
-  final double fontSize; 
+  final double widthFactor;
+  final double heightFactor;
+  final double fontSize;
 
   const Phase1Card({
     Key? key,
     required this.card,
     required this.onTap,
-    this.widthFactor = 0.5,  // Default 
+    this.widthFactor = 0.5, // Default
     this.heightFactor = 0.5,
     this.fontSize = 18,
   }) : super(key: key);
@@ -45,7 +44,6 @@ class Phase1Card extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildImage(context),
-              
               Padding(
                 padding: const EdgeInsets.only(bottom: 30.0),
                 child: Text(
@@ -80,7 +78,6 @@ class Phase1Card extends StatelessWidget {
       ),
       child: CachedNetworkImage(
         imageUrl: card.imageUrl,
-        
         fit: BoxFit.fill,
         placeholder: (context, url) => Center(
           child: const WaitingDialog(),
