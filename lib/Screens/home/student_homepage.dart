@@ -1,12 +1,10 @@
 // ignore_for_file: unrelated_type_equality_checks, avoid_print
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
 import 'package:speakbright_mobile/Screens/home/explore.dart';
-import 'package:speakbright_mobile/Screens/home/learn_phase1.dart';
 import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Screens/home/play.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';

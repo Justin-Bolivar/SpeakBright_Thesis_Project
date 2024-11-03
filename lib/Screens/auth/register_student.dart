@@ -1,15 +1,12 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
+// ignore_for_file: use_build_context_synchronously, avoid_print, implicit_call_tearoffs
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
-import 'package:speakbright_mobile/Screens/auth/auth_controller.dart';
 import 'package:speakbright_mobile/Screens/guardian/build_profile.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
@@ -111,7 +108,7 @@ class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, 0),
+                    offset: const Offset(0, 0),
                   ),
                 ],
               ),
@@ -320,6 +317,9 @@ class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
                             // );
                             onSubmit();
                           },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: mainpurple,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
@@ -329,9 +329,6 @@ class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
                                   fontSize: 26,
                                   letterSpacing: .9),
                             ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainpurple,
                           )),
                     ),
                   ],
