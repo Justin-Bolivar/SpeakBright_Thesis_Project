@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -118,7 +120,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                               children: [
                                 Stack(
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       width: MediaQuery.of(context).size.width,
                                       height:
                                           MediaQuery.of(context).size.height *
@@ -500,6 +502,10 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                                           borderRadius:
                                                                               BorderRadius.circular(40.0),
                                                                         ),
+                                                                        width:
+                                                                            100,
+                                                                        height:
+                                                                            50,
                                                                         child:
                                                                             Center(
                                                                           child:
@@ -513,10 +519,6 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                                             ),
                                                                           ),
                                                                         ),
-                                                                        width:
-                                                                            100,
-                                                                        height:
-                                                                            50,
                                                                       ),
                                                                     ),
                                                                   )
