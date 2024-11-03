@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, avoid_print, use_build_context_synchronously
+
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -273,13 +275,13 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                       ElevatedButton(
                           onPressed: () => _submitCard(context, ref,
                               facilitatorEmail, facilitatorPassword),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: addGreen,
+                          ),
                           child: Text(
                             'Add +',
                             style: GoogleFonts.rubikSprayPaint(
                                 color: kwhite, fontSize: 20, letterSpacing: .5),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: addGreen,
                           )),
 
                       //skip button
