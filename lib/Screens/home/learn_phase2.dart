@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
+import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
@@ -48,12 +49,20 @@ class _Learn2State extends ConsumerState<Learn2> {
     });
   }
 
-  void _addCardTitleToSentence(String title) {
+  void _addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (sentence.length > 1) {
-        sentence[sentence.length - 1] = title;
+      if (category == "Activities") {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = "to $title";
+        } else {
+          sentence.add("to $title");
+        }
       } else {
-        sentence.add(title);
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+        } else {
+          sentence.add(title);
+        }
       }
     });
   }
@@ -96,6 +105,20 @@ class _Learn2State extends ConsumerState<Learn2> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase2);
     return Scaffold(
       backgroundColor: kwhite,
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              PromptButton(phaseCurrent: currentUserPhase),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -282,18 +305,18 @@ class _Learn2State extends ConsumerState<Learn2> {
             child: cardsAsyncValue.when(
               data: (cards) {
                 print('Cards fetched successfully: ${cards.length}');
-                return CardList(
+                return CardGrid(
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _addCardTitleToSentence(cardTitle);
+                    _addCardTitleToSentence(cardTitle, category);
                     _ttsService.speak(cardTitle);
                     _firestoreService.storeTappedCards(
                         cardTitle, category, cardId);
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
+                    ref.read(cardProvider.notifier).deleteCard(cardId, '0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"
