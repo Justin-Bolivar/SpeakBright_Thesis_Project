@@ -29,7 +29,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   void initState() {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
-    FirestoreService().updatePhase1Independence();
+    // FirestoreService().updatePhase1Independence();
   }
 
   @override

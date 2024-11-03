@@ -34,6 +34,7 @@ class _FavoritesViewState extends ConsumerState<FavoritesView> {
           .collection('favorites')
           .doc(studentID)
           .collection('cards')
+          .orderBy('rank')
           .get();
       setState(() {
         _cards = snapshot.docs;
