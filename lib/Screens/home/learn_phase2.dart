@@ -49,12 +49,20 @@ class _Learn2State extends ConsumerState<Learn2> {
     });
   }
 
-  void _addCardTitleToSentence(String title) {
+  void _addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (sentence.length > 1) {
-        sentence[sentence.length - 1] = title;
+      if (category == "Activities") {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = "to $title";
+        } else {
+          sentence.add("to $title");
+        }
       } else {
-        sentence.add(title);
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+        } else {
+          sentence.add(title);
+        }
       }
     });
   }
@@ -301,7 +309,7 @@ class _Learn2State extends ConsumerState<Learn2> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _addCardTitleToSentence(cardTitle);
+                    _addCardTitleToSentence(cardTitle, category);
                     _ttsService.speak(cardTitle);
                     _firestoreService.storeTappedCards(
                         cardTitle, category, cardId);

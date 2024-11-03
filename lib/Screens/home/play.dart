@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/student_profile.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -23,124 +20,32 @@ class Play extends ConsumerStatefulWidget {
 }
 
 class _PlayState extends ConsumerState<Play> {
-  final newCardTitleProvider = StateProvider<String>((ref) => '');
-  final selectedCategoryProvider = StateProvider<String?>((ref) => null);
-  final imageUrlProvider = StateProvider<String?>((ref) => null);
-
-  final addedCardCountProvider = StateProvider<int>((ref) => 0);
+  List<dynamic> cards = [];
+  List<bool> flippedCards = [];
+  int matchedCount = 0;
 
   @override
-  Widget build(BuildContext context) {
-    String? imageUrl = ref.watch(imageUrlProvider);
-    String? selectedCategory = ref.watch(selectedCategoryProvider);
+  void initState() {
+    super.initState();
+    fetchCardsFromFirestore();
+  }
 
-    int addedCardCount = ref.watch(addedCardCountProvider);
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
-            Positioned.fill(
-                child: Image.asset(
-              'assets/add-bg.png',
-              fit: BoxFit.cover,
-            )),
-            Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: Center(
-                  child: Container(
-                alignment: Alignment.bottomCenter,
-                height: MediaQuery.of(context).size.height * 0.70,
-                width: MediaQuery.of(context).size.width * 0.80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(0, 0),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(25.0),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.08,
-                      ),
-                      Text(
-                        'Add 3-10 favorite objects (${addedCardCount + 1}/10)',
-                        style: TextStyle(
-                          color: scoreYellow,
-                          fontStyle: FontStyle.normal,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 15,
-                          // fontWeight: FontWeight.w500
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: imageUrl == null
-                            ? Image.asset(
-                                'assets/add_image_icon.png',
-                                fit: BoxFit.cover,
-                                height: 150,
-                              )
-                            : Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                height: 150,
-                              ),
-                      ),
-                      TextField(
-                        onChanged: (value) {
-                          ref.read(newCardTitleProvider.notifier).state = value;
-                        },
-                        decoration:
-                            const InputDecoration(hintText: "Enter card title"),
-                      ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: FutureBuilder<List<String>>(
-                          future: fetchCategories(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<List<String>> snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const SizedBox.shrink();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else if (snapshot.hasData) {
-                              List<String> categories = snapshot.data!;
+  Future<void> fetchCardsFromFirestore() async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    String uid = auth.currentUser?.uid ?? '';
 
-                              return DropdownButtonFormField<String>(
-                                value: selectedCategory,
-                                hint: const Text('Select Category'),
-                                items: categories.map<DropdownMenuItem<String>>(
-                                    (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (newValue) {
-                                  ref
-                                      .read(selectedCategoryProvider.notifier)
-                                      .state = newValue;
-                                },
-                              );
-                            } else {
-                              return const Text('No categories available');
-                            }
-                          },
-                        ),
-                      ),
+    try {
+      final cardsRef = await FirebaseFirestore.instance
+          .collection('favorites')
+          .doc(uid)
+          .collection('cards')
+          .get();
 
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05,
-                      ),
+      setState(() {
+        cards = cardsRef.docs.map((doc) => doc.data()['cardID']).toList();
+        cards.shuffle(); // Shuffle the cards
+        cards.insertAll(
+            cards.length ~/ 2, cards.take(cards.length ~/ 2).toList());
 
                       Padding(
                         padding: EdgeInsets.only(left: 20, right: 20),
@@ -279,10 +184,11 @@ class _PlayState extends ConsumerState<Play> {
                             onPressed: () {
                               GlobalRouter.I.router.push(StudentProfile.route);
                             },
-                            child: Text('Skip', style: GoogleFonts.roboto(
-                              color: Color(0xFF55ADFF),
-                              fontSize: 10
-                            ),),
+                            child: Text(
+                              'Skip',
+                              style: GoogleFonts.roboto(
+                                  color: Color(0xFF55ADFF), fontSize: 10),
+                            ),
                           ),
                         ),
                       SizedBox(
@@ -309,23 +215,15 @@ class _PlayState extends ConsumerState<Play> {
         ));
   }
 
-  Future<void> _pickImage(ImageSource source, WidgetRef ref1) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? photo = await picker.pickImage(source: source);
-
-    if (photo != null) {
-      String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('images/$uniqueFileName');
-      try {
-        await ref.putFile(File(photo.path));
-        String? imageUrl = await ref.getDownloadURL();
-        ref1.watch(imageUrlProvider.notifier).state = imageUrl;
-      } catch (e) {
-        print(e);
+  void flipCard(int index) {
+    setState(() {
+      if (!flippedCards[index]) {
+        flippedCards[index] = true;
+        if (index + 1 < cards.length && !flippedCards[index + 1]) {
+          flippedCards[index + 1] = true;
+        }
       }
-    }
+    });
   }
 
   void _submitCard(BuildContext context, WidgetRef ref) {
@@ -345,7 +243,7 @@ class _PlayState extends ConsumerState<Play> {
           'imageUrl': imageUrl,
           'category': selectedCategory,
           'tapCount': 0,
-          'isFavorite': true, 
+          'isFavorite': true,
           'phase1_independence': false,
           'phase2_independence': false,
           'phase3_independence': false,
@@ -410,43 +308,51 @@ class _PlayState extends ConsumerState<Play> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill out all fields')));
+      // Cards don't match, flip them back
+      setState(() {
+        flippedCards[index] = false;
+        flippedCards[index + 1] = false;
+      });
     }
   }
 
-  Future<List<String>> fetchCategories() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('categories').get();
+  void showAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Congratulations! You won the game!'),
+          actions: [
+            TextButton(
+              child: Text('Play Again'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  matchedCount = 0;
+                  flippedCards.fillRange(0, flippedCards.length, false);
+                  fetchCardsFromFirestore();
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-      List<String> allCategories =
-          querySnapshot.docs.map((doc) => doc['category'] as String).toList();
-
-      // Define the priority categories, but do not include 'All'
-      final priorityCategories = ['Food', 'Toys', 'Emotions', 'School'];
-
-      allCategories.sort((a, b) {
-        final indexA = priorityCategories.indexOf(a);
-        final indexB = priorityCategories.indexOf(b);
-
-        if (indexA != -1 && indexB != -1) {
-          return indexA.compareTo(indexB);
-        } else if (indexA != -1) {
-          return -1;
-        } else if (indexB != -1) {
-          return 1;
-        } else {
-          return a.compareTo(b);
-        }
-      });
-
-      // Exclude the "All" category
-      allCategories.remove('All');
-
-      return allCategories;
-    } catch (e) {
-      throw Exception('Error fetching categories: $e');
-    }
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemCount: cards.length,
+      itemBuilder: (context, index) {
+        return PlayCard(
+          cardId: cards[index],
+          cardValue: cards[index].substring(0, 1),
+        );
+      },
+    );
   }
 }

@@ -6,6 +6,7 @@ import "package:get_it/get_it.dart";
 import "package:go_router/go_router.dart";
 import "package:speakbright_mobile/Screens/auth/register_student.dart";
 import "package:speakbright_mobile/Screens/guardian/build_profile.dart";
+import "package:speakbright_mobile/Screens/guardian/favorites_view.dart";
 import "package:speakbright_mobile/Screens/guardian/student_profile.dart";
 import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
@@ -209,6 +210,13 @@ class GlobalRouter {
               name: StudentProfile.name,
               builder: (context, _) {
                 return const StudentProfile();
+              }),
+          GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: FavoritesView.route,
+              name: FavoritesView.name,
+              builder: (context, _) {
+                return const FavoritesView();
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,
