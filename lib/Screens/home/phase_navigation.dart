@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase1.dart';
@@ -29,12 +28,16 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   void initState() {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
+    FirestoreService().updatePhase1Independence();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: sky, shadowColor: lGray,),
+      appBar: AppBar(
+        backgroundColor: sky,
+        shadowColor: lGray,
+      ),
       backgroundColor: sky,
       body: SafeArea(
         child: Stack(
@@ -76,7 +79,10 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
               bottom: 80,
               right: 110,
               child: InkWell(
-                onTap: () => GlobalRouter.I.router.push(Learn1.route),
+                onTap: ()  {
+                  FirestoreService().updatePhase1Independence();
+                  GlobalRouter.I.router.push(Learn1.route);
+                },
                 child: Image.asset('assets/phase/P1.png', height: 115),
               ),
             ),

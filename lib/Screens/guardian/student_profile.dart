@@ -1,13 +1,12 @@
-// ignore_for_file: unrelated_type_equality_checks, avoid_print
+// ignore_for_file: unrelated_type_equality_checks, avoid_print, no_leading_underscores_for_local_identifiers, prefer_const_constructors
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
-import 'package:speakbright_mobile/Screens/home/guardian_homepage.dart';
-import 'package:speakbright_mobile/Screens/home/home.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
@@ -96,7 +95,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          const Text(
                             "How ready is ",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
@@ -107,12 +106,12 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                           buildFutureWidget(
                               _firestoreService.fetchStudentName(studentID),
                               'Failed to fetch student name',
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                   fontFamily: 'Roboto',
                                   color: jblack,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 20)),
-                          Text(
+                          const Text(
                             " for next phase?",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
@@ -122,7 +121,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                           )
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 25,
                       ),
                       Row(
@@ -133,14 +132,14 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                           buildFutureWidget(
                               getStudentReadiness(studentID, _currentPhase),
                               'Failed to fetch readiness',
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                   color: scoreYellow,
                                   fontFamily: 'Roboto',
                                   fontSize: 21,
                                   fontWeight: FontWeight.w600)),
                         ],
                       ),
-                      Text(
+                      const Text(
                         "Student needs more time in the current phase (sample)",
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
@@ -153,7 +152,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               "MOVE TO PHASE  ",
                               style: TextStyle(
                                   fontSize: 18,
@@ -315,7 +314,6 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
         : 'assets/studcard_monster.png';
 
     return Scaffold(
-      
       body: Stack(
         children: [
           Container(
@@ -474,114 +472,90 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                             padding: const EdgeInsets.all(15.0),
                             child: Column(
                               children: [
-                                SizedBox(
-                                  width: screenWidth * 0.7,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.15,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Container(
-                                        height: 70,
-                                        decoration: BoxDecoration(
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () =>
+                                            GlobalRouter.I.router.push(GuardianCommunicate.route),
+                                        child: Container(
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(colors: [
+                                              Colors.blue.withOpacity(0.7),
+                                              Colors.green.withOpacity(0.7),
+                                            ]),
                                             borderRadius:
-                                                BorderRadius.circular(8),
-                                            color: Color(0xFF729FF3)
-                                            // gradient: const LinearGradient(
-                                            //   colors: [
-                                            //     Color(0xFF7CB342),
-                                            //     Color.fromARGB(255, 103, 143, 60),
-                                            //   ],
-                                            // ),
-                                            ),
-                                        child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Row(
-                                              children: [
-                                                Spacer(),
-                                                Text(
-                                                  'Total Cards: ',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Image.asset(
+                                                    'assets/sp-card.png',
+                                                    width: 50,
+                                                    height: 50),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  'View Cards',
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 18,
                                                       fontWeight:
-                                                          FontWeight.w100,
-                                                      color: kwhite),
+                                                          FontWeight.bold),
                                                 ),
-                                                Text(
-                                                  '24',
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: kwhite),
-                                                ),
-                                                // Spacer(),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 20, left: 30),
-                                                  child: InkWell(
-                                                    onTap: _handleTap,
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(12),
-                                                          color: kwhite),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Row(
-                                                          children: [
-                                                            Theme(
-                                                              data: ThemeData(
-                                                                  fontFamily:
-                                                                      'Roboto'),
-                                                              child: const Text(
-                                                                "View Card",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontFamily:
-                                                                      'Roboto',
-                                                                  color: Color(
-                                                                      0xFF729FF3),
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w200,
-                                                                  fontSize: 15,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                                width: 5),
-                                                            Icon(
-                                                              MdiIcons.eye,
-                                                              color: Color(
-                                                                  0xFF729FF3),
-                                                              size: 15,
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            )),
-                                      ),
-                                      Positioned(
-                                        left: 0,
-                                        top: 0,
-                                        child: Image.asset(
-                                          'assets/viewCard.png',
-                                          // fit: BoxFit.cover,
-                                          height: 110,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () =>
+                                            GlobalRouter.I.router.push(FavoritesView.route),
+                                        child: Container(
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(colors: [
+                                              Colors.red.withOpacity(0.7),
+                                              Colors.yellow.withOpacity(0.7),
+                                            ]),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Image.asset(
+                                                    'assets/sp-fave.png',
+                                                    width: 50,
+                                                    height: 50),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  'Favorite Cards',
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                SizedBox(height: 10,),
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
