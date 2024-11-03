@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_list.dart';
-import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
+import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
@@ -33,7 +30,7 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   List<String> sentence = [];
   List<String> categories = [];
-  int currentUserPhase = 1;
+  int currentUserPhase = 4;
   int selectedCategory = -1;
 
   @override
@@ -54,7 +51,9 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void _addCardTitleToSentence(String title) {
     setState(() {
-      sentence.add(title);
+      if (sentence.length < 2) {
+        sentence.add(title);
+      }
     });
   }
 
@@ -65,7 +64,7 @@ class _Learn4State extends ConsumerState<Learn4> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = sentence.join(' ');
+    String sentenceString = "I " + sentence.join(' ');
 
     showDialog(
       context: context,
@@ -81,40 +80,38 @@ class _Learn4State extends ConsumerState<Learn4> {
     );
 
     try {
-      if (currentUserPhase == 4) {
-        String url_phase4 =
-            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+      String url_phase4 =
+          'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
-        final response = await http.post(
-          Uri.parse(url_phase4),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+      final response = await http.post(
+        Uri.parse(url_phase4),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        setState(() {
+          sentence.clear();
+          sentence.addAll(responseBody['sentence'].split(' '));
+        });
+
+        sentenceString = sentence.join(' ');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create sentence: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          setState(() {
-            sentence.clear();
-            sentence.addAll(responseBody['sentence'].split(' '));
-          });
-
-          sentenceString = sentence.join(' ');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create sentence: ${response.body}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Map<String, dynamic> errorResponse = jsonDecode(response.body);
-          String errorMessage =
-              errorResponse['detail'].replaceFirst('Error: ', '');
-          _ttsService.speak(errorMessage);
-          setState(() {
-            sentence.clear();
-          });
-        }
+        Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        String errorMessage =
+            errorResponse['detail'].replaceFirst('Error: ', '');
+        _ttsService.speak(errorMessage);
+        setState(() {
+          sentence.clear();
+        });
       }
       _firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
@@ -131,6 +128,20 @@ class _Learn4State extends ConsumerState<Learn4> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase4);
     return Scaffold(
       backgroundColor: kwhite,
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 0),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              PromptButton(phaseCurrent: currentUserPhase),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -162,34 +173,21 @@ class _Learn4State extends ConsumerState<Learn4> {
                       child: sentence.isEmpty
                           ? Center(
                               child: Text(
-                                "TAP CARDS TO CREATE A SENTENCE",
+                                "I feel ______, I want ______",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             )
-                          : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: sentence.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.fromLTRB(5, 20, 5, 20),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: kwhite,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      sentence[index],
-                                      style: const TextStyle(
-                                          color: dullpurple, fontSize: 24.0),
-                                    ),
-                                  ),
-                                );
-                              },
+                          : Center(
+                              child: Text(
+                                "I feel ${sentence.length > 0 ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                style: TextStyle(
+                                    color: kLightPruple,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
                             ),
                     ),
                   ),
@@ -317,7 +315,7 @@ class _Learn4State extends ConsumerState<Learn4> {
             child: cardsAsyncValue.when(
               data: (cards) {
                 print('Cards fetched successfully: ${cards.length}');
-                return CardList(
+                return CardGrid(
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
@@ -328,7 +326,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId,'0');
+                    ref.read(cardProvider.notifier).deleteCard(cardId, '0');
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"
