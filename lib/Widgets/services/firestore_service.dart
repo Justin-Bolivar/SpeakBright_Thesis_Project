@@ -232,7 +232,100 @@ class FirestoreService {
     }
   }
 
-  //distractor???
+  //distractor???---------------------------------------------------
+//   Future<bool> showDistractor(String cardID) async {
+//   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+//   final FirebaseAuth auth = FirebaseAuth.instance;
+
+//   String uid = auth.currentUser?.uid ?? '';
+//   if (uid.isEmpty) {
+//     throw Exception('User not logged in');
+//   }
+
+//   // Reference to the user's activity log
+//   DocumentReference activityLogRef = firestore.collection('activity_log').doc(uid);
+
+//   // Fetch recent sessions containing the target cardID in trialPrompt
+//   QuerySnapshot sessionSnapshot = await activityLogRef
+//       .collection('phase')
+//       .doc('1')
+//       .collection('session')
+//       .orderBy('timestamp', descending: true)
+//       .limit(10)
+//       .get();
+
+//   // Track the sessions that meet the criteria
+//   List<QueryDocumentSnapshot> relevantSessions = [];
+
+//   // Iterate through sessions to find ones where cardID is frequently tapped
+//   for (var sessionDoc in sessionSnapshot.docs) {
+//     QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
+//         .collection('trialPrompt')
+//         .where('cardID', isEqualTo: cardID)
+//         .get();
+
+//     int cardIDTapCount = trialPromptsSnapshot.size;
+//     int totalTapCount =
+//         (await sessionDoc.reference.collection('trialPrompt').get()).size;
+
+//     // Check if cardID was tapped in more than half of the total taps
+//     if (cardIDTapCount > totalTapCount / 2) {
+//       relevantSessions.add(sessionDoc);
+//       if (relevantSessions.length == 3) break;
+//     }
+//   }
+
+//   // If less than 3 sessions met the criteria, check current session
+//   if (relevantSessions.length < 3) {
+//     // Check current session
+//     DocumentReference currentSessionRef =
+//         activityLogRef.collection('phase').doc('1').collection('session').doc();
+
+//     QuerySnapshot trialPromptsSnapshot = await currentSessionRef
+//         .collection('trialPrompt')
+//         .where('prompt', isEqualTo: 'Independent')
+//         .get();
+
+//     return trialPromptsSnapshot.size >= 10;
+//   }
+
+//   // Calculate proficiency in the recent 3 sessions
+//   int independentCount = 0;
+//   int totalTapCount = 0;
+
+//   for (var sessionDoc in relevantSessions) {
+//     QuerySnapshot trialPromptsSnapshot =
+//         await sessionDoc.reference.collection('trialPrompt').get();
+
+//     for (var trialPromptDoc in trialPromptsSnapshot.docs) {
+//       totalTapCount++;
+//       if (trialPromptDoc['prompt'] == 'Independent') {
+//         independentCount++;
+//       }
+//     }
+//   }
+
+//   // Calculate proficiency percentage
+//   double proficiency = (independentCount / totalTapCount) * 100;
+//   print(proficiency);
+
+//   // Return true if either condition is met
+//   bool hasEnoughIndependentPrompts = await activityLogRef.collection('phase').doc('1').collection('session')
+//       .where('timestamp', isEqualTo: FieldValue.serverTimestamp())
+//       .limit(1)
+//       .get()
+//       .then((snapshot) {
+//         if (snapshot.docs.isEmpty) return false;
+//         return snapshot.docs.first.reference
+//             .collection('trialPrompt')
+//             .where('prompt', isEqualTo: 'Independent')
+//             .get()
+//             .then((trialPromptsSnapshot) => trialPromptsSnapshot.size >= 10);
+//       });
+
+//   return proficiency >= 70 || hasEnoughIndependentPrompts;
+// }
+
   Future<bool> showDistractor(String cardID) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
@@ -241,24 +334,19 @@ class FirestoreService {
     if (uid.isEmpty) {
       throw Exception('User not logged in');
     }
-
-    // Reference to the user's activity log
     DocumentReference activityLogRef =
         firestore.collection('activity_log').doc(uid);
 
-    // Fetch recent sessions containing the target cardID in trialPrompt
     QuerySnapshot sessionSnapshot = await activityLogRef
         .collection('phase')
         .doc('1')
         .collection('session')
         .orderBy('timestamp', descending: true)
-        .limit(10) // Limit to recent 10 sessions for efficiency
+        .limit(10)
         .get();
 
-    // Track the sessions that meet the criteria
     List<QueryDocumentSnapshot> relevantSessions = [];
 
-    // Iterate through sessions to find ones where cardID is frequently tapped
     for (var sessionDoc in sessionSnapshot.docs) {
       QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
           .collection('trialPrompt')
@@ -276,10 +364,9 @@ class FirestoreService {
       }
     }
 
-    // If less than 3 sessions met the criteria, return false
-    if (relevantSessions.length < 3) return false;
+    // if (relevantSessions.length < 3) return false;
+    print('more than 3 session');
 
-    // Calculate proficiency in the recent 3 sessions
     int independentCount = 0;
     int totalTapCount = 0;
 
@@ -298,6 +385,138 @@ class FirestoreService {
     // Calculate proficiency percentage
     double proficiency = (independentCount / totalTapCount) * 100;
     print(proficiency);
-    return proficiency >= 70;
+
+    // Return true if either condition is met
+    bool hasEnoughIndependentPrompts = await activityLogRef
+        .collection('phase')
+        .doc('1')
+        .collection('session')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get()
+        .then((snapshot) {
+      if (snapshot.docs.isEmpty) return false;
+      return snapshot.docs.first.reference
+          .collection('trialPrompt')
+          .where('prompt', isEqualTo: 'Independent')
+          .get()
+          .then((trialPromptsSnapshot) => trialPromptsSnapshot.size >= 10);
+    });
+
+    if (hasEnoughIndependentPrompts) return hasEnoughIndependentPrompts;
+
+    // return proficiency >= 70;
+    return false;
+  }
+
+//phase 1 independence check cards -- idk where to call
+
+  void updatePhase1Independence() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String uid = auth.currentUser?.uid ?? '';
+    if (uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      DocumentReference activityLogRef =
+          firestore.collection('activity_log').doc(uid);
+
+      QuerySnapshot cardsSnapshot = await firestore
+          .collection('cards')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      QuerySnapshot sessionSnapshot = await activityLogRef
+          .collection('phase')
+          .doc('1')
+          .collection('session')
+          .orderBy('timestamp', descending: true)
+          .limit(10)
+          .get();
+
+      Map<String, dynamic> independenceData = {};
+
+      for (var cardDoc in cardsSnapshot.docs) {
+        String cardID = cardDoc.id;
+
+        List<DocumentSnapshot> relevantSessions = [];
+
+        for (var sessionDoc in sessionSnapshot.docs) {
+          QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          int cardIDTapCount = trialPromptsSnapshot.size;
+          int totalSessionTaps =
+              (await sessionDoc.reference.collection('trialPrompt').get()).size;
+
+          if (cardIDTapCount > totalSessionTaps / 2) {
+            relevantSessions.add(sessionDoc);
+            if (relevantSessions.length == 3) break;
+          }
+        }
+
+        if (relevantSessions.length < 3) {
+          DocumentReference currentSessionRef = activityLogRef
+              .collection('phase')
+              .doc('1')
+              .collection('session')
+              .doc();
+
+          QuerySnapshot trialPromptsSnapshot = await currentSessionRef
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          if (trialPromptsSnapshot.size >= 10) {
+            independenceData[cardID] = true;
+            continue; // Skip further calculations for this card
+          } else {
+            DocumentSnapshot currentSessionDoc = await currentSessionRef.get();
+            if (currentSessionDoc.exists) {
+              relevantSessions.add(currentSessionDoc);
+            }
+          }
+        }
+
+        int independentCount = 0;
+        int cardTotalTapCount = 0;
+
+        for (var sessionDoc in relevantSessions) {
+          QuerySnapshot trialPromptsSnapshot =
+              await sessionDoc.reference.collection('trialPrompt').get();
+
+          for (var trialPromptDoc in trialPromptsSnapshot.docs) {
+            cardTotalTapCount++;
+            if (trialPromptDoc['prompt'] == 'Independent') {
+              independentCount++;
+            }
+          }
+        }
+
+        double cardIndependencePercentage = cardTotalTapCount > 0
+            ? (independentCount / cardTotalTapCount * 100)
+            : 0;
+
+        independenceData[cardID] = cardIndependencePercentage >= 70;
+      }
+
+      await Future.wait(
+        independenceData.entries.map((entry) async {
+          await firestore.collection('cards').doc(entry.key).update({
+            'phase1_independence': entry.value,
+          });
+        }),
+      );
+
+      print(
+          'Updated phase1_independence for ${independenceData.length} cards.');
+    } catch (e) {
+      print('Error updating phase1_independence: $e');
+    }
   }
 }
