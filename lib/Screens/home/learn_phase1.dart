@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/cards/phase1Card.dart';
 import 'package:speakbright_mobile/Widgets/cards/topFavorite.dart';
@@ -70,7 +71,11 @@ class _Learn1State extends ConsumerState<Learn1> {
               SizedBox(
                 width: 20,
               ),
-              PromptButton(phaseCurrent: currentUserPhase),
+              PromptButton(
+                  phaseCurrent: currentUserPhase,
+                  onRefresh: () {
+                    setState(() {});
+                  }),
             ],
           ),
         ),
@@ -143,12 +148,10 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                                 color: Colors
                                                                     .black
                                                                     .withOpacity(
-                                                                        0.5), // Shadow color with opacity
+                                                                        0.5),
                                                                 offset: Offset(
-                                                                    3,
-                                                                    3), // Position of the shadow (horizontal, vertical)
-                                                                blurRadius:
-                                                                    5, // Blur radius for a softer shadow
+                                                                    3, 3),
+                                                                blurRadius: 5,
                                                               ),
                                                             ],
                                                           ),
@@ -607,12 +610,12 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   'Error: ${distractorSnapshot.error}'));
                                         }
 
-                                        bool showDistractor =
+                                        bool _showDistractor =
                                             distractorSnapshot.data ?? false;
 
                                         return Padding(
                                           padding: const EdgeInsets.all(16.0),
-                                          child: showDistractor == false
+                                          child: _showDistractor == false
                                               ? Column(
                                                   children: [
                                                     Phase1Card(
@@ -670,25 +673,26 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                       },
                                                     ),
                                                     SizedBox(width: 25),
-                                                    if (distractorCard != null)
-                                                      Phase1Card(
-                                                        widthFactor: 0.35,
-                                                        heightFactor: 0.35,
-                                                        card: distractorCard,
-                                                        onTap: () {
-                                                          final cardTitle =
-                                                              distractorCard
-                                                                  .title;
-                                                          final category =
-                                                              distractorCard
-                                                                  .category;
-                                                          print(
-                                                              'Distractor - title: $cardTitle, cat: $category');
-
-                                                          _ttsService
-                                                              .speak(cardTitle);
-                                                        },
-                                                      ),
+                                                    if (_showDistractor && distractorCard !=
+                                                          null)
+                                            
+                                                        Phase1Card(
+                                                          widthFactor: 0.35,
+                                                          heightFactor: 0.35,
+                                                          card: distractorCard,
+                                                          onTap: () {
+                                                            final cardTitle =
+                                                                distractorCard
+                                                                    .title;
+                                                            final category =
+                                                                distractorCard
+                                                                    .category;
+                                                            print(
+                                                                'Distractor - title: $cardTitle, cat: $category');
+                                                            _ttsService.speak(
+                                                                cardTitle);
+                                                          },
+                                                        ),
                                                   ],
                                                 ),
                                         );

@@ -29,12 +29,16 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   void initState() {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
+    FirestoreService().updatePhase1Independence();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: sky, shadowColor: lGray,),
+      appBar: AppBar(
+        backgroundColor: sky,
+        shadowColor: lGray,
+      ),
       backgroundColor: sky,
       body: SafeArea(
         child: Stack(
@@ -76,7 +80,10 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
               bottom: 80,
               right: 110,
               child: InkWell(
-                onTap: () => GlobalRouter.I.router.push(Learn1.route),
+                onTap: ()  {
+                  FirestoreService().updatePhase1Independence();
+                  GlobalRouter.I.router.push(Learn1.route);
+                },
                 child: Image.asset('assets/phase/P1.png', height: 115),
               ),
             ),
