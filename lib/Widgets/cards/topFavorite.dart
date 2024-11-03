@@ -5,30 +5,44 @@ import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 class TopFavoriteCard {
   static Future<List<CardModel>?> fetchTopFavoriteAndDistractorCards() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    CollectionReference favoritesCollection = FirebaseFirestore.instance.collection('favorites');
+    CollectionReference favoritesCollection =
+        FirebaseFirestore.instance.collection('favorites');
 
     try {
-      QuerySnapshot snapshot = await favoritesCollection
+      QuerySnapshot favoritesSnapshot = await favoritesCollection
           .doc(userId)
           .collection('cards')
           .orderBy('rank')
-          .limit(2) // Fetch the top 2 cards
           .get();
 
-      if (snapshot.docs.length >= 2) {
-        // Extract the top favorite and the distractor card
-        DocumentSnapshot topFavoriteDoc = snapshot.docs[0];
-        DocumentSnapshot distractorDoc = snapshot.docs[1];
+      List<CardModel> validCards = [];
+      
+      // Map favorite card IDs to their ranks for ordering
+      Map<String, int> favoriteCardRanks = {
+        for (var doc in favoritesSnapshot.docs) doc.id: doc['rank'] ?? 0
+      };
 
-        return [
-          CardModel.fromFirestore(topFavoriteDoc),
-          CardModel.fromFirestore(distractorDoc),
-        ];
-      } else if (snapshot.docs.isNotEmpty) {
-        // If there's only one card, return it as the top favorite without a distractor
-        DocumentSnapshot topFavoriteDoc = snapshot.docs.first;
-        return [CardModel.fromFirestore(topFavoriteDoc)];
+      QuerySnapshot cardsSnapshot = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      Set<String> favoriteCardIds = favoriteCardRanks.keys.toSet();
+
+      for (var cardDoc in cardsSnapshot.docs) {
+        if (favoriteCardIds.contains(cardDoc.id)) {
+          bool phase1Independence = cardDoc['phase1_independence'] ?? false;
+
+          if (!phase1Independence) {
+            validCards.add(CardModel.fromFirestore(cardDoc));
+          }
+        }
       }
+
+      // Sort validCards by rank
+      validCards.sort((a, b) => (favoriteCardRanks[a.id] ?? 0).compareTo(favoriteCardRanks[b.id] ?? 0));
+
+      return validCards.isNotEmpty ? validCards : null;
     } catch (e) {
       print('Error fetching top favorite and distractor cards: $e');
     }
