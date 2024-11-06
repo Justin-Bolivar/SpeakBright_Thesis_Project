@@ -306,6 +306,7 @@ class _Learn2State extends ConsumerState<Learn2> {
               data: (cards) {
                 print('Cards fetched successfully: ${cards.length}');
                 return CardGrid(
+                  phase: 2,
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
