@@ -364,7 +364,7 @@ class FirestoreService {
       }
     }
 
-    // if (relevantSessions.length < 3) return false;
+    if (relevantSessions.length < 3) return false;
     print('more than 3 session');
 
     int independentCount = 0;
