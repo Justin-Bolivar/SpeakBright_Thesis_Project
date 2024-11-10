@@ -21,17 +21,18 @@ class CardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<CardModel> filteredCards = cards.where((card) {
-      if (selectedCategory != "All" && card.category != selectedCategory) {
-        return false;
-      }
 
       if (phase == 2) {
-        return card.phase1_independence == true;
+        return card.phase1_independence == true && card.category != "Emotions";
       } else if (phase == 3) {
-        return card.phase1_independence == true && card.category == "emotions";
+        return card.phase1_independence == true && card.category == "Emotions";
       } else if (phase == 4) {
         return card.phase2_independence == true &&
             card.phase3_independence == true;
+      }
+
+      if (selectedCategory != "All" && card.category != selectedCategory) {
+        return false;
       }
 
       return true;
