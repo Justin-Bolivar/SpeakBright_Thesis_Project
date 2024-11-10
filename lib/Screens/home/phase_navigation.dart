@@ -9,6 +9,7 @@ import 'package:speakbright_mobile/Screens/home/learn_phase3.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase4.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
+import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 
 class PhaseNav extends ConsumerStatefulWidget {
   const PhaseNav({super.key});
@@ -28,7 +29,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   void initState() {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
-    FirestoreService().updatePhase1Independence();
+    // FirestoreService().updatePhase1Independence();
   }
 
   @override
@@ -44,7 +45,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
           children: [
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/phase/phases-bg.png'),
                     fit: BoxFit.cover,
@@ -116,7 +117,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: WaitingDialog());
               },
             ),
           ],
@@ -131,7 +132,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
     return InkWell(
       onTap: isLocked
           ? () => Fluttertoast.showToast(msg: "Oops Phase locked")
-          : () => GlobalRouter.I.router.push(routeName),
+          : () => GlobalRouter.I.router.push(routeName) , 
       child: Image.asset(
           isLocked
               ? 'assets/phase/$lockedAsset.png'
