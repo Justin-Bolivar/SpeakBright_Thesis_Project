@@ -31,6 +31,7 @@ class _Learn4State extends ConsumerState<Learn4> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<String> sentence = [];
+  List<String> words = [];
   List<String> categories = [];
   int currentUserPhase = 4;
   int selectedCategory = -1;
@@ -54,20 +55,37 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void _addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (category == "Emotions") {
-        if (sentence.isEmpty) {
-          sentence.insert(0, title);
+      if (_sentencePrefix == "I feel") {
+        if (category == "Emotions") {
+          if (sentence.isEmpty) {
+            sentence.insert(0, title);
+            words.add(title);
+          } else {
+            sentence[0] = title;
+            words.add(title);
+          }
         } else {
-          sentence[0] = title;
+          if (sentence.length < 2) {
+            if (sentence.isEmpty) {
+              sentence.add("______"); // Placeholder for emotion at index 0
+            }
+            sentence.add(title);
+            words.add(title);
+          } else {
+            sentence[1] = title;
+            words.add(title);
+          }
         }
-      } else {
+      } else if (_sentencePrefix == "I want" && category != "Emotions") {
         if (sentence.length < 2) {
           if (sentence.isEmpty) {
             sentence.add("______"); // Placeholder for emotion at index 0
           }
           sentence.add(title);
+          words.add(title);
         } else {
-          sentence[1] = title;
+          sentence.add(title);
+          words.add(title);
         }
       }
     });
@@ -86,7 +104,7 @@ class _Learn4State extends ConsumerState<Learn4> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I ${sentence.join(' ')}";
+    String sentenceString = "I ${words.join(' ')}";
 
     showDialog(
       context: context,
@@ -204,7 +222,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                             )
                           : Center(
                               child: Text(
-                                "I feel ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -253,10 +271,27 @@ class _Learn4State extends ConsumerState<Learn4> {
             ),
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _toggleSentencePrefix,
-            child: Text(
-                "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}"),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: mainpurple,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _toggleSentencePrefix,
+              child: Text(
+                "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           ConstrainedBox(
