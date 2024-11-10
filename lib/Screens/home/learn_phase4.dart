@@ -50,6 +50,7 @@ class _Learn4State extends ConsumerState<Learn4> {
   void _clearSentence() {
     setState(() {
       sentence.clear();
+      words.clear();
     });
   }
 
@@ -57,35 +58,24 @@ class _Learn4State extends ConsumerState<Learn4> {
     setState(() {
       if (_sentencePrefix == "I feel") {
         if (category == "Emotions") {
-          if (sentence.isEmpty) {
-            sentence.insert(0, title);
-            words.add(title);
-          } else {
-            sentence[0] = title;
-            words.add(title);
-          }
+          sentence.add(title);
+          words.add(title);
         } else {
-          if (sentence.length < 2) {
-            if (sentence.isEmpty) {
-              sentence.add("______"); // Placeholder for emotion at index 0
-            }
-            sentence.add(title);
-            words.add(title);
-          } else {
+          if (sentence.length > 1) {
             sentence[1] = title;
-            words.add(title);
+            words[1] = title;
+          } else {
+            sentence.insert(1, title);
+            words.insert(1, title);
           }
         }
-      } else if (_sentencePrefix == "I want" && category != "Emotions") {
-        if (sentence.length < 2) {
-          if (sentence.isEmpty) {
-            sentence.add("______"); // Placeholder for emotion at index 0
-          }
+      } else if (_sentencePrefix == "I want") {
+        if (category != "Emotions") {
           sentence.add(title);
           words.add(title);
         } else {
-          sentence.add(title);
-          words.add(title);
+          sentence.clear();
+          words.clear();
         }
       }
     });
@@ -94,6 +84,8 @@ class _Learn4State extends ConsumerState<Learn4> {
   void _toggleSentencePrefix() {
     setState(() {
       _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
+      words.clear();
+      sentence.clear();
     });
   }
 
@@ -105,6 +97,7 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   Future<void> _sendSentenceAndSpeak() async {
     String sentenceString = "I ${words.join(' ')}";
+    print(sentenceString);
 
     showDialog(
       context: context,
