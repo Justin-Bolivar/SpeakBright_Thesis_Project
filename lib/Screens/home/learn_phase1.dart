@@ -14,6 +14,8 @@ import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:accordion/accordion.dart';
+// import 'package:mdi/mdi.dart'; // To use MdiIcons
 
 class Learn1 extends ConsumerStatefulWidget {
   const Learn1({super.key});
@@ -37,6 +39,19 @@ class _Learn1State extends ConsumerState<Learn1> {
   String? _selectedTargetCard;
   int _trials = 5;
 
+  List<IconData> icons = [
+    Icons.category,
+    MdiIcons.foodAppleOutline,
+    MdiIcons.teddyBear,
+    MdiIcons.emoticonHappyOutline,
+    MdiIcons.schoolOutline,
+    MdiIcons.weightLifter,
+    MdiIcons.broom,
+    MdiIcons.sunglasses,
+    MdiIcons.accountGroupOutline,
+    MdiIcons.earth,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +60,7 @@ class _Learn1State extends ConsumerState<Learn1> {
         categories.addAll(value);
       });
     });
+    
   }
 
   @override
@@ -62,6 +78,62 @@ class _Learn1State extends ConsumerState<Learn1> {
         leading: const BackButton(color: phase1Color),
         // shadowColor: kblack,
         backgroundColor: learn1bg,
+        actions: [
+          PopupMenuButton<int>(
+            icon: Icon(Icons.category, color: phase1Color),
+            onSelected: (index) {
+              setState(() {
+                selectedCategory = index;
+              });
+            },
+            itemBuilder: (context) => List.generate(categories.length, (index) {
+              final category = categories[index];
+              int colorIndex = index % boxColors.length;
+              Color itemColor = boxColors[colorIndex];
+
+              return PopupMenuItem<int>(
+                value: index,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: selectedCategory == index // Highlight selected item
+                        ? itemColor
+                        : itemColor.withOpacity(0.8), // Default color
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: selectedCategory == index // Add glow effect
+                        ? [
+                            BoxShadow(
+                              color: itemColor, // Set glow color same as the button color
+                              spreadRadius: 3, // Spread of the glow
+                              blurRadius: 6,  // Intensity of the glow
+                              offset: const Offset(0, 0), // Position of the glow
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        category,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                            icons[index % icons.length],
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
       backgroundColor: learn1bg,
       floatingActionButton: Align(
