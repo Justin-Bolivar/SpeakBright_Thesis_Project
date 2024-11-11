@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -29,9 +31,11 @@ class _Learn4State extends ConsumerState<Learn4> {
   final FirestoreService _firestoreService = FirestoreService();
 
   List<String> sentence = [];
+  List<String> words = [];
   List<String> categories = [];
   int currentUserPhase = 4;
   int selectedCategory = -1;
+  String _sentencePrefix = "I feel";
 
   @override
   void initState() {
@@ -46,14 +50,42 @@ class _Learn4State extends ConsumerState<Learn4> {
   void _clearSentence() {
     setState(() {
       sentence.clear();
+      words.clear();
     });
   }
 
-  void _addCardTitleToSentence(String title) {
+  void _addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (sentence.length < 2) {
-        sentence.add(title);
+      if (_sentencePrefix == "I feel") {
+        if (category == "Emotions") {
+          sentence.add(title);
+          words.add(title);
+        } else {
+          if (sentence.length > 1) {
+            sentence[1] = title;
+            words[1] = title;
+          } else {
+            sentence.insert(1, title);
+            words.insert(1, title);
+          }
+        }
+      } else if (_sentencePrefix == "I want") {
+        if (category != "Emotions") {
+          sentence.add(title);
+          words.add(title);
+        } else {
+          sentence.clear();
+          words.clear();
+        }
       }
+    });
+  }
+
+  void _toggleSentencePrefix() {
+    setState(() {
+      _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
+      words.clear();
+      sentence.clear();
     });
   }
 
@@ -64,7 +96,8 @@ class _Learn4State extends ConsumerState<Learn4> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I " + sentence.join(' ');
+    String sentenceString = "I ${words.join(' ')}";
+    print(sentenceString);
 
     showDialog(
       context: context,
@@ -80,11 +113,11 @@ class _Learn4State extends ConsumerState<Learn4> {
     );
 
     try {
-      String url_phase4 =
+      String urlPhase4 =
           'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
       final response = await http.post(
-        Uri.parse(url_phase4),
+        Uri.parse(urlPhase4),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode(<String, dynamic>{'text': sentenceString}),
       );
@@ -173,7 +206,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                       child: sentence.isEmpty
                           ? Center(
                               child: Text(
-                                "I feel ______, I want ______",
+                                "$_sentencePrefix ______, I want ______",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -182,7 +215,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                             )
                           : Center(
                               child: Text(
-                                "I feel ${sentence.length > 0 ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -191,44 +224,65 @@ class _Learn4State extends ConsumerState<Learn4> {
                             ),
                     ),
                   ),
-                  Container(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _sendSentenceAndSpeak,
-                            icon: const Icon(
-                              Icons.volume_up,
-                              color: Colors.white,
-                            ),
+                  Column(
+                    children: [
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: IconButton(
+                          onPressed: _sendSentenceAndSpeak,
+                          icon: const Icon(
+                            Icons.volume_up,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(
-                          height: 15,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _clearSentence,
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                            ),
+                        child: IconButton(
+                          onPressed: _clearSentence,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: mainpurple,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _toggleSentencePrefix,
+              child: Text(
+                "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -320,7 +374,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _addCardTitleToSentence(cardTitle);
+                    _addCardTitleToSentence(cardTitle, category);
                     _ttsService.speak(cardTitle);
                     _firestoreService.storeTappedCards(
                         cardTitle, category, cardId);
