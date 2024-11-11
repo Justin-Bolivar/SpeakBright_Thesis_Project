@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
 import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
@@ -517,7 +518,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     Expanded(
                                       child: InkWell(
                                         onTap: () =>
-                                            GlobalRouter.I.router.push(FavoritesView.route),
+                                            GlobalRouter.I.router.push(CardRankingMenu.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -540,7 +541,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                               ),
                                               Expanded(
                                                 child: Text(
-                                                  'Favorite Cards',
+                                                  'Card Ranking',
                                                   style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 18,
