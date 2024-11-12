@@ -132,7 +132,11 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
     return InkWell(
       onTap: isLocked
           ? () => Fluttertoast.showToast(msg: "Oops Phase locked")
-          : () => GlobalRouter.I.router.push(routeName) , 
+          : () =>{
+            GlobalRouter.I.router.push(routeName),
+            FirestoreService().updatePhase2Independence(),
+            FirestoreService().updatePhase3Independence()
+          }  , 
       child: Image.asset(
           isLocked
               ? 'assets/phase/$lockedAsset.png'

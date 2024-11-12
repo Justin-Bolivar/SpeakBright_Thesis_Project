@@ -360,6 +360,18 @@ class AddCardPage extends ConsumerWidget {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Card added successfully')));
+
+          // Call function to update categoryRanking after adding the card
+          if (selectedCategory != null) {
+            _updateCategoryRanking(
+              studentID,
+              selectedCategory,
+              newCardID,
+              newCardTitle,
+              imageUrl,
+            );
+          }
+
           FirebaseFirestore.instance
               .collection('cards')
               .doc(newCardID)
@@ -375,8 +387,7 @@ class AddCardPage extends ConsumerWidget {
               FirebaseFirestore.instance.runTransaction((transaction) async {
                 DocumentReference favoritesDoc =
                     favoritesCollection.doc(newCardID);
-                // DocumentSnapshot favoritesSnapshot =
-                //     await transaction.get(favoritesDoc);
+
                 DocumentReference studentFavoritesDoc = FirebaseFirestore
                     .instance
                     .collection('favorites')
@@ -427,6 +438,57 @@ class AddCardPage extends ConsumerWidget {
           const SnackBar(content: Text('Please fill out all fields')));
     }
   }
+
+// Function to update categoryRanking collection
+  Future<void> _updateCategoryRanking(
+  String studentID,
+  String category,
+  String cardID,
+  String cardTitle,
+  String imageUrl,
+) async {
+  // Reference to the student's document
+  DocumentReference studentDoc =
+      FirebaseFirestore.instance.collection('categoryRanking').doc(studentID);
+
+  try {
+    // Check if the student document exists, if not, add the studentID field
+    DocumentSnapshot studentSnapshot = await studentDoc.get();
+    if (!studentSnapshot.exists) {
+      // Create the document with the studentID field
+      await studentDoc.set({
+        'studentID': studentID,
+      });
+      print('Student document created with studentID');
+    }
+
+    // Query for the highest rank in the category collection
+    QuerySnapshot querySnapshot = await studentDoc
+        .collection(category)
+        .orderBy('rank', descending: true)
+        .limit(1)
+        .get();
+
+    int newRank = 1;
+    if (querySnapshot.docs.isNotEmpty) {
+      int highestRank = querySnapshot.docs.first['rank'];
+      newRank = highestRank + 1;
+    }
+
+    // Add the new card with the updated rank to the specific category collection
+    await studentDoc.collection(category).doc(cardID).set({
+      'cardID': cardID,
+      'cardTitle': cardTitle,
+      'imageUrl': imageUrl,
+      'rank': newRank,
+    });
+
+    print('Card added successfully to $category with rank $newRank');
+  } catch (e) {
+    print('Error updating category ranking: $e');
+  }
+}
+
 
   Future<List<String>> fetchCategories() async {
     try {
