@@ -483,7 +483,7 @@ class FirestoreService {
           }
         }
 
-        int independentCount = 0;
+        int independentCountWithDistractor = 0;
         int cardTotalTapCount = 0;
 
         for (var sessionDoc in relevantSessions) {
@@ -493,13 +493,13 @@ class FirestoreService {
           for (var trialPromptDoc in trialPromptsSnapshot.docs) {
             cardTotalTapCount++;
             if (trialPromptDoc['prompt'] == 'Independent') {
-              independentCount++;
+              independentCountWithDistractor++;
             }
           }
         }
 
         double cardIndependencePercentage = cardTotalTapCount > 0
-            ? (independentCount / cardTotalTapCount * 100)
+            ? (independentCountWithDistractor / cardTotalTapCount * 100)
             : 0;
 
         independenceData[cardID] = cardIndependencePercentage >= 70;
@@ -520,9 +520,7 @@ class FirestoreService {
     }
   }
 
-
-
-void updatePhase2Independence() async {
+  void updatePhase2Independence() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -594,7 +592,7 @@ void updatePhase2Independence() async {
           }
         }
 
-        int independentCount = 0;
+        int independentCountWithDistractor = 0;
         int cardTotalTapCount = 0;
 
         for (var sessionDoc in relevantSessions) {
@@ -603,14 +601,14 @@ void updatePhase2Independence() async {
 
           for (var trialPromptDoc in trialPromptsSnapshot.docs) {
             cardTotalTapCount++;
-            if (trialPromptDoc['prompt'] == 'Independent') {
-              independentCount++;
+            if (trialPromptDoc['prompt'] == 'Independent' && trialPromptDoc['withDistractor'] == true) {
+              independentCountWithDistractor++;
             }
           }
         }
 
         double cardIndependencePercentage = cardTotalTapCount > 0
-            ? (independentCount / cardTotalTapCount * 100)
+            ? (independentCountWithDistractor / cardTotalTapCount * 100)
             : 0;
 
         independenceData[cardID] = cardIndependencePercentage >= 70;
@@ -740,5 +738,52 @@ void updatePhase2Independence() async {
       print('Error updating phase3_independence: $e');
     }
   }
+
+  Future<void> setCurrentlyLearningCard(String cardId, String category) async {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  String? userId = auth.currentUser?.uid;
+  if (userId == null || userId.isEmpty) {
+    print('User not logged in');
+    return;
+  }
+
+  try {
+    // Reference to the parent document for the user
+    DocumentReference<Map<String, dynamic>> parentDocRef =
+        firestore.collection('currently_learning').doc(userId);
+
+    // Check if the parent document exists
+    DocumentSnapshot<Map<String, dynamic>> parentDocSnapshot = await parentDocRef.get();
+
+    // If the parent document does not exist, create it with a default field
+    if (!parentDocSnapshot.exists) {
+      await parentDocRef.set({
+        'userId': userId,
+        'createdAt': FieldValue.serverTimestamp(),  // Add any initial field
+      });
+      print("Parent document for user $userId created");
+    }
+
+    // Reference to the Firestore path for the card under the category
+    DocumentReference<Map<String, dynamic>> cardDocRef = firestore
+        .collection('currently_learning')
+        .doc(userId)
+        .collection(category)
+        .doc(cardId);
+
+    // Store the cardId and other data in the specified category collection
+    await cardDocRef.set({
+      'cardId': cardId,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    print("Successfully set currently learning card: $cardId in category: $category");
+
+  } catch (e) {
+    print("Error setting currently learning card: $e");
+  }
+}
 
 }
