@@ -364,7 +364,7 @@ class FirestoreService {
       }
     }
 
-    // if (relevantSessions.length < 3) return false;
+    if (relevantSessions.length < 3) return false;
     print('more than 3 session');
 
     int independentCount = 0;
@@ -483,6 +483,226 @@ class FirestoreService {
           }
         }
 
+        int independentCountWithDistractor = 0;
+        int cardTotalTapCount = 0;
+
+        for (var sessionDoc in relevantSessions) {
+          QuerySnapshot trialPromptsSnapshot =
+              await sessionDoc.reference.collection('trialPrompt').get();
+
+          for (var trialPromptDoc in trialPromptsSnapshot.docs) {
+            cardTotalTapCount++;
+            if (trialPromptDoc['prompt'] == 'Independent') {
+              independentCountWithDistractor++;
+            }
+          }
+        }
+
+        double cardIndependencePercentage = cardTotalTapCount > 0
+            ? (independentCountWithDistractor / cardTotalTapCount * 100)
+            : 0;
+
+        independenceData[cardID] = cardIndependencePercentage >= 70;
+      }
+
+      await Future.wait(
+        independenceData.entries.map((entry) async {
+          await firestore.collection('cards').doc(entry.key).update({
+            'phase1_independence': entry.value,
+          });
+        }),
+      );
+
+      print(
+          'Updated phase1_independence for ${independenceData.length} cards.');
+    } catch (e) {
+      print('Error updating phase1_independence: $e');
+    }
+  }
+
+  void updatePhase2Independence() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String uid = auth.currentUser?.uid ?? '';
+    if (uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      DocumentReference activityLogRef =
+          firestore.collection('activity_log').doc(uid);
+
+      QuerySnapshot cardsSnapshot = await firestore
+          .collection('cards')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      QuerySnapshot sessionSnapshot = await activityLogRef
+          .collection('phase')
+          .doc('2')
+          .collection('session')
+          .orderBy('timestamp', descending: true)
+          .limit(10)
+          .get();
+
+      Map<String, dynamic> independenceData = {};
+
+      for (var cardDoc in cardsSnapshot.docs) {
+        String cardID = cardDoc.id;
+
+        List<DocumentSnapshot> relevantSessions = [];
+
+        for (var sessionDoc in sessionSnapshot.docs) {
+          QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          int cardIDTapCount = trialPromptsSnapshot.size;
+          int totalSessionTaps =
+              (await sessionDoc.reference.collection('trialPrompt').get()).size;
+
+          if (cardIDTapCount > totalSessionTaps / 2) {
+            relevantSessions.add(sessionDoc);
+            if (relevantSessions.length == 3) break;
+          }
+        }
+
+        if (relevantSessions.length < 3) {
+          DocumentReference currentSessionRef = activityLogRef
+              .collection('phase')
+              .doc('2')
+              .collection('session')
+              .doc();
+
+          QuerySnapshot trialPromptsSnapshot = await currentSessionRef
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          if (trialPromptsSnapshot.size >= 10) {
+            independenceData[cardID] = true;
+            continue; // Skip further calculations for this card
+          } else {
+            DocumentSnapshot currentSessionDoc = await currentSessionRef.get();
+            if (currentSessionDoc.exists) {
+              relevantSessions.add(currentSessionDoc);
+            }
+          }
+        }
+
+        int independentCountWithDistractor = 0;
+        int cardTotalTapCount = 0;
+
+        for (var sessionDoc in relevantSessions) {
+          QuerySnapshot trialPromptsSnapshot =
+              await sessionDoc.reference.collection('trialPrompt').get();
+
+          for (var trialPromptDoc in trialPromptsSnapshot.docs) {
+            cardTotalTapCount++;
+            if (trialPromptDoc['prompt'] == 'Independent' &&
+                trialPromptDoc['withDistractor'] == true) {
+              independentCountWithDistractor++;
+            }
+          }
+        }
+
+        double cardIndependencePercentage = cardTotalTapCount > 0
+            ? (independentCountWithDistractor / cardTotalTapCount * 100)
+            : 0;
+
+        independenceData[cardID] = cardIndependencePercentage >= 70;
+      }
+
+      await Future.wait(
+        independenceData.entries.map((entry) async {
+          await firestore.collection('cards').doc(entry.key).update({
+            'phase2_independence': entry.value,
+          });
+        }),
+      );
+
+      print(
+          'Updated phase2_independence for ${independenceData.length} cards.');
+    } catch (e) {
+      print('Error updating phase2_independence: $e');
+    }
+  }
+
+//phase 3
+  void updatePhase3Independence() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String uid = auth.currentUser?.uid ?? '';
+    if (uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      DocumentReference activityLogRef =
+          firestore.collection('activity_log').doc(uid);
+
+      QuerySnapshot cardsSnapshot = await firestore
+          .collection('cards')
+          .where('userId', isEqualTo: uid)
+          .get();
+
+      QuerySnapshot sessionSnapshot = await activityLogRef
+          .collection('phase')
+          .doc('3')
+          .collection('session')
+          .orderBy('timestamp', descending: true)
+          .limit(10)
+          .get();
+
+      Map<String, dynamic> independenceData = {};
+
+      for (var cardDoc in cardsSnapshot.docs) {
+        String cardID = cardDoc.id;
+
+        List<DocumentSnapshot> relevantSessions = [];
+
+        for (var sessionDoc in sessionSnapshot.docs) {
+          QuerySnapshot trialPromptsSnapshot = await sessionDoc.reference
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          int cardIDTapCount = trialPromptsSnapshot.size;
+          int totalSessionTaps =
+              (await sessionDoc.reference.collection('trialPrompt').get()).size;
+
+          if (cardIDTapCount > totalSessionTaps / 2) {
+            relevantSessions.add(sessionDoc);
+            if (relevantSessions.length == 3) break;
+          }
+        }
+
+        if (relevantSessions.length < 3) {
+          DocumentReference currentSessionRef = activityLogRef
+              .collection('phase')
+              .doc('3')
+              .collection('session')
+              .doc();
+
+          QuerySnapshot trialPromptsSnapshot = await currentSessionRef
+              .collection('trialPrompt')
+              .where('cardID', isEqualTo: cardID)
+              .get();
+
+          if (trialPromptsSnapshot.size >= 10) {
+            independenceData[cardID] = true;
+            continue; // Skip further calculations for this card
+          } else {
+            DocumentSnapshot currentSessionDoc = await currentSessionRef.get();
+            if (currentSessionDoc.exists) {
+              relevantSessions.add(currentSessionDoc);
+            }
+          }
+        }
+
         int independentCount = 0;
         int cardTotalTapCount = 0;
 
@@ -508,15 +728,63 @@ class FirestoreService {
       await Future.wait(
         independenceData.entries.map((entry) async {
           await firestore.collection('cards').doc(entry.key).update({
-            'phase1_independence': entry.value,
+            'phase3_independence': entry.value,
           });
         }),
       );
 
       print(
-          'Updated phase1_independence for ${independenceData.length} cards.');
+          'Updated phase3_independence for ${independenceData.length} cards.');
     } catch (e) {
-      print('Error updating phase1_independence: $e');
+      print('Error updating phase3_independence: $e');
+    }
+  }
+
+  Future<void> setCurrentlyLearningCard(String cardId, String category) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String? userId = auth.currentUser?.uid;
+    if (userId == null || userId.isEmpty) {
+      print('User not logged in');
+      return;
+    }
+
+    try {
+      // Reference to the parent document for the user
+      DocumentReference<Map<String, dynamic>> parentDocRef =
+          firestore.collection('currently_learning').doc(userId);
+
+      // Check if the parent document exists
+      DocumentSnapshot<Map<String, dynamic>> parentDocSnapshot =
+          await parentDocRef.get();
+
+      // If the parent document does not exist, create it with a default field
+      if (!parentDocSnapshot.exists) {
+        await parentDocRef.set({
+          'userId': userId,
+          'createdAt': FieldValue.serverTimestamp(), // Add any initial field
+        });
+        print("Parent document for user $userId created");
+      }
+
+      // Reference to the Firestore path for the card under the category
+      DocumentReference<Map<String, dynamic>> cardDocRef = firestore
+          .collection('currently_learning')
+          .doc(userId)
+          .collection(category)
+          .doc(cardId);
+
+      // Store the cardId and other data in the specified category collection
+      await cardDocRef.set({
+        'cardId': cardId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print(
+          "Successfully set currently learning card: $cardId in category: $category");
+    } catch (e) {
+      print("Error setting currently learning card: $e");
     }
   }
 }

@@ -22,7 +22,7 @@ const gradientPurple = Color(0xFF8E2DE2);
 const softPink = Color.fromARGB(255, 222, 117, 224);
 const softGray = Color(0xFF8C8C8C);
 const jblack = Color(0xFF1E1E1E);
-const lGray = Color(0xFF444444); 
+const lGray = Color(0xFF444444);
 const scoreYellow = Color(0xFFE7A321);
 const dullWhite = Color(0xFFD9D9D9);
 const addGreen = Color(0xFF7CB342);
@@ -51,4 +51,42 @@ final List<Color> boxColors = [
   Colors.blue,
   Colors.indigo,
   Colors.purple,
+];
+
+const List<String> phase1Categories = [
+  'Favorites',
+  'Food',
+  'Toys',
+  'Emotions',
+  'School',
+  'Activities',
+  'Chores',
+  'Clothing',
+  'People',
+  'Places', 
+];
+
+const List<IconData> phase1Icons = [
+  Icons.star, // Icon for "Favorites"
+  Icons.fastfood, // Icon for "Food"
+  Icons.toys, // Icon for "Toys"
+  Icons.sentiment_very_satisfied, // Icon for "Emotions"
+  Icons.school, // Icon for "School"
+  Icons.fitness_center, // Icon for "Activities"
+  Icons.cleaning_services, // Icon for "Chores"
+  Icons.checkroom, // Icon for "Clothing"
+  Icons.people, // Icon for "People"
+  Icons.location_on, // Icon for "Places"
+];
+
+const List<String> addCategories = [
+  'Food',
+  'Toys',
+  'Emotions',
+  'School',
+  'Activities',
+  'Chores',
+  'Clothing',
+  'People',
+  'Places', 
 ];

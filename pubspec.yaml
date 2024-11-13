@@ -60,13 +60,13 @@ dependencies:
   fluttertoast: ^8.2.8
   google_fonts: ^6.2.1
   rxdart: ^0.28.0
+  accordion: ^2.6.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.1
   flutter_lints:
-
 
 flutter_launcher_icons:
   android: true

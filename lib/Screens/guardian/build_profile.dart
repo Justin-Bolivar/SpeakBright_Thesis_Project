@@ -83,7 +83,7 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                         height: MediaQuery.of(context).size.height * 0.08,
                       ),
                       Text(
-                        'Add 3-10 favorite objects (${addedCardCount + 1}/10)',
+                        'Add 10 favorite objects (${addedCardCount + 1}/10)',
                         style: TextStyle(
                           color: scoreYellow,
                           fontStyle: FontStyle.normal,
@@ -115,37 +115,52 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
                       ),
                       const SizedBox(height: 16),
                       Expanded(
-                        child: FutureBuilder<List<String>>(
-                          future: fetchCategories(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<List<String>> snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const SizedBox.shrink();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else if (snapshot.hasData) {
-                              List<String> categories = snapshot.data!;
+                        // child: FutureBuilder<List<String>>(
+                        //   future: fetchCategories(),
+                        //   builder: (BuildContext context,
+                        //       AsyncSnapshot<List<String>> snapshot) {
+                        //     if (snapshot.connectionState ==
+                        //         ConnectionState.waiting) {
+                        //       return const SizedBox.shrink();
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else if (snapshot.hasData) {
+                        //       List<String> categories = snapshot.data!;
 
-                              return DropdownButtonFormField<String>(
-                                value: selectedCategory,
-                                hint: const Text('Select Category'),
-                                items: categories.map<DropdownMenuItem<String>>(
-                                    (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (newValue) {
-                                  ref
-                                      .read(selectedCategoryProvider.notifier)
-                                      .state = newValue;
-                                },
-                              );
-                            } else {
-                              return const Text('No categories available');
-                            }
+                        //       return DropdownButtonFormField<String>(
+                        //         value: selectedCategory,
+                        //         hint: const Text('Select Category'),
+                        //         items: categories.map<DropdownMenuItem<String>>(
+                        //             (String value) {
+                        //           return DropdownMenuItem<String>(
+                        //             value: value,
+                        //             child: Text(value),
+                        //           );
+                        //         }).toList(),
+                        //         onChanged: (newValue) {
+                        //           ref
+                        //               .read(selectedCategoryProvider.notifier)
+                        //               .state = newValue;
+                        //         },
+                        //       );
+                        //     } else {
+                        //       return const Text('No categories available');
+                        //     }
+                        //   },
+                        // ),
+                        child: DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          hint: const Text('Select Category'),
+                          items: addCategories
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            ref.read(selectedCategoryProvider.notifier).state =
+                                newValue;
                           },
                         ),
                       ),
@@ -381,21 +396,29 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
           if (currentCount < 9) {
             ref.read(addedCardCountProvider.notifier).state = currentCount + 1;
           } else {
-            // Sign out the student account
             await FirebaseAuth.instance.signOut();
-
-            // Re-sign in the facilitator
             await FirebaseAuth.instance.signInWithEmailAndPassword(
               email: facilitatorEmail,
               password: facilitatorPassword,
             );
-
             GlobalRouter.I.router.push(StudentProfile.route);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('All cards added successfully')),
             );
           }
 
+          // Add to categoryRanking collection
+          if (selectedCategory != null) {
+            await _updateCategoryRanking(
+              studentID,
+              selectedCategory,
+              newCardID,
+              newCardTitle,
+              imageUrl,
+            );
+          }
+
+          // Add to favorites if isFavorite is true
           FirebaseFirestore.instance
               .collection('cards')
               .doc(newCardID)
@@ -411,8 +434,6 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
               FirebaseFirestore.instance.runTransaction((transaction) async {
                 DocumentReference favoritesDoc =
                     favoritesCollection.doc(newCardID);
-                // DocumentSnapshot favoritesSnapshot =
-                //     await transaction.get(favoritesDoc);
                 DocumentReference studentFavoritesDoc = FirebaseFirestore
                     .instance
                     .collection('favorites')
@@ -462,6 +483,68 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please fill out all fields')));
+    }
+  }
+
+// Function to update categoryRanking
+  Future<void> _updateCategoryRanking(
+    String studentID,
+    String category,
+    String cardID,
+    String cardTitle,
+    String imageUrl,
+  ) async {
+    // Reference to the student's document
+    DocumentReference studentDoc =
+        FirebaseFirestore.instance.collection('categoryRanking').doc(studentID);
+
+    try {
+      // Check if the student document exists
+      DocumentSnapshot studentSnapshot = await studentDoc.get();
+
+      if (!studentSnapshot.exists) {
+        // If the document does not exist, create it and add studentID field
+        await studentDoc.set({
+          'studentID': studentID,
+        });
+        print('Student document created with studentID');
+      } else {
+        // If document exists, make sure studentID is set (optional, depending on needs)
+        Map<String, dynamic> studentData =
+            studentSnapshot.data() as Map<String, dynamic>;
+
+        if (!studentData.containsKey('studentID')) {
+          await studentDoc.update({
+            'studentID': studentID,
+          });
+          print('Student document updated with studentID');
+        }
+      }
+
+      // Query for the highest rank in the category collection
+      QuerySnapshot querySnapshot = await studentDoc
+          .collection(category)
+          .orderBy('rank', descending: true)
+          .limit(1)
+          .get();
+
+      int newRank = 1;
+      if (querySnapshot.docs.isNotEmpty) {
+        int highestRank = querySnapshot.docs.first['rank'];
+        newRank = highestRank + 1;
+      }
+
+      // Add the new card with the updated rank to the specific category collection
+      await studentDoc.collection(category).doc(cardID).set({
+        'cardID': cardID,
+        'cardTitle': cardTitle,
+        'imageUrl': imageUrl,
+        'rank': newRank,
+      });
+
+      print('Card added successfully to $category with rank $newRank');
+    } catch (e) {
+      print('Error updating category ranking: $e');
     }
   }
 
