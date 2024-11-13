@@ -94,7 +94,7 @@ class _CardRankingListState extends ConsumerState<CardRankingList> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           'Cards in ${widget.selectedCategory}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,

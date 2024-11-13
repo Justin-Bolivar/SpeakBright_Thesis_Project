@@ -16,15 +16,12 @@ class _FavoriteRankingListState extends ConsumerState<FavoriteRankingList> {
   List<DocumentSnapshot> _cards = [];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String studentID;
-  late String selectedCategory;
   List<DocumentSnapshot> categoryData = []; 
 
   @override
   void initState() {
     super.initState();
     studentID = ref.read(studentIdProvider.notifier).state;
-    // Assume selectedCategory is passed into the widget or set elsewhere
-    selectedCategory = "exampleCategory";  // Example, replace with actual selection logic
     _loadCards();
   }
 
