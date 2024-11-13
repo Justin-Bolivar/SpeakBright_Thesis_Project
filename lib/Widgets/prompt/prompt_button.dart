@@ -1,15 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
+import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 
-class PromptButton extends StatefulWidget {
+class PromptButton extends ConsumerStatefulWidget {
   final int phaseCurrent;
   final Function()? onRefresh;
 
@@ -20,10 +21,9 @@ class PromptButton extends StatefulWidget {
   _PromptButtonState createState() => _PromptButtonState();
 }
 
-class _PromptButtonState extends State<PromptButton>
+class _PromptButtonState extends ConsumerState<PromptButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  // ignore: unused_field
   late Animation _animation;
   bool showLock = false;
   bool isAnimationCompleted = false;
@@ -75,36 +75,7 @@ class _PromptButtonState extends State<PromptButton>
     _controller.reverse();
   }
 
-  Future<void> _updatePromptField(int index) async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    String uid = auth.currentUser?.uid ?? '';
-    if (uid.isEmpty) {
-      throw Exception('User not logged in');
-    }
-
-    Map<int, String> fieldsToUpdate = {
-      0: 'Physical',
-      1: 'Modeling',
-      2: 'Gestural',
-      3: 'Verbal',
-      4: 'Independent'
-    };
-
-    String fieldToUpdate = fieldsToUpdate[index] ?? '';
-
-    // Update prompt collection
-    await firestore.collection('prompt').doc(uid).set({
-      fieldToUpdate: FieldValue.increment(1),
-      'email': auth.currentUser?.email ?? '',
-    }, SetOptions(merge: true));
-
-    updateActivityLog(index);
-  }
-
-  //act log
-  Future<void> updateActivityLog(int index) async {
+  Future<void> _updatePromptField(int index, {bool isLoop = false}) async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -174,12 +145,10 @@ class _PromptButtonState extends State<PromptButton>
         });
       }
 
-      // Fetch the cardID from temp_recentCard collection
-      DocumentSnapshot tempRecentCardSnapshot =
-          await firestore.collection('temp_recentCard').doc(user.uid).get();
+      //read card id val in provider
+      final cardID = ref.watch(cardActivityProvider).cardId;
 
-      if (tempRecentCardSnapshot.exists) {
-        String cardID = tempRecentCardSnapshot.get('cardID');
+      if (cardID != null) {
         DocumentReference trialPromptRef =
             trialRef.collection('trialPrompt').doc();
 
@@ -220,11 +189,22 @@ class _PromptButtonState extends State<PromptButton>
               'prompt': promptType,
               'cardID': cardID,
               'timestamp': FieldValue.serverTimestamp(),
+              'withDistractor': ref.watch(cardActivityProvider).showDistractor
             },
             SetOptions(merge: true),
           );
 
-          transaction.delete(tempRecentCardSnapshot.reference);
+          // If it's part of the loop (+10 Independent), don't reset
+          if (!isLoop) {
+            // Use `WidgetsBinding.instance.addPostFrameCallback` to reset the provider after the widget tree is built
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Reset values after the update
+              ref.read(cardActivityProvider).reset();
+              print("Deleting tempRecentCard because it's not Independent.");
+            });
+          } else {
+            print("Not deleting tempRecentCard because it's part of the loop.");
+          }
         });
 
         print("update log successfully.");
@@ -235,54 +215,62 @@ class _PromptButtonState extends State<PromptButton>
     }
   }
 
-  Future<String?> fetchRecentCardID() async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    String? uid = auth.currentUser?.uid;
-    if (uid == null) {
-      print('User is not logged in');
-      return null;
-    }
-
-    try {
-      DocumentSnapshot tempRecentCardSnapshot =
-          await firestore.collection('temp_recentCard').doc(uid).get();
-
-      if (tempRecentCardSnapshot.exists) {
-        String cardID = tempRecentCardSnapshot.get('cardID');
-        return cardID;
-      } else {
-        print('Document does not exist');
-      }
-    } catch (e) {
-      print('Error fetching recent card ID: $e');
-    }
-
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width - 20,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            bottom: 0,
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (_, __) {
-                return showLock
-                    ? _buildImageButtons()
-                    : _buildPurpleContainer();
-              },
-            ),
+
+        return SizedBox(
+          width: MediaQuery.of(context).size.width - 20,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                bottom: 120,
+                child: GestureDetector(
+                  onTap: () async {
+                    // Add +10 Independent to the activity log on button press
+                    for (int i = 0; i < 10; i++) {
+                      await _updatePromptField(4,
+                          isLoop: true); // Assuming 4 is "Independent"
+                    }
+                    Fluttertoast.showToast(
+                        msg: "Looped 10 times: Activity log updated.",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.green,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  },
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue, // Adjust the color as needed
+                    ),
+                    child: const Center(
+                      child: Text('+10', style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (_, __) {
+                    return showLock
+                        ? _buildImageButtons()
+                        : _buildPurpleContainer();
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        );
+      }
+    
+  
 
   Widget _buildPurpleContainer() {
     return Align(
@@ -357,14 +345,10 @@ class _PromptButtonState extends State<PromptButton>
                           particleCount: 400, spread: 70, y: 0.6),
                     );
 
-                     widget.onRefresh?.call();
+                    widget.onRefresh?.call();
                   } else {
                     FlameAudio.play('chime_fast.mp3');
                   }
-                  ;
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   const SnackBar(content: Text('Prompt updated successfully')),
-                  // );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error updating prompt: $e')),
