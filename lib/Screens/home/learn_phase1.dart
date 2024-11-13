@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/cards/phase1Card.dart';
-import 'package:speakbright_mobile/Widgets/cards/topFavorite.dart';
+import 'package:speakbright_mobile/Widgets/cards/top_favorite.dart';
 import 'package:speakbright_mobile/Widgets/cards/top_category.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
+import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 
 class Learn1 extends ConsumerStatefulWidget {
   const Learn1({super.key});
@@ -38,6 +39,9 @@ class _Learn1State extends ConsumerState<Learn1> {
 
   @override
   Widget build(BuildContext context) {
+
+    final cardActivity = ref.watch(cardActivityProvider); // Access CardActivityProvider
+    
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: phase1Color),
@@ -187,7 +191,7 @@ class _Learn1State extends ConsumerState<Learn1> {
 
                                 if (cards == null || cards.isEmpty) {
                                   return Center(
-                                      child: Text('No favorite card found.'));
+                                      child: Text('No favorite card found.',style: TextStyle(color: phase1Color),));
                                 }
 
                                 final CardModel topFavoriteCard = cards[0];
@@ -212,6 +216,9 @@ class _Learn1State extends ConsumerState<Learn1> {
                                     bool showDistractor =
                                         distractorSnapshot.data ?? false;
 
+                                    // Set the values for cardId and showDistractor
+                                    
+
                                     return Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: showDistractor == false
@@ -221,6 +228,8 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   fontSize: 20,
                                                   card: topFavoriteCard,
                                                   onTap: () {
+                                                    cardActivity.setCardId(topFavoriteCard.id);
+                                                    cardActivity.setShowDistractor(showDistractor);
                                                     final cardTitle =
                                                         topFavoriteCard.title;
                                                     final category =
@@ -228,9 +237,10 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             .category;
                                                     final cardId =
                                                         topFavoriteCard.id;
+                                                     _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
+                                                    
                                                     print(
                                                         'Top Favorite - title: $cardTitle, cat: $category');
-
                                                     _ttsService
                                                         .speak(cardTitle);
                                                     _firestoreService
@@ -238,6 +248,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             cardTitle,
                                                             category,
                                                             cardId);
+                                                    
                                                   },
                                                 ),
                                               ],
@@ -250,6 +261,8 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   fontSize: 20,
                                                   card: topFavoriteCard,
                                                   onTap: () {
+                                                    cardActivity.setCardId(topFavoriteCard.id);
+                                                    cardActivity.setShowDistractor(showDistractor);
                                                     final cardTitle =
                                                         topFavoriteCard.title;
                                                     final category =
@@ -257,6 +270,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             .category;
                                                     final cardId =
                                                         topFavoriteCard.id;
+                                                    _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
                                                     print(
                                                         'Top Favorite - title: $cardTitle, cat: $category');
 
@@ -267,6 +281,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             cardTitle,
                                                             category,
                                                             cardId);
+                                                   
                                                   },
                                                 ),
                                                 SizedBox(width: 25),
@@ -295,7 +310,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                 );
                               },
                             )
-                          : FutureBuilder<List<CardModel>?>(
+                          : FutureBuilder<List<CardModel>?>( //other categery
                               future: TopCategoryCard
                                   .fetchTopCategoryAndDistractorCards(
                                       phase1Categories[selectedCategory]),
@@ -347,6 +362,8 @@ class _Learn1State extends ConsumerState<Learn1> {
                                     bool showDistractor =
                                         distractorSnapshot.data ?? false;
 
+                                    // Set the values for cardId and showDistractor
+                                    
                                     return Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: showDistractor == false
@@ -356,15 +373,19 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   fontSize: 20,
                                                   card: topCategoryCard,
                                                   onTap: () {
+                                                    cardActivity.setCardId(topCategoryCard.id);
+                                                    cardActivity.setShowDistractor(showDistractor);
+
                                                     final cardTitle =
                                                         topCategoryCard.title;
                                                     final category =
                                                         topCategoryCard
                                                             .category;
-                                                    final cardId =
+                                                    final cardIdCategory =
                                                         topCategoryCard.id;
                                                     print(
                                                         'Top Category - title: $cardTitle, cat: $category');
+                                                    _firestoreService.setCurrentlyLearningCard(cardIdCategory, phase1Categories[selectedCategory]);
 
                                                     _ttsService
                                                         .speak(cardTitle);
@@ -372,7 +393,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                         .storeTappedCards(
                                                             cardTitle,
                                                             category,
-                                                            cardId);
+                                                            cardIdCategory);
                                                   },
                                                 ),
                                               ],
@@ -385,15 +406,18 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   fontSize: 20,
                                                   card: topCategoryCard,
                                                   onTap: () {
+                                                    cardActivity.setCardId(topCategoryCard.id);
+                                                    cardActivity.setShowDistractor(showDistractor);
                                                     final cardTitle =
                                                         topCategoryCard.title;
                                                     final category =
                                                         topCategoryCard
                                                             .category;
-                                                    final cardId =
+                                                    final cardIdCategory =
                                                         topCategoryCard.id;
                                                     print(
                                                         'Top Category - title: $cardTitle, cat: $category');
+                                                    _firestoreService.setCurrentlyLearningCard(cardIdCategory, phase1Categories[selectedCategory]);
 
                                                     _ttsService
                                                         .speak(cardTitle);
@@ -401,7 +425,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                         .storeTappedCards(
                                                             cardTitle,
                                                             category,
-                                                            cardId);
+                                                            cardIdCategory);
                                                   },
                                                 ),
                                                 SizedBox(width: 25),
