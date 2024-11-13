@@ -28,7 +28,7 @@ class _Learn2State extends ConsumerState<Learn2> {
 
   List<String> sentence = [];
   List<String> categories = [];
-  int currentUserPhase = 3;
+  int currentUserPhase = 2;
   int selectedCategory = -1;
 
   @override
