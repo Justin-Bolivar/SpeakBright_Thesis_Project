@@ -487,65 +487,66 @@ class _BuildProfileState extends ConsumerState<BuildProfile> {
   }
 
 // Function to update categoryRanking
-Future<void> _updateCategoryRanking(
-  String studentID,
-  String category,
-  String cardID,
-  String cardTitle,
-  String imageUrl,
-) async {
-  // Reference to the student's document
-  DocumentReference studentDoc =
-      FirebaseFirestore.instance.collection('categoryRanking').doc(studentID);
+  Future<void> _updateCategoryRanking(
+    String studentID,
+    String category,
+    String cardID,
+    String cardTitle,
+    String imageUrl,
+  ) async {
+    // Reference to the student's document
+    DocumentReference studentDoc =
+        FirebaseFirestore.instance.collection('categoryRanking').doc(studentID);
 
-  try {
-    // Check if the student document exists
-    DocumentSnapshot studentSnapshot = await studentDoc.get();
-    
-    if (!studentSnapshot.exists) {
-      // If the document does not exist, create it and add studentID field
-      await studentDoc.set({
-        'studentID': studentID,
-      });
-      print('Student document created with studentID');
-    } else {
-      // If document exists, make sure studentID is set (optional, depending on needs)
-      Map<String, dynamic> studentData = studentSnapshot.data() as Map<String, dynamic>;
-      
-      if (!studentData.containsKey('studentID')) {
-        await studentDoc.update({
+    try {
+      // Check if the student document exists
+      DocumentSnapshot studentSnapshot = await studentDoc.get();
+
+      if (!studentSnapshot.exists) {
+        // If the document does not exist, create it and add studentID field
+        await studentDoc.set({
           'studentID': studentID,
         });
-        print('Student document updated with studentID');
+        print('Student document created with studentID');
+      } else {
+        // If document exists, make sure studentID is set (optional, depending on needs)
+        Map<String, dynamic> studentData =
+            studentSnapshot.data() as Map<String, dynamic>;
+
+        if (!studentData.containsKey('studentID')) {
+          await studentDoc.update({
+            'studentID': studentID,
+          });
+          print('Student document updated with studentID');
+        }
       }
+
+      // Query for the highest rank in the category collection
+      QuerySnapshot querySnapshot = await studentDoc
+          .collection(category)
+          .orderBy('rank', descending: true)
+          .limit(1)
+          .get();
+
+      int newRank = 1;
+      if (querySnapshot.docs.isNotEmpty) {
+        int highestRank = querySnapshot.docs.first['rank'];
+        newRank = highestRank + 1;
+      }
+
+      // Add the new card with the updated rank to the specific category collection
+      await studentDoc.collection(category).doc(cardID).set({
+        'cardID': cardID,
+        'cardTitle': cardTitle,
+        'imageUrl': imageUrl,
+        'rank': newRank,
+      });
+
+      print('Card added successfully to $category with rank $newRank');
+    } catch (e) {
+      print('Error updating category ranking: $e');
     }
-
-    // Query for the highest rank in the category collection
-    QuerySnapshot querySnapshot = await studentDoc
-        .collection(category)
-        .orderBy('rank', descending: true)
-        .limit(1)
-        .get();
-
-    int newRank = 1;
-    if (querySnapshot.docs.isNotEmpty) {
-      int highestRank = querySnapshot.docs.first['rank'];
-      newRank = highestRank + 1;
-    }
-
-    // Add the new card with the updated rank to the specific category collection
-    await studentDoc.collection(category).doc(cardID).set({
-      'cardID': cardID,
-      'cardTitle': cardTitle,
-      'imageUrl': imageUrl,
-      'rank': newRank,
-    });
-
-    print('Card added successfully to $category with rank $newRank');
-  } catch (e) {
-    print('Error updating category ranking: $e');
   }
-}
 
   Future<List<String>> fetchCategories() async {
     try {
