@@ -74,8 +74,13 @@ class _CommunicateState extends ConsumerState<Communicate> {
     setState(() {
       if (_sentencePrefix == "I feel") {
         if (category == "Emotions") {
-          sentence.insert(0, title);
-          words.add(title);
+          if (sentence.isNotEmpty) {
+            sentence[0] = title;
+            words[0] = title;
+          } else {
+            sentence.add(title);
+            words.add(title);
+          }
         } else {
           if (sentence.isNotEmpty) {
             sentence.add(title);
@@ -92,8 +97,13 @@ class _CommunicateState extends ConsumerState<Communicate> {
         }
       } else if (_sentencePrefix == "I want") {
         if (category != "Emotions") {
-          sentence.add(title);
-          words.add(title);
+          if (sentence.length > 1) {
+            sentence[1] = title;
+            words[1] = title;
+          } else {
+            sentence.add(title);
+            words.add(title);
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
