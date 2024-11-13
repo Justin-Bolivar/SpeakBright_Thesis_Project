@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
@@ -75,36 +76,7 @@ class _PromptButtonState extends State<PromptButton>
     _controller.reverse();
   }
 
-  Future<void> _updatePromptField(int index) async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    String uid = auth.currentUser?.uid ?? '';
-    if (uid.isEmpty) {
-      throw Exception('User not logged in');
-    }
-
-    Map<int, String> fieldsToUpdate = {
-      0: 'Physical',
-      1: 'Modeling',
-      2: 'Gestural',
-      3: 'Verbal',
-      4: 'Independent'
-    };
-
-    String fieldToUpdate = fieldsToUpdate[index] ?? '';
-
-    // Update prompt collection
-    await firestore.collection('prompt').doc(uid).set({
-      fieldToUpdate: FieldValue.increment(1),
-      'email': auth.currentUser?.email ?? '',
-    }, SetOptions(merge: true));
-
-    updateActivityLog(index);
-  }
-
-  //act log
-  Future<void> updateActivityLog(int index) async {
+  Future<void> _updatePromptField(int index, {bool isLoop = false}) async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -180,6 +152,7 @@ class _PromptButtonState extends State<PromptButton>
 
       if (tempRecentCardSnapshot.exists) {
         String cardID = tempRecentCardSnapshot.get('cardID');
+
         DocumentReference trialPromptRef =
             trialRef.collection('trialPrompt').doc();
 
@@ -224,7 +197,14 @@ class _PromptButtonState extends State<PromptButton>
             SetOptions(merge: true),
           );
 
-          transaction.delete(tempRecentCardSnapshot.reference);
+          // If it's part of the loop (+10 Independent), don't delete tempRecentCard
+          if (!isLoop) {
+            // Delete tempRecentCard when not in the loop
+            transaction.delete(tempRecentCardSnapshot.reference);
+            print("Deleting tempRecentCard because it's not Independent.");
+          } else {
+            print("Not deleting tempRecentCard because it's part of the loop.");
+          }
         });
 
         print("update log successfully.");
@@ -268,6 +248,38 @@ class _PromptButtonState extends State<PromptButton>
       child: Stack(
         alignment: Alignment.center,
         children: [
+          Positioned(
+            bottom: 120,
+            child: GestureDetector(
+              onTap: () async {
+                // Add +10 Independent to the activity log on button press
+                for (int i = 0; i < 10; i++) {
+                  // Pass isLoop as true for the loop case
+                  await _updatePromptField(4,
+                      isLoop: true); // Assuming 4 is "Independent"
+                }
+                Fluttertoast.showToast(
+                    msg: "Looped 10 times: Activity log updated.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue, // Adjust the color as needed
+                ),
+                child: Center(
+                  child: Text('+10', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ),
+          ),
           Positioned(
             bottom: 0,
             child: AnimatedBuilder(
@@ -357,7 +369,7 @@ class _PromptButtonState extends State<PromptButton>
                           particleCount: 400, spread: 70, y: 0.6),
                     );
 
-                     widget.onRefresh?.call();
+                    widget.onRefresh?.call();
                   } else {
                     FlameAudio.play('chime_fast.mp3');
                   }

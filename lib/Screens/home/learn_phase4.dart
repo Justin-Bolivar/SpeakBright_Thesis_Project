@@ -58,24 +58,44 @@ class _Learn4State extends ConsumerState<Learn4> {
     setState(() {
       if (_sentencePrefix == "I feel") {
         if (category == "Emotions") {
-          sentence.add(title);
-          words.add(title);
-        } else {
-          if (sentence.length > 1) {
-            sentence[1] = title;
-            words[1] = title;
+          if (sentence.isNotEmpty) {
+            sentence[0] = title;
+            words[0] = title;
           } else {
-            sentence.insert(1, title);
-            words.insert(1, title);
+            sentence.add(title);
+            words.add(title);
+          }
+        } else {
+          if (sentence.isNotEmpty) {
+            sentence.add(title);
+            words.add(title);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Add an Emotion first'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            //_ttsService.speak('Add an Emotion first');
           }
         }
       } else if (_sentencePrefix == "I want") {
         if (category != "Emotions") {
-          sentence.add(title);
-          words.add(title);
+          if (sentence.length > 1) {
+            sentence[1] = title;
+            words[1] = title;
+          } else {
+            sentence.add(title);
+            words.add(title);
+          }
         } else {
-          sentence.clear();
-          words.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Emotions are not needed for this sentence'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          //_ttsService.speak('No Emotions Needed');
         }
       }
     });
