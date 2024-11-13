@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakbright_mobile/Widgets/card_ranking_list.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/favorite_ranking_list.dart';
+import 'package:speakbright_mobile/Screens/guardian/category_ranking_list.dart';
+import 'package:speakbright_mobile/Screens/guardian/favorite_ranking_list.dart';
 
 class CardRankingMenu extends ConsumerStatefulWidget {
   const CardRankingMenu({super.key});
