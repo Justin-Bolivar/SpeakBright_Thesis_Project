@@ -124,8 +124,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I ${words.join(' ')}";
-    print(sentenceString);
+    String sentenceString = "I";
+    String pronoun = "I";
+    words.add(pronoun);
+    print(words);
 
     showDialog(
       context: context,
@@ -148,7 +150,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
         final response = await http.post(
           Uri.parse(urlPhase4),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'text': sentenceString}),
+          body: jsonEncode(<String, dynamic>{'words': words}),
         );
 
         if (response.statusCode == 200) {
