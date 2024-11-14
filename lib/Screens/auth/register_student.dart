@@ -455,6 +455,8 @@ class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
         FirebaseFirestore.instance.collection('user_guardian');
     DocumentReference userGuardianDoc = userGuardianRef.doc(guardianID);
     CollectionReference studentsRef = userGuardianDoc.collection('students');
+    CollectionReference phaseRef = 
+        FirebaseFirestore.instance.collection('activity_log').doc(userId).collection('phase').doc('1');
 
     DateTime birthdayDate = selectedBirthday ?? DateTime.now();
     Timestamp birthdayTimestamp = Timestamp.fromDate(DateTime(
@@ -470,8 +472,15 @@ class _RegistrationStudentState extends ConsumerState<RegistrationStudent> {
     };
     print(userId);
 
+    Map<String, dynamic> phaseData = {
+      'phase': 1,
+      'entryTimestamps': [FieldValue.serverTimestamp()],
+      'exitTimestamps': [],
+    };
+
     await users.doc(userId).set(studentData);
     await studentsRef.doc(userId).set(studentData);
+    await phaseRef.set(phaseData);
   }
 
   Future<void> initializePromptData() async {
