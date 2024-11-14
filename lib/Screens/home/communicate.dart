@@ -195,6 +195,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
     bool showSentenceWidget = currentUserPhase > 1;
+    bool showSwitchWidget = currentUserPhase == 4;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -228,109 +229,115 @@ class _CommunicateState extends ConsumerState<Communicate> {
       body: Column(
         children: [
           if (showSentenceWidget)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    DottedBorder(
-                      color: dullpurple,
-                      strokeWidth: 1,
-                      dashPattern: const [6, 7],
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(20.0),
-                      child: Container(
-                          height: 100,
-                          width: MediaQuery.of(context).size.width * .8,
-                          decoration: BoxDecoration(
-                            color: kwhite,
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: sentence.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    "$_sentencePrefix ______, I want ______",
-                                    style: const TextStyle(
-                                        color: kLightPruple,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
-                                    style: const TextStyle(
-                                        color: kLightPruple,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                )),
-                    ),
-                    if (showSentenceWidget)
-                      Container(
-                        child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 50,
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        DottedBorder(
+                          color: dullpurple,
+                          strokeWidth: 1,
+                          dashPattern: const [6, 7],
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(20.0),
+                          child: Container(
+                              height: 100,
+                              width: MediaQuery.of(context).size.width * .8,
                               decoration: BoxDecoration(
-                                color: mainpurple,
-                                borderRadius: BorderRadius.circular(10),
+                                color: kwhite,
+                                borderRadius: BorderRadius.circular(20.0),
                               ),
-                              child: IconButton(
-                                onPressed: _sendSentenceAndSpeak,
-                                icon: const Icon(
-                                  Icons.volume_up,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              // width: 30,
-                              height: 15,
-                            ),
-                            Container(
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color: mainpurple,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: IconButton(
-                                onPressed: _clearSentence,
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                              child: sentence.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        "$_sentencePrefix ______, I want ______",
+                                        style: const TextStyle(
+                                            color: kLightPruple,
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Text(
+                                        "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                        style: const TextStyle(
+                                            color: kLightPruple,
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    )),
                         ),
-                      ),
-                  ],
+                        if (showSentenceWidget)
+                          Container(
+                            child: Column(
+                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    color: mainpurple,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _sendSentenceAndSpeak,
+                                    icon: const Icon(
+                                      Icons.volume_up,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  // width: 30,
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    color: mainpurple,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _clearSentence,
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                if (showSwitchWidget)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: mainpurple,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _toggleSentencePrefix,
+                    child: Text(
+                      "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: mainpurple,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _toggleSentencePrefix,
-            child: Text(
-              "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           const SizedBox(height: 20),
           Row(
             children: [
