@@ -82,17 +82,25 @@ class _CommunicateState extends ConsumerState<Communicate> {
             words.add(title);
           }
         } else {
+          String placeHolder = "____";
           if (sentence.isNotEmpty) {
-            sentence.add(title);
-            words.add(title);
+            print("not empty");
+            if (sentence.length > 1) {
+              print(">1");
+              print(sentence);
+              sentence[1] = title;
+              words[1] = title;
+            } else {
+              print("<1");
+              sentence.add(title);
+              words.add(title);
+            }
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Add an Emotion first'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            //_ttsService.speak('Add an Emotion first');
+            print("empty");
+            sentence.add(placeHolder);
+            sentence.add(title);
+            words.add(placeHolder);
+            words.add(title);
           }
         }
       } else if (_sentencePrefix == "I want") {
@@ -111,7 +119,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
               backgroundColor: Colors.red,
             ),
           );
-          //_ttsService.speak('No Emotions Needed');
         }
       }
     });
