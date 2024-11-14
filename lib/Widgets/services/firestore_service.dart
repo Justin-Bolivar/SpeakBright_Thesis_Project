@@ -128,10 +128,45 @@ class FirestoreService {
     return null;
   }
 
-  Future<void> updateStudentPhase(String studentID, int phase) async {
-    await FirebaseFirestore.instance.collection('users').doc(studentID).update({
-      'phase': phase,
-    });
+  Future<void> updateStudentPhase(String studentID, int newPhase) async {
+    try {
+      // Step 1: Get the previous phase from the 'users' document
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(studentID).get();
+      int previousPhase = userSnapshot.data()?['phase'];
+
+      // Step 2: Update 'exitTimestamps' for the previous phase in 'activity_log'
+      if (previousPhase != null) {
+        DocumentReference prevPhaseRef = FirebaseFirestore.instance
+            .collection('activity_log')
+            .doc(studentID)
+            .collection('phase')
+            .doc(previousPhase.toString());
+
+        await prevPhaseRef.set({
+          'exitTimestamps': FieldValue.arrayUnion([FieldValue.serverTimestamp()]),
+        }, SetOptions(merge: true));
+      }
+
+      // Step 3: Update 'entryTimestamps' for the new phase in 'activity_log'
+      DocumentReference newPhaseRef = FirebaseFirestore.instance
+          .collection('activity_log')
+          .doc(studentID)
+          .collection('phase')
+          .doc(newPhase.toString());
+
+      await newPhaseRef.set({
+        'entryTimestamps': FieldValue.arrayUnion([FieldValue.serverTimestamp()]),
+      }, SetOptions(merge: true));
+
+      // Step 4: Update the 'phase' field in the 'users' document
+      await FirebaseFirestore.instance.collection('users').doc(studentID).update({
+        'phase': newPhase,
+      });
+
+      print('Student phase updated successfully.');
+    } catch (e) {
+      print('Error updating student phase: $e');
+    }
   }
 
   Future<String?> fetchStudentName(String studentID) async {
