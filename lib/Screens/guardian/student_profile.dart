@@ -75,7 +75,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
   }
 
   void selectPhase(BuildContext context) async {
-    List<int> options = [1, 2, 3, 4, 5];
+    List<int> options = [1, 2, 3, 4];
     int? _selectedValue = _currentPhase;
 
     await showDialog(
@@ -477,8 +477,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   children: [
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(GuardianCommunicate.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(GuardianCommunicate.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -517,8 +517,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(CardRankingMenu.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(CardRankingMenu.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -556,7 +556,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 10,),
+                                SizedBox(
+                                  height: 10,
+                                ),
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
