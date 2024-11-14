@@ -131,8 +131,12 @@ class FirestoreService {
   Future<void> updateStudentPhase(String studentID, int newPhase) async {
     try {
       // Step 1: Get the previous phase from the 'users' document
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(studentID).get();
-      int previousPhase = userSnapshot.data()?['phase'];
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(studentID)
+          .get();
+      int previousPhase =
+          (userSnapshot.data() as Map<String, dynamic>)['phase'];
 
       // Step 2: Update 'exitTimestamps' for the previous phase in 'activity_log'
       if (previousPhase != null) {
@@ -143,7 +147,7 @@ class FirestoreService {
             .doc(previousPhase.toString());
 
         await prevPhaseRef.set({
-          'exitTimestamps': FieldValue.arrayUnion([FieldValue.serverTimestamp()]),
+          'exitTimestamps': FieldValue.arrayUnion([DateTime.now()]),
         }, SetOptions(merge: true));
       }
 
@@ -154,12 +158,15 @@ class FirestoreService {
           .collection('phase')
           .doc(newPhase.toString());
 
-      await newPhaseRef.set({
-        'entryTimestamps': FieldValue.arrayUnion([FieldValue.serverTimestamp()]),
-      }, SetOptions(merge: true));
+      await newPhaseRef.update({
+        'entryTimestamps': FieldValue.arrayUnion([DateTime.now()]),
+      });
 
       // Step 4: Update the 'phase' field in the 'users' document
-      await FirebaseFirestore.instance.collection('users').doc(studentID).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(studentID)
+          .update({
         'phase': newPhase,
       });
 
@@ -636,7 +643,8 @@ class FirestoreService {
 
           for (var trialPromptDoc in trialPromptsSnapshot.docs) {
             cardTotalTapCount++;
-            if (trialPromptDoc['prompt'] == 'Independent' && trialPromptDoc['withDistractor'] == true) {
+            if (trialPromptDoc['prompt'] == 'Independent' &&
+                trialPromptDoc['withDistractor'] == true) {
               independentCountWithDistractor++;
             }
           }
@@ -775,50 +783,50 @@ class FirestoreService {
   }
 
   Future<void> setCurrentlyLearningCard(String cardId, String category) async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
 
-  String? userId = auth.currentUser?.uid;
-  if (userId == null || userId.isEmpty) {
-    print('User not logged in');
-    return;
-  }
-
-  try {
-    // Reference to the parent document for the user
-    DocumentReference<Map<String, dynamic>> parentDocRef =
-        firestore.collection('currently_learning').doc(userId);
-
-    // Check if the parent document exists
-    DocumentSnapshot<Map<String, dynamic>> parentDocSnapshot = await parentDocRef.get();
-
-    // If the parent document does not exist, create it with a default field
-    if (!parentDocSnapshot.exists) {
-      await parentDocRef.set({
-        'userId': userId,
-        'createdAt': FieldValue.serverTimestamp(),  // Add any initial field
-      });
-      print("Parent document for user $userId created");
+    String? userId = auth.currentUser?.uid;
+    if (userId == null || userId.isEmpty) {
+      print('User not logged in');
+      return;
     }
 
-    // Reference to the Firestore path for the card under the category
-    DocumentReference<Map<String, dynamic>> cardDocRef = firestore
-        .collection('currently_learning')
-        .doc(userId)
-        .collection(category)
-        .doc(cardId);
+    try {
+      // Reference to the parent document for the user
+      DocumentReference<Map<String, dynamic>> parentDocRef =
+          firestore.collection('currently_learning').doc(userId);
 
-    // Store the cardId and other data in the specified category collection
-    await cardDocRef.set({
-      'cardId': cardId,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+      // Check if the parent document exists
+      DocumentSnapshot<Map<String, dynamic>> parentDocSnapshot =
+          await parentDocRef.get();
 
-    print("Successfully set currently learning card: $cardId in category: $category");
+      // If the parent document does not exist, create it with a default field
+      if (!parentDocSnapshot.exists) {
+        await parentDocRef.set({
+          'userId': userId,
+          'createdAt': FieldValue.serverTimestamp(), // Add any initial field
+        });
+        print("Parent document for user $userId created");
+      }
 
-  } catch (e) {
-    print("Error setting currently learning card: $e");
+      // Reference to the Firestore path for the card under the category
+      DocumentReference<Map<String, dynamic>> cardDocRef = firestore
+          .collection('currently_learning')
+          .doc(userId)
+          .collection(category)
+          .doc(cardId);
+
+      // Store the cardId and other data in the specified category collection
+      await cardDocRef.set({
+        'cardId': cardId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print(
+          "Successfully set currently learning card: $cardId in category: $category");
+    } catch (e) {
+      print("Error setting currently learning card: $e");
+    }
   }
-}
-
 }
