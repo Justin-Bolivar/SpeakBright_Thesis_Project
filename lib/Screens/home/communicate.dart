@@ -84,19 +84,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
         } else {
           String placeHolder = "____";
           if (sentence.isNotEmpty) {
-            print("not empty");
             if (sentence.length > 1) {
-              print(">1");
-              print(sentence);
               sentence[1] = title;
               words[1] = title;
             } else {
-              print("<1");
               sentence.add(title);
               words.add(title);
             }
           } else {
-            print("empty");
             sentence.add(placeHolder);
             sentence.add(title);
             words.add(placeHolder);
@@ -113,12 +108,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
             words.add(title);
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Emotions are not needed for this sentence'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          _toggleSentencePrefix();
+          sentence.add(title);
+          words.add(title);
         }
       }
     });
