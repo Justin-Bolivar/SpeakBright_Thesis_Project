@@ -8,6 +8,7 @@ import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
+import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 import 'package:speakbright_mobile/providers/card_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 
@@ -102,6 +103,7 @@ class _Learn2State extends ConsumerState<Learn2> {
 
   @override
   Widget build(BuildContext context) {
+    final cardActivity = ref.watch(cardActivityProvider);
     final cardsAsyncValue = ref.watch(cardsListProviderPhase2);
     return Scaffold(
       backgroundColor: kwhite,
@@ -310,6 +312,7 @@ class _Learn2State extends ConsumerState<Learn2> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
+                    cardActivity.setCardId(cardId);
                     _addCardTitleToSentence(cardTitle, category);
                     _ttsService.speak(cardTitle);
                     _firestoreService.storeTappedCards(
