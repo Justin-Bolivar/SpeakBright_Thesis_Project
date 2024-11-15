@@ -325,6 +325,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
   }
 
   Widget _buildImageButtons() {
+    final cardID = ref.watch(cardActivityProvider).cardId;
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Align(
@@ -336,6 +337,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
             (index) => GestureDetector(
               onTap: () async {
                 try {
+                  _firestoreService.setCurrentlyLearningCard(cardID);
                   await _updatePromptField(index);
                   if (index == 4) {
                     FlameAudio.play('bell_congrats.mp3');

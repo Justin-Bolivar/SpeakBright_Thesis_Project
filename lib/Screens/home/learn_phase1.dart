@@ -199,8 +199,6 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             .category;
                                                     final cardId =
                                                         topFavoriteCard.id;
-                                                     _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
-                                                    
                                                     print(
                                                         'Top Favorite - title: $cardTitle, cat: $category');
                                                     _ttsService
@@ -232,7 +230,6 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                             .category;
                                                     final cardId =
                                                         topFavoriteCard.id;
-                                                    _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
                                                     print(
                                                         'Top Favorite - title: $cardTitle, cat: $category');
 
