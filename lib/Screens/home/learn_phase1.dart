@@ -160,27 +160,8 @@ class _Learn1State extends ConsumerState<Learn1> {
                                 final CardModel? distractorCard =
                                     cards.length > 1 ? cards[1] : null;
 
-                                return FutureBuilder<bool>(
-                                  future: _firestoreService
-                                      .showDistractor(topFavoriteCard.id),
-                                  builder: (context, distractorSnapshot) {
-                                    if (distractorSnapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(child: WaitingDialog());
-                                    }
-
-                                    if (distractorSnapshot.hasError) {
-                                      return Center(
-                                          child: Text(
-                                              'Error: ${distractorSnapshot.error}'));
-                                    }
-
-                                    bool showDistractor =
-                                        distractorSnapshot.data ?? false;
-
-                                    // Set the values for cardId and showDistractor
-                                    
-
+                               
+                                  bool showDistractor = cardActivity.showDistractor;
                                     return Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: showDistractor == false
@@ -191,7 +172,6 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   card: topFavoriteCard,
                                                   onTap: () {
                                                     cardActivity.setCardId(topFavoriteCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
                                                     final cardTitle =
                                                         topFavoriteCard.title;
                                                     final category =
@@ -222,7 +202,6 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                   card: topFavoriteCard,
                                                   onTap: () {
                                                     cardActivity.setCardId(topFavoriteCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
                                                     final cardTitle =
                                                         topFavoriteCard.title;
                                                     final category =
@@ -266,10 +245,10 @@ class _Learn1State extends ConsumerState<Learn1> {
                                             ),
                                     );
                                   },
-                                );
-                              },
-                            )
                           
+                        
+                          
+                       )
                     ],
                   ),
                 ),

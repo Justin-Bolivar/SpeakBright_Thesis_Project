@@ -31,9 +31,9 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
     ref.read(cardActivityProvider).reset();
-    FirestoreService().updatePhase3Independence();
-    FirestoreService().updatePhase1Independence();
-    FirestoreService().updatePhase2Independence();
+    // FirestoreService().updatePhase3Independence();
+    // FirestoreService().updatePhase1Independence();
+    // FirestoreService().updatePhase2Independence();
   }
 
   @override

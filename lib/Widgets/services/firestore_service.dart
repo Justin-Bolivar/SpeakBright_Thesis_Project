@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -139,17 +141,15 @@ class FirestoreService {
           (userSnapshot.data() as Map<String, dynamic>)['phase'];
 
       // Step 2: Update 'exitTimestamps' for the previous phase in 'activity_log'
-      if (previousPhase != null) {
-        DocumentReference prevPhaseRef = FirebaseFirestore.instance
-            .collection('activity_log')
-            .doc(studentID)
-            .collection('phase')
-            .doc(previousPhase.toString());
+      DocumentReference prevPhaseRef = FirebaseFirestore.instance
+          .collection('activity_log')
+          .doc(studentID)
+          .collection('phase')
+          .doc(previousPhase.toString());
 
-        await prevPhaseRef.set({
-          'exitTimestamps': FieldValue.arrayUnion([DateTime.now()]),
-        }, SetOptions(merge: true));
-      }
+      await prevPhaseRef.set({
+        'exitTimestamps': FieldValue.arrayUnion([DateTime.now()]),
+      }, SetOptions(merge: true));
 
       // Step 3: Update 'entryTimestamps' for the new phase in 'activity_log'
       DocumentReference newPhaseRef = FirebaseFirestore.instance
@@ -444,8 +444,9 @@ class FirestoreService {
           .then((trialPromptsSnapshot) => trialPromptsSnapshot.size >= 5);
     });
 
-    if (hasEnoughIndependentPrompts)
+    if (hasEnoughIndependentPrompts) {
       return hasEnoughIndependentPrompts; //dapat in the current session 5 independent then distractor is shown
+    }
 
     // return proficiency >= 70;
     return false;
@@ -898,4 +899,144 @@ class FirestoreService {
       print("Error setting currently learning card: $e");
     }
   }
+
+  void updatePhase1IndependenceOptimized(String cardId) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    String uid = auth.currentUser?.uid ?? '';
+    if (uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      // Accessing the card details from the 'cards' collection
+      DocumentSnapshot cardSnapshot =
+          await firestore.collection('cards').doc(cardId).get();
+
+      if (!cardSnapshot.exists) {
+        print('Card not found for cardId: $cardId');
+        return;
+      }
+
+      Map<String, dynamic>? cardData =
+          cardSnapshot.data() as Map<String, dynamic>?;
+      bool isPhase1Independence = cardData?['phase1_independence'] ?? false;
+
+      // If the card already has phase1_independence as true, no need to update
+      if (isPhase1Independence) {
+        print('The card already has phase1_independence as true.');
+        return;
+      }
+
+      // Fetching the most recent 3 session data for phase 1
+      DocumentReference activityLogRef =
+          firestore.collection('activity_log').doc(uid);
+      QuerySnapshot sessionSnapshot = await activityLogRef
+          .collection('phase')
+          .doc('1')
+          .collection('session')
+          .orderBy('timestamp', descending: true)
+          .limit(3)
+          .get();
+
+      if (sessionSnapshot.docs.isEmpty) {
+        print('No relevant sessions found.');
+        return; // No sessions to process
+      }
+
+      List<DocumentSnapshot> relevantSessions = sessionSnapshot.docs;
+
+      int independentDistractorCount = 0;
+      int totalDistractorCount = 0;
+
+      // Loop through sessions to access the pre-calculated fields
+      for (var sessionDoc in relevantSessions) {
+        // Fetch the independentDistractorCount and totalDistractorCount directly from the session
+        independentDistractorCount +=
+            (sessionDoc['independentDistractorCount'] ?? 0) as int;
+        totalDistractorCount +=
+            (sessionDoc['totalDistractorCount'] ?? 0) as int;
+      }
+
+      // Calculate the independence percentage
+      double cardIndependencePercentage = totalDistractorCount > 0
+          ? (independentDistractorCount / totalDistractorCount * 100)
+          : 0;
+
+      // If the card has an independence percentage of >= 70, update phase1_independence
+      if (cardIndependencePercentage >= 70) {
+        await firestore.collection('cards').doc(cardId).update({
+          'phase1_independence': true,
+        });
+
+        // Also update in the 'favorites' collection
+        await firestore
+            .collection('favorites')
+            .doc(uid)
+            .collection('cards')
+            .doc(cardId)
+            .update({
+          'phase1_independence': true,
+        });
+
+        print('Phase1 independence updated to true for $cardId');
+      } else {
+        print('Phase1 independence remains false for $cardId');
+      }
+    } catch (e) {
+      print('Error updating phase1_independence: $e');
+    }
+  }
+
+  Future<void> updatePhaseIndependence(
+  String cardID, int phase) async {
+  final firestore = FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
+  final uid = auth.currentUser?.uid;
+
+  if (uid == null) {
+    throw Exception("User not logged in");
+  }
+
+  try {
+    DocumentReference activityLogRef =
+        firestore.collection('activity_log').doc(uid);
+
+    // Retrieve the session collection for the correct phase
+    DocumentReference phaseRef = activityLogRef.collection('phase').doc(phase.toString());
+
+    // Retrieve the session data (last 3 sessions)
+    QuerySnapshot sessionSnapshot = await phaseRef
+        .collection('session')
+        .orderBy('timestamp', descending: true)
+        .limit(3)
+        .get();
+
+    // Store the counts for the card
+    int independentDistractorCount = 0;
+    int totalDistractorCount = 0;
+
+    // Iterate through the sessions to aggregate the counts
+    for (var sessionDoc in sessionSnapshot.docs) {
+      independentDistractorCount += (sessionDoc['independentDistractorCount'] ?? 0) as int;
+      totalDistractorCount += (sessionDoc['totalDistractorCount'] ?? 0 ) as int;
+    }
+
+    // Calculate the independence percentage based on the counts
+    double cardIndependencePercentage = totalDistractorCount > 0
+        ? (independentDistractorCount / totalDistractorCount * 100)
+        : 0;
+
+    // Update the card document with the phase-specific independence data
+    await firestore.collection('cards').doc(cardID).update({
+      'phase${phase}_independence': cardIndependencePercentage >= 70,
+    });
+
+    print("Updated phase $phase data for card: $cardID");
+  } catch (e) {
+    print("Error updating phase $phase independence: $e");
+  }
+}
+
 }
