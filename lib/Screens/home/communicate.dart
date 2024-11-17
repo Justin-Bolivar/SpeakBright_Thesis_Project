@@ -56,8 +56,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
       if (currentUserPhase == 2) {
         sentence.add("I want");
+        sentence.add("____");
       } else if (currentUserPhase == 3) {
         sentence.add("I feel");
+        sentence.add("____");
       }
     });
   }
@@ -70,20 +72,69 @@ class _CommunicateState extends ConsumerState<Communicate> {
     });
   }
 
-  void _addCardTitleToSentence(String title, String category) {
+  void _addCardTitleToSentence3(String title, String category) {
     setState(() {
-      if (_sentencePrefix == "I feel") {
-        if (category == "Emotions") {
-          if (sentence.isNotEmpty) {
-            sentence[0] = title;
-            words[0] = title;
-          } else {
-            sentence.add(title);
-            words.add(title);
-          }
+      if (sentence.length > 1) {
+        sentence[sentence.length - 1] = title;
+      } else {
+        sentence.add(title);
+      }
+    });
+  }
+
+  void _addCardTitleToSentence2(String title, String category) {
+    setState(() {
+      if (category == "Activities") {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = "to $title";
+          words[words.length - 1] = "to $title";
         } else {
-          String placeHolder = "____";
-          if (sentence.isNotEmpty) {
+          sentence.add("to $title");
+          words.add(title);
+        }
+      } else {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+          words[words.length - 1] = title;
+        } else {
+          sentence.add(title);
+          words.add(title);
+        }
+      }
+    });
+  }
+
+  void _addCardTitleToSentence4(String title, String category) {
+    setState(() {
+      if (currentUserPhase == 4) {
+        if (_sentencePrefix == "I feel") {
+          if (category == "Emotions") {
+            if (sentence.isNotEmpty) {
+              sentence[0] = title;
+              words[0] = title;
+            } else {
+              sentence.add(title);
+              words.add(title);
+            }
+          } else {
+            String placeHolder = "____";
+            if (sentence.isNotEmpty) {
+              if (sentence.length > 1) {
+                sentence[1] = title;
+                words[1] = title;
+              } else {
+                sentence.add(title);
+                words.add(title);
+              }
+            } else {
+              sentence.add(placeHolder);
+              sentence.add(title);
+              words.add(placeHolder);
+              words.add(title);
+            }
+          }
+        } else if (_sentencePrefix == "I want") {
+          if (category != "Emotions") {
             if (sentence.length > 1) {
               sentence[1] = title;
               words[1] = title;
@@ -92,25 +143,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
               words.add(title);
             }
           } else {
-            sentence.add(placeHolder);
-            sentence.add(title);
-            words.add(placeHolder);
-            words.add(title);
-          }
-        }
-      } else if (_sentencePrefix == "I want") {
-        if (category != "Emotions") {
-          if (sentence.length > 1) {
-            sentence[1] = title;
-            words[1] = title;
-          } else {
+            _toggleSentencePrefix();
             sentence.add(title);
             words.add(title);
           }
-        } else {
-          _toggleSentencePrefix();
-          sentence.add(title);
-          words.add(title);
         }
       }
     });
@@ -123,7 +159,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I";
+    String sentenceString = sentence.join(' ');
     String pronoun = "I";
     words.add(pronoun);
     print(words);
@@ -174,15 +210,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
               errorResponse['detail'].replaceFirst('Error: ', '');
           _ttsService.speak(errorMessage);
           setState(() {
-            sentence.clear();
-            words.clear();
+            _clearSentence();
           });
         }
+      } else {
+        _ttsService.speak(sentenceString);
+        _firestoreService.storeSentence(sentence);
+        _clearSentence();
       }
-
-      _firestoreService.storeSentence(sentence);
-      _ttsService.speak(sentenceString);
-      _clearSentence();
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -244,31 +279,24 @@ class _CommunicateState extends ConsumerState<Communicate> {
                           borderType: BorderType.RRect,
                           radius: const Radius.circular(20.0),
                           child: Container(
-                              height: 100,
-                              width: MediaQuery.of(context).size.width * .8,
-                              decoration: BoxDecoration(
-                                color: kwhite,
-                                borderRadius: BorderRadius.circular(20.0),
+                            height: 100,
+                            width: MediaQuery.of(context).size.width * .8,
+                            decoration: BoxDecoration(
+                              color: kwhite,
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                currentUserPhase == 2 || currentUserPhase == 3
+                                    ? sentence.join(' ')
+                                    : "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                style: const TextStyle(
+                                    color: kLightPruple,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w400),
                               ),
-                              child: sentence.isEmpty
-                                  ? Center(
-                                      child: Text(
-                                        "$_sentencePrefix ______, I want ______",
-                                        style: const TextStyle(
-                                            color: kLightPruple,
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                    )
-                                  : Center(
-                                      child: Text(
-                                        "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
-                                        style: const TextStyle(
-                                            color: kLightPruple,
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                    )),
+                            ),
+                          ),
                         ),
                         if (showSentenceWidget)
                           Container(
@@ -459,14 +487,18 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
                     if (currentUserPhase > 1) {
-                      _addCardTitleToSentence(cardTitle, category);
-                      _firestoreService.tapCountIncrement(cardId);
+                      if (currentUserPhase == 2) {
+                        _addCardTitleToSentence2(cardTitle, category);
+                      } else if (currentUserPhase == 3) {
+                        _addCardTitleToSentence3(cardTitle, category);
+                      } else if (currentUserPhase == 4) {
+                        _addCardTitleToSentence4(cardTitle, category);
+                      }
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);
                       print('title: $cardTitle, cat: $category');
                     } else {
-                      _firestoreService.tapCountIncrement(cardId);
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);
