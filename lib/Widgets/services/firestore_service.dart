@@ -2,6 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {
@@ -990,7 +992,10 @@ class FirestoreService {
   }
 
   Future<void> updatePhaseIndependence(
-  String cardID, int phase) async {
+  String cardID, 
+  int phase, 
+  WidgetRef ref, // Pass the widgetRef to update the provider
+) async {
   final firestore = FirebaseFirestore.instance;
   final auth = FirebaseAuth.instance;
   final uid = auth.currentUser?.uid;
@@ -1000,8 +1005,7 @@ class FirestoreService {
   }
 
   try {
-    DocumentReference activityLogRef =
-        firestore.collection('activity_log').doc(uid);
+    DocumentReference activityLogRef = firestore.collection('activity_log').doc(uid);
 
     // Retrieve the session collection for the correct phase
     DocumentReference phaseRef = activityLogRef.collection('phase').doc(phase.toString());
@@ -1020,7 +1024,7 @@ class FirestoreService {
     // Iterate through the sessions to aggregate the counts
     for (var sessionDoc in sessionSnapshot.docs) {
       independentDistractorCount += (sessionDoc['independentDistractorCount'] ?? 0) as int;
-      totalDistractorCount += (sessionDoc['totalDistractorCount'] ?? 0 ) as int;
+      totalDistractorCount += (sessionDoc['totalDistractorCount'] ?? 0) as int;
     }
 
     // Calculate the independence percentage based on the counts
@@ -1029,9 +1033,23 @@ class FirestoreService {
         : 0;
 
     // Update the card document with the phase-specific independence data
-    await firestore.collection('cards').doc(cardID).update({
+    if(phase == 1){
+      await firestore.collection('cards').doc(cardID).update({
       'phase${phase}_independence': cardIndependencePercentage >= 70,
     });
+    }else{
+      await firestore.collection('cards').doc(cardID).update({
+      'phase2_independence': cardIndependencePercentage >= 70,
+      'phase3_independence': cardIndependencePercentage >= 70,
+
+    });
+    }
+    
+
+    // If the independence percentage is above 70, update the reset state
+    if (cardIndependencePercentage >= 70) {
+      ref.read(cardActivityProvider.notifier).reset();
+    }
 
     print("Updated phase $phase data for card: $cardID");
   } catch (e) {

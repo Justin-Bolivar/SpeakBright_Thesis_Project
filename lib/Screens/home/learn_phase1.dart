@@ -183,11 +183,11 @@ class _Learn1State extends ConsumerState<Learn1> {
                                                         'Top Favorite - title: $cardTitle, cat: $category');
                                                     _ttsService
                                                         .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardId);
+                                                    // _firestoreService
+                                                    //     .storeTappedCards(
+                                                    //         cardTitle,
+                                                    //         category,
+                                                    //         cardId);
                                                     
                                                   },
                                                 ),
@@ -214,11 +214,11 @@ class _Learn1State extends ConsumerState<Learn1> {
 
                                                     _ttsService
                                                         .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardId);
+                                                    // _firestoreService
+                                                    //     .storeTappedCards(
+                                                    //         cardTitle,
+                                                    //         category,
+                                                    //         cardId);
                                                    
                                                   },
                                                 ),

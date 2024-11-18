@@ -11,6 +11,7 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class PromptButton extends ConsumerStatefulWidget {
   final int phaseCurrent;
@@ -103,7 +104,10 @@ class _PromptButtonState extends ConsumerState<PromptButton>
 
     // Trigger batch upload if buffer size exceeds a limit
     if (tapBuffer.length >= 20) {
+      print(tapBuffer);
       _uploadBufferedTaps();
+      print('buffer 20 $cardID!');
+      _firestoreService.updatePhaseIndependence(cardID!, widget.phaseCurrent, ref);
       ref.read(cardActivityProvider.notifier).reset();
     }
   }
@@ -115,29 +119,23 @@ class _PromptButtonState extends ConsumerState<PromptButton>
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // Show the loading dialog
-    await showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Prevents closing the dialog by tapping outside
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text("Ending Session..."),
-            ],
-          ),
-        );
-      },
-    );
-
     try {
       final activityLogRef = firestore.collection('activity_log').doc(user.uid);
       final currentPhase = widget.phaseCurrent;
       final phaseRef =
           activityLogRef.collection('phase').doc(currentPhase.toString());
+
+      await activityLogRef.set({
+        'email': user.email,
+        'userID': user.uid,
+      }, SetOptions(merge: true));
+
+      // Ensure the phase document exists (if not, create it)
+      DocumentSnapshot phaseSnapshot = await phaseRef.get();
+      if (!phaseSnapshot.exists) {
+        print("Phase document not found, creating new phase document");
+        await phaseRef.set({'createdAt': FieldValue.serverTimestamp()});
+      }
 
       final trialRef = phaseRef.collection('session').doc();
 
@@ -151,14 +149,19 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       // Process each buffered tap event
       for (var tap in tapBuffer) {
         final cardID = tap['cardID'];
+        if (cardID == null) {
+          print("CardID is null in tap, skipping this tap.");
+          continue; // Skip this iteration if cardID is null
+        }
+
         final trialPromptRef = trialRef.collection('trialPrompt').doc();
 
-        // Check if the trial has distractor and if it's independent
-        if (tap['withDistractor']) {
-          totalDistractorCount++;
-          if (tap['index'] == 4) {
-            // Assuming index 4 represents 'Independent'
-            independentDistractorCount++;
+        if (tap['withDistractor'] != null) {
+          if (tap['withDistractor']) {
+            totalDistractorCount++;
+            if (tap['index'] == 4) {
+              independentDistractorCount++;
+            }
           }
         }
 
@@ -167,7 +170,6 @@ class _PromptButtonState extends ConsumerState<PromptButton>
         }
         totalTaps++;
 
-        // Add the tap event to the batch
         batch.set(trialPromptRef, {
           'prompt': [
             'Physical',
@@ -182,34 +184,31 @@ class _PromptButtonState extends ConsumerState<PromptButton>
         });
       }
 
-      // Commit the batch write for the tap events
-      await batch.commit();
-      print("Batch write completed");
-
-      // Now, update the session document with the counts of independent distractors
-
-      await trialRef.update({
+      await trialRef.set({
         'independentDistractorCount': independentDistractorCount,
         'totalDistractorCount': totalDistractorCount,
         'independentCount': independentCount,
         'totalTaps': totalTaps,
+        'timestamp': FieldValue.serverTimestamp(),
       });
-      print("Session updated with distractor counts");
+      print("Session document created with distractor counts");
 
-      final cardID = ref.watch(cardActivityProvider).cardId;
-
-
-      _firestoreService.updatePhaseIndependence(cardID!, currentPhase);
-      
+      await batch.commit();
+      print("Batch write completed");
 
       tapBuffer.clear();
+
+      Fluttertoast.showToast(
+        msg: "Session ended successfully!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     } catch (e) {
       print("Error uploading batch: $e");
-    } finally {
-      // Dismiss the loading dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
     }
   }
 
@@ -245,6 +244,8 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                           .watch(cardActivityProvider)
                           .showDistractor // Get the distractor state from provider
                       );
+                  ref.read(cardActivityProvider).tapPrompt(4);
+
                 }
                 Fluttertoast.showToast(
                     msg: "Looped 10 times: Activity log updated.",
@@ -260,10 +261,56 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                 height: 60,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.blue, // Adjust the color as needed
+                  color: lGray, // Adjust the color as needed
                 ),
                 child: const Center(
                   child: Text('+10', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 120,
+            left: 100,
+            child: GestureDetector(
+              onTap: () async {
+                _firestoreService.setCurrentlyLearningCard(
+                  ref.watch(cardActivityProvider).cardId,
+                );
+
+                // Add +10 Independent to the activity log on button press
+                for (int i = 0; i < 5; i++) {
+                  // await _updatePromptField(4, isLoop: true);
+                  bufferTapEvent(
+                      4, // Index for "Independent"
+                      ref
+                          .watch(cardActivityProvider)
+                          .cardId, // Get the current cardID from provider
+                      ref
+                          .watch(cardActivityProvider)
+                          .showDistractor // Get the distractor state from provider
+                      );
+
+                  ref.read(cardActivityProvider).tapPrompt(4);
+                }
+                Fluttertoast.showToast(
+                    msg: "Looped 5 times: Activity log updated.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: lGray, // Adjust the color as needed
+                ),
+                child: const Center(
+                  child: Text('+5', style: TextStyle(color: Colors.white)),
                 ),
               ),
             ),
