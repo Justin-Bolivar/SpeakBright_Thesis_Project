@@ -992,69 +992,101 @@ class FirestoreService {
   }
 
   Future<void> updatePhaseIndependence(
-  String cardID, 
-  int phase, 
-  WidgetRef ref, // Pass the widgetRef to update the provider
-) async {
-  final firestore = FirebaseFirestore.instance;
-  final auth = FirebaseAuth.instance;
-  final uid = auth.currentUser?.uid;
+    String cardID,
+    int phase,
+    WidgetRef ref, // Pass the widgetRef to update the provider
+  ) async {
+    final firestore = FirebaseFirestore.instance;
+    final auth = FirebaseAuth.instance;
+    final uid = auth.currentUser?.uid;
 
-  if (uid == null) {
-    throw Exception("User not logged in");
+    if (uid == null) {
+      throw Exception("User not logged in");
+    }
+
+    try {
+      DocumentReference activityLogRef =
+          firestore.collection('activity_log').doc(uid);
+
+      // Retrieve the session collection for the correct phase
+      DocumentReference phaseRef =
+          activityLogRef.collection('phase').doc(phase.toString());
+
+      // Retrieve the session data (last 3 sessions)
+      QuerySnapshot sessionSnapshot = await phaseRef
+          .collection('session')
+          .orderBy('timestamp', descending: true)
+          // .where('totalDistractorCount' as int != 0)
+          .limit(3)
+          .get();
+
+      // Store the counts for the card
+      int independentDistractorCount = 0;
+      int totalDistractorCount = 0;
+
+      int validSessionsCount = 0;
+
+      // Iterate over the fetched sessions
+      for (var sessionDoc in sessionSnapshot.docs) {
+        final trialPromptCollection =
+            sessionDoc.reference.collection('trialPrompt');
+
+        // Check if the session contains the given cardID in its `trialPrompt` subcollection
+        QuerySnapshot trialPromptSnapshot = await trialPromptCollection
+            .where('cardID', isEqualTo: cardID)
+            .limit(1)
+            .get();
+
+        // If no matching trial prompt is found, mark this session as invalid and stop further processing
+        if (trialPromptSnapshot.docs.isEmpty) {
+          print("Session ${sessionDoc.id} is invalid for cardID $cardID");
+          continue;
+        }
+
+        // Increment valid session count
+        validSessionsCount++;
+
+        // Sum up counts for valid sessions
+        independentDistractorCount +=
+            (sessionDoc['independentDistractorCount'] ?? 0) as int;
+        totalDistractorCount +=
+            (sessionDoc['totalDistractorCount'] ?? 0) as int;
+
+        
+        if (validSessionsCount >= 3) break;
+      }
+
+// Check if there are at least 3 valid sessions
+      if (validSessionsCount < 3) {
+        print("Insufficient valid sessions for cardID $cardID in phase $phase");
+        return;
+      }
+
+      // Calculate the independence percentage based on the counts
+      double cardIndependencePercentage = totalDistractorCount > 0
+          ? (independentDistractorCount / totalDistractorCount * 100)
+          : 0;
+
+      // Update the card document with the phase-specific independence data
+      if (phase == 1) {
+        await firestore.collection('cards').doc(cardID).update({
+          'phase${phase}_independence': cardIndependencePercentage >= 70,
+        });
+      } else {
+        await firestore.collection('cards').doc(cardID).update({
+          'phase2_independence': cardIndependencePercentage >= 70,
+          'phase3_independence': cardIndependencePercentage >= 70,
+        });
+      }
+
+      // If the independence percentage is above 70, update the reset state
+      if (cardIndependencePercentage >= 70) {
+        ref.read(cardActivityProvider.notifier).reset();
+      }
+
+      print("Updated phase $phase data for card: $cardID");
+    } catch (e) {
+      print("Error updating phase $phase independence: $e");
+    }
   }
-
-  try {
-    DocumentReference activityLogRef = firestore.collection('activity_log').doc(uid);
-
-    // Retrieve the session collection for the correct phase
-    DocumentReference phaseRef = activityLogRef.collection('phase').doc(phase.toString());
-
-    // Retrieve the session data (last 3 sessions)
-    QuerySnapshot sessionSnapshot = await phaseRef
-        .collection('session')
-        .orderBy('timestamp', descending: true)
-        .limit(3)
-        .get();
-
-    // Store the counts for the card
-    int independentDistractorCount = 0;
-    int totalDistractorCount = 0;
-
-    // Iterate through the sessions to aggregate the counts
-    for (var sessionDoc in sessionSnapshot.docs) {
-      independentDistractorCount += (sessionDoc['independentDistractorCount'] ?? 0) as int;
-      totalDistractorCount += (sessionDoc['totalDistractorCount'] ?? 0) as int;
-    }
-
-    // Calculate the independence percentage based on the counts
-    double cardIndependencePercentage = totalDistractorCount > 0
-        ? (independentDistractorCount / totalDistractorCount * 100)
-        : 0;
-
-    // Update the card document with the phase-specific independence data
-    if(phase == 1){
-      await firestore.collection('cards').doc(cardID).update({
-      'phase${phase}_independence': cardIndependencePercentage >= 70,
-    });
-    }else{
-      await firestore.collection('cards').doc(cardID).update({
-      'phase2_independence': cardIndependencePercentage >= 70,
-      'phase3_independence': cardIndependencePercentage >= 70,
-
-    });
-    }
-    
-
-    // If the independence percentage is above 70, update the reset state
-    if (cardIndependencePercentage >= 70) {
-      ref.read(cardActivityProvider.notifier).reset();
-    }
-
-    print("Updated phase $phase data for card: $cardID");
-  } catch (e) {
-    print("Error updating phase $phase independence: $e");
-  }
-}
-
 }

@@ -107,8 +107,11 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       print(tapBuffer);
       _uploadBufferedTaps();
       print('buffer 20 $cardID!');
-      _firestoreService.updatePhaseIndependence(cardID!, widget.phaseCurrent, ref);
+      _firestoreService.updatePhaseIndependence(
+          cardID!, widget.phaseCurrent, ref);
       ref.read(cardActivityProvider.notifier).reset();
+      print('reset??');
+      widget.onRefresh?.call();
     }
   }
 
@@ -197,6 +200,8 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       print("Batch write completed");
 
       tapBuffer.clear();
+      ref.read(cardActivityProvider.notifier).reset();
+
 
       Fluttertoast.showToast(
         msg: "Session ended successfully!",
@@ -245,7 +250,6 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                           .showDistractor // Get the distractor state from provider
                       );
                   ref.read(cardActivityProvider).tapPrompt(4);
-
                 }
                 Fluttertoast.showToast(
                     msg: "Looped 10 times: Activity log updated.",
@@ -388,6 +392,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
     final withDistractor = widget.phaseCurrent > 1
         ? true
         : ref.watch(cardActivityProvider).showDistractor;
+    print('Distractor bool: $withDistractor, Phase is ${widget.phaseCurrent}');
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,

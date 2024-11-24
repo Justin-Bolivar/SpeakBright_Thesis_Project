@@ -39,9 +39,9 @@ class _Learn1State extends ConsumerState<Learn1> {
 
   @override
   Widget build(BuildContext context) {
+    final cardActivity =
+        ref.watch(cardActivityProvider); // Access CardActivityProvider
 
-    final cardActivity = ref.watch(cardActivityProvider); // Access CardActivityProvider
-    
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: phase1Color),
@@ -56,12 +56,9 @@ class _Learn1State extends ConsumerState<Learn1> {
             },
             itemBuilder: (context) =>
                 List.generate(phase1Categories.length, (index) {
-
               return PopupMenuItem<int>(
                 value: index,
-                child: Container(
-                  
-                ),
+                child: Container(),
               );
             }),
           ),
@@ -78,7 +75,7 @@ class _Learn1State extends ConsumerState<Learn1> {
               PromptButton(
                 phaseCurrent: currentUserPhase,
                 onRefresh: () {
-                  setState(() {});
+                  setState(() {ref.watch(cardActivityProvider);});
                 },
               ),
             ],
@@ -135,120 +132,111 @@ class _Learn1State extends ConsumerState<Learn1> {
                       // card part
 
                       // Wrap the FutureBuilder inside the widget tree properly
-                       FutureBuilder<List<CardModel>?>(
-                              future: TopFavoriteCard
-                                  .fetchTopFavoriteAndDistractorCards(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(child: WaitingDialog());
-                                }
+                      FutureBuilder<List<CardModel>?>(
+                        future: TopFavoriteCard
+                            .fetchTopFavoriteAndDistractorCards(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: WaitingDialog());
+                          }
 
-                                if (snapshot.hasError) {
-                                  return Center(
-                                      child: Text('Error: ${snapshot.error}'));
-                                }
+                          if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          }
 
-                                final List<CardModel>? cards = snapshot.data;
+                          final List<CardModel>? cards = snapshot.data;
 
-                                if (cards == null || cards.isEmpty) {
-                                  return Center(
-                                      child: Text('No favorite card found.',style: TextStyle(color: phase1Color),));
-                                }
+                          if (cards == null || cards.isEmpty) {
+                            return Center(
+                                child: Text(
+                              'No favorite card found.',
+                              style: TextStyle(color: phase1Color),
+                            ));
+                          }
 
-                                final CardModel topFavoriteCard = cards[0];
-                                final CardModel? distractorCard =
-                                    cards.length > 1 ? cards[1] : null;
+                          final CardModel topFavoriteCard = cards[0];
+                          final CardModel? distractorCard =
+                              cards.length > 1 ? cards[1] : null;
 
-                               
-                                  bool showDistractor = cardActivity.showDistractor;
-                                    return Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: showDistractor == false
-                                          ? Column(
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topFavoriteCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topFavoriteCard.id);
-                                                    final cardTitle =
-                                                        topFavoriteCard.title;
-                                                    final category =
-                                                        topFavoriteCard
-                                                            .category;
-                                                    final cardId =
-                                                        topFavoriteCard.id;
-                                                    print(
-                                                        'Top Favorite - title: $cardTitle, cat: $category');
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    // _firestoreService
-                                                    //     .storeTappedCards(
-                                                    //         cardTitle,
-                                                    //         category,
-                                                    //         cardId);
-                                                    
-                                                  },
-                                                ),
-                                              ],
-                                            )
-                                          : Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topFavoriteCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topFavoriteCard.id);
-                                                    final cardTitle =
-                                                        topFavoriteCard.title;
-                                                    final category =
-                                                        topFavoriteCard
-                                                            .category;
-                                                    final cardId =
-                                                        topFavoriteCard.id;
-                                                    print(
-                                                        'Top Favorite - title: $cardTitle, cat: $category');
+                          bool showDistractor = cardActivity.showDistractor;
+                          print('LEARN 1PAGE: $showDistractor');
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: showDistractor == false
+                                ? Column(
+                                    children: [
+                                      Phase1Card(
+                                        fontSize: 20,
+                                        card: topFavoriteCard,
+                                        onTap: () {
+                                          cardActivity
+                                              .setCardId(topFavoriteCard.id);
+                                          final cardTitle =
+                                              topFavoriteCard.title;
+                                          final category =
+                                              topFavoriteCard.category;
+                                          final cardId = topFavoriteCard.id;
+                                          print(
+                                              'Top Favorite - title: $cardTitle, cat: $category');
+                                          _ttsService.speak(cardTitle);
+                                          // _firestoreService
+                                          //     .storeTappedCards(
+                                          //         cardTitle,
+                                          //         category,
+                                          //         cardId);
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Phase1Card(
+                                        fontSize: 20,
+                                        card: topFavoriteCard,
+                                        onTap: () {
+                                          cardActivity
+                                              .setCardId(topFavoriteCard.id);
+                                          final cardTitle =
+                                              topFavoriteCard.title;
+                                          final category =
+                                              topFavoriteCard.category;
+                                          final cardId = topFavoriteCard.id;
+                                          print(
+                                              'Top Favorite - title: $cardTitle, cat: $category');
 
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    // _firestoreService
-                                                    //     .storeTappedCards(
-                                                    //         cardTitle,
-                                                    //         category,
-                                                    //         cardId);
-                                                   
-                                                  },
-                                                ),
-                                                SizedBox(width: 25),
-                                                if (showDistractor &&
-                                                    distractorCard != null)
-                                                  Phase1Card(
-                                                    widthFactor: 0.35,
-                                                    heightFactor: 0.35,
-                                                    card: distractorCard,
-                                                    onTap: () {
-                                                      final cardTitle =
-                                                          distractorCard.title;
-                                                      final category =
-                                                          distractorCard
-                                                              .category;
-                                                      print(
-                                                          'Distractor - title: $cardTitle, cat: $category');
-                                                      _ttsService
-                                                          .speak(cardTitle);
-                                                    },
-                                                  ),
-                                              ],
-                                            ),
-                                    );
-                                  },
-                          
-                        
-                          
-                       )
+                                          _ttsService.speak(cardTitle);
+                                          // _firestoreService
+                                          //     .storeTappedCards(
+                                          //         cardTitle,
+                                          //         category,
+                                          //         cardId);
+                                        },
+                                      ),
+                                      SizedBox(width: 25),
+                                      if (showDistractor &&
+                                          distractorCard != null)
+                                        Phase1Card(
+                                          widthFactor: 0.35,
+                                          heightFactor: 0.35,
+                                          card: distractorCard,
+                                          onTap: () {
+                                            final cardTitle =
+                                                distractorCard.title;
+                                            final category =
+                                                distractorCard.category;
+                                            print(
+                                                'Distractor - title: $cardTitle, cat: $category');
+                                            _ttsService.speak(cardTitle);
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                          );
+                        },
+                      )
                     ],
                   ),
                 ),
