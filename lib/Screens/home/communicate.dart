@@ -56,8 +56,10 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
       if (currentUserPhase == 2) {
         sentence.add("I want");
+        sentence.add("____");
       } else if (currentUserPhase == 3) {
         sentence.add("I feel");
+        sentence.add("____");
       }
     });
   }
@@ -70,48 +72,81 @@ class _CommunicateState extends ConsumerState<Communicate> {
     });
   }
 
-  void _addCardTitleToSentence(String title, String category) {
+  void _addCardTitleToSentence3(String title, String category) {
     setState(() {
-      if (_sentencePrefix == "I feel") {
-        if (category == "Emotions") {
-          if (sentence.isNotEmpty) {
-            sentence[0] = title;
-            words[0] = title;
-          } else {
-            sentence.add(title);
-            words.add(title);
-          }
+      if (sentence.length > 1) {
+        sentence[sentence.length - 1] = title;
+      } else {
+        sentence.add(title);
+      }
+    });
+  }
+
+  void _addCardTitleToSentence2(String title, String category) {
+    setState(() {
+      if (category == "Activities") {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = "to $title";
+          words[words.length - 1] = "to $title";
         } else {
-          if (sentence.isNotEmpty) {
-            sentence.add(title);
-            words.add(title);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Add an Emotion first'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            //_ttsService.speak('Add an Emotion first');
-          }
+          sentence.add("to $title");
+          words.add(title);
         }
-      } else if (_sentencePrefix == "I want") {
-        if (category != "Emotions") {
-          if (sentence.length > 1) {
-            sentence[1] = title;
-            words[1] = title;
+      } else {
+        if (sentence.length > 1) {
+          sentence[sentence.length - 1] = title;
+          words[words.length - 1] = title;
+        } else {
+          sentence.add(title);
+          words.add(title);
+        }
+      }
+    });
+  }
+
+  void _addCardTitleToSentence4(String title, String category) {
+    setState(() {
+      if (currentUserPhase == 4) {
+        if (_sentencePrefix == "I feel") {
+          if (category == "Emotions") {
+            if (sentence.isNotEmpty) {
+              sentence[0] = title;
+              words[0] = title;
+            } else {
+              sentence.add(title);
+              words.add(title);
+            }
           } else {
+            String placeHolder = "____";
+            if (sentence.isNotEmpty) {
+              if (sentence.length > 1) {
+                sentence[1] = title;
+                words[1] = title;
+              } else {
+                sentence.add(title);
+                words.add(title);
+              }
+            } else {
+              sentence.add(placeHolder);
+              sentence.add(title);
+              words.add(placeHolder);
+              words.add(title);
+            }
+          }
+        } else if (_sentencePrefix == "I want") {
+          if (category != "Emotions") {
+            if (sentence.length > 1) {
+              sentence[1] = title;
+              words[1] = title;
+            } else {
+              sentence.add(title);
+              words.add(title);
+            }
+          } else {
+            _toggleSentencePrefix();
             sentence.add(title);
             words.add(title);
           }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Emotions are not needed for this sentence'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          //_ttsService.speak('No Emotions Needed');
         }
       }
     });
@@ -124,7 +159,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   }
 
   Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I";
+    String sentenceString = sentence.join(' ');
     String pronoun = "I";
     words.add(pronoun);
     print(words);
@@ -175,15 +210,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
               errorResponse['detail'].replaceFirst('Error: ', '');
           _ttsService.speak(errorMessage);
           setState(() {
-            sentence.clear();
-            words.clear();
+            _clearSentence();
           });
         }
+      } else {
+        _ttsService.speak(sentenceString);
+        _firestoreService.storeSentence(sentence);
+        _clearSentence();
       }
-
-      _firestoreService.storeSentence(sentence);
-      _ttsService.speak(sentenceString);
-      _clearSentence();
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -195,6 +229,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
     bool showSentenceWidget = currentUserPhase > 1;
+    bool showSwitchWidget = currentUserPhase == 4;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -228,109 +263,108 @@ class _CommunicateState extends ConsumerState<Communicate> {
       body: Column(
         children: [
           if (showSentenceWidget)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    DottedBorder(
-                      color: dullpurple,
-                      strokeWidth: 1,
-                      dashPattern: const [6, 7],
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(20.0),
-                      child: Container(
-                          height: 100,
-                          width: MediaQuery.of(context).size.width * .8,
-                          decoration: BoxDecoration(
-                            color: kwhite,
-                            borderRadius: BorderRadius.circular(20.0),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        DottedBorder(
+                          color: dullpurple,
+                          strokeWidth: 1,
+                          dashPattern: const [6, 7],
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(20.0),
+                          child: Container(
+                            height: 100,
+                            width: MediaQuery.of(context).size.width * .8,
+                            decoration: BoxDecoration(
+                              color: kwhite,
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                currentUserPhase == 2 || currentUserPhase == 3
+                                    ? sentence.join(' ')
+                                    : "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                style: const TextStyle(
+                                    color: kLightPruple,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ),
                           ),
-                          child: sentence.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    "$_sentencePrefix ______, I want ______",
-                                    style: const TextStyle(
-                                        color: kLightPruple,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
-                                    style: const TextStyle(
-                                        color: kLightPruple,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                )),
-                    ),
-                    if (showSentenceWidget)
-                      Container(
-                        child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color: mainpurple,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: IconButton(
-                                onPressed: _sendSentenceAndSpeak,
-                                icon: const Icon(
-                                  Icons.volume_up,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              // width: 30,
-                              height: 15,
-                            ),
-                            Container(
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color: mainpurple,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: IconButton(
-                                onPressed: _clearSentence,
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
-                      ),
-                  ],
+                        if (showSentenceWidget)
+                          Container(
+                            child: Column(
+                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    color: mainpurple,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _sendSentenceAndSpeak,
+                                    icon: const Icon(
+                                      Icons.volume_up,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  // width: 30,
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    color: mainpurple,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: _clearSentence,
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                if (showSwitchWidget)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: mainpurple,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _toggleSentencePrefix,
+                    child: Text(
+                      "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: mainpurple,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _toggleSentencePrefix,
-            child: Text(
-              "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           const SizedBox(height: 20),
           Row(
             children: [
@@ -453,14 +487,18 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
                     if (currentUserPhase > 1) {
-                      _addCardTitleToSentence(cardTitle, category);
-                      _firestoreService.tapCountIncrement(cardId);
+                      if (currentUserPhase == 2) {
+                        _addCardTitleToSentence2(cardTitle, category);
+                      } else if (currentUserPhase == 3) {
+                        _addCardTitleToSentence3(cardTitle, category);
+                      } else if (currentUserPhase == 4) {
+                        _addCardTitleToSentence4(cardTitle, category);
+                      }
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);
                       print('title: $cardTitle, cat: $category');
                     } else {
-                      _firestoreService.tapCountIncrement(cardId);
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);

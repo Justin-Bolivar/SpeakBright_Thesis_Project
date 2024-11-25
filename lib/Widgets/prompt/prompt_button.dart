@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +11,7 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
 
 class PromptButton extends ConsumerStatefulWidget {
   final int phaseCurrent;
@@ -22,17 +25,22 @@ class PromptButton extends ConsumerStatefulWidget {
 }
 
 class _PromptButtonState extends ConsumerState<PromptButton>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   late Animation _animation;
   bool showLock = false;
   bool isAnimationCompleted = false;
   final FirestoreService _firestoreService = FirestoreService();
 
+// Buffer to store the taps temporarily before uploading
+  List<Map<String, dynamic>> tapBuffer = [];
+
   @override
   void initState() {
     super.initState();
-    _firestoreService.fetchPhase();
+    // Register this widget to listen for lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+    // _firestoreService.fetchPhase();
 
     _controller = AnimationController(
       vsync: this,
@@ -62,6 +70,13 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       });
   }
 
+  @override
+  void dispose() {
+    // Unregister this widget when it's disposed
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   //for circle2 na animation
   _onLongPressStart(LongPressStartDetails details) {
     if (!_controller.isAnimating) {
@@ -75,202 +90,250 @@ class _PromptButtonState extends ConsumerState<PromptButton>
     _controller.reverse();
   }
 
-  Future<void> _updatePromptField(int index, {bool isLoop = false}) async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    String uid = auth.currentUser?.uid ?? '';
-    if (uid.isEmpty) {
-      throw Exception('User not logged in');
+  void bufferTapEvent(int index, String? cardID, bool withDistractor) {
+    // final cardAct = ref.watch(cardActivityProvider);
+    // Store the event locally
+    if (cardID != null) {
+      tapBuffer.add({
+        'index': index,
+        'cardID': cardID,
+        'timestamp': DateTime.now(),
+        'withDistractor': withDistractor,
+      });
     }
 
-    User? user = auth.currentUser;
+    // Trigger batch upload if buffer size exceeds a limit
+    if (tapBuffer.length >= 20) {
+      print(tapBuffer);
+      _uploadBufferedTaps();
+      print('buffer 20 $cardID!');
+      _firestoreService.updatePhaseIndependence(
+          cardID!, widget.phaseCurrent, ref);
+      ref.read(cardActivityProvider.notifier).reset();
+      print('reset??');
+      widget.onRefresh?.call();
+    }
+  }
 
-    if (user != null) {
-      DocumentReference activityLogRef =
-          firestore.collection('activity_log').doc(user.uid);
+  Future<void> _uploadBufferedTaps() async {
+    if (tapBuffer.isEmpty) return;
+
+    final firestore = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final activityLogRef = firestore.collection('activity_log').doc(user.uid);
+      final currentPhase = widget.phaseCurrent;
+      final phaseRef =
+          activityLogRef.collection('phase').doc(currentPhase.toString());
 
       await activityLogRef.set({
         'email': user.email,
         'userID': user.uid,
       }, SetOptions(merge: true));
 
-      int currentPhase = widget.phaseCurrent;
-
-      DocumentReference phaseRef =
-          activityLogRef.collection('phase').doc(currentPhase.toString());
-
-      await phaseRef.set({
-        'phase': currentPhase,
-      }, SetOptions(merge: true));
-
-      // Get the most recent session
-      QuerySnapshot lastSessionSnapshot = await phaseRef
-          .collection('session')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .get();
-
-      bool createNewSession = false;
-      if (lastSessionSnapshot.docs.isNotEmpty) {
-        DocumentSnapshot lastSessionDoc = lastSessionSnapshot.docs.first;
-        Timestamp lastSessionTimestamp = lastSessionDoc['timestamp'];
-        int totalTrials = lastSessionDoc['total_trials'];
-
-        DateTime now = DateTime.now();
-        Duration timeSinceLastSession =
-            now.difference(lastSessionTimestamp.toDate());
-
-        if (timeSinceLastSession.inMinutes >= 10 || totalTrials >= 20) {
-          createNewSession = true;
-        }
-      } else {
-        createNewSession = true;
+      // Ensure the phase document exists (if not, create it)
+      DocumentSnapshot phaseSnapshot = await phaseRef.get();
+      if (!phaseSnapshot.exists) {
+        print("Phase document not found, creating new phase document");
+        await phaseRef.set({'createdAt': FieldValue.serverTimestamp()});
       }
 
-      // Reference for new or existing trial
-      DocumentReference trialRef;
-      if (createNewSession) {
-        trialRef = phaseRef.collection('session').doc();
-        await trialRef.set({
-          'timestamp': FieldValue.serverTimestamp(),
-          'total_trials': 1,
-        }, SetOptions(merge: true));
-      } else {
-        trialRef = phaseRef
-            .collection('session')
-            .doc(lastSessionSnapshot.docs.first.id);
-        await trialRef.update({
-          'total_trials': FieldValue.increment(1),
+      final trialRef = phaseRef.collection('session').doc();
+
+      WriteBatch batch = firestore.batch();
+
+      int independentDistractorCount = 0;
+      int totalDistractorCount = 0;
+      int independentCount = 0;
+      int totalTaps = 0;
+
+      // Process each buffered tap event
+      for (var tap in tapBuffer) {
+        final cardID = tap['cardID'];
+        if (cardID == null) {
+          print("CardID is null in tap, skipping this tap.");
+          continue; // Skip this iteration if cardID is null
+        }
+
+        final trialPromptRef = trialRef.collection('trialPrompt').doc();
+
+        if (tap['withDistractor'] != null) {
+          if (tap['withDistractor']) {
+            totalDistractorCount++;
+            if (tap['index'] == 4) {
+              independentDistractorCount++;
+            }
+          }
+        }
+
+        if (tap['index'] == 4) {
+          independentCount++;
+        }
+        totalTaps++;
+
+        batch.set(trialPromptRef, {
+          'prompt': [
+            'Physical',
+            'Modeling',
+            'Gestural',
+            'Verbal',
+            'Independent'
+          ][tap['index']],
+          'cardID': cardID,
+          'timestamp': tap['timestamp'],
+          'withDistractor': tap['withDistractor'],
         });
       }
 
-      //read card id val in provider
-      final cardID = ref.watch(cardActivityProvider).cardId;
+      await trialRef.set({
+        'independentDistractorCount': independentDistractorCount,
+        'totalDistractorCount': totalDistractorCount,
+        'independentCount': independentCount,
+        'totalTaps': totalTaps,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      print("Session document created with distractor counts");
 
-      if (cardID != null) {
-        DocumentReference trialPromptRef =
-            trialRef.collection('trialPrompt').doc();
+      await batch.commit();
+      print("Batch write completed");
 
-        // Determine the prompt type based on index
-        String promptType;
-        switch (index) {
-          case 0:
-            promptType = 'Physical';
-            break;
-          case 1:
-            promptType = 'Modeling';
-            break;
-          case 2:
-            promptType = 'Gestural';
-            break;
-          case 3:
-            promptType = 'Verbal';
-            break;
-          case 4:
-            promptType = 'Independent';
-            break;
-          default:
-            throw Exception("Invalid index");
-        }
+      tapBuffer.clear();
+      ref.read(cardActivityProvider.notifier).reset();
 
-        // Firestore transaction to increment the total field and add a new trial prompt document
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          DocumentSnapshot phaseSnapshot = await transaction.get(phaseRef);
 
-          if (!phaseSnapshot.exists) {
-            throw Exception("Required document does not exist!");
-          }
+      Fluttertoast.showToast(
+        msg: "Session ended successfully!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } catch (e) {
+      print("Error uploading batch: $e");
+    }
+  }
 
-          // Add a new document to the trialPrompt collection
-          transaction.set(
-            trialPromptRef,
-            {
-              'prompt': promptType,
-              'cardID': cardID,
-              'timestamp': FieldValue.serverTimestamp(),
-              'withDistractor': ref.watch(cardActivityProvider).showDistractor
-            },
-            SetOptions(merge: true),
-          );
-
-          // If it's part of the loop (+10 Independent), don't reset
-          if (!isLoop) {
-            // Use `WidgetsBinding.instance.addPostFrameCallback` to reset the provider after the widget tree is built
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              // Reset values after the update
-              ref.read(cardActivityProvider).reset();
-              print("Deleting tempRecentCard because it's not Independent.");
-            });
-          } else {
-            print("Not deleting tempRecentCard because it's part of the loop.");
-          }
-        });
-
-        print("update log successfully.");
-      } else {
-        print("Tap on a card first");
-        throw Exception("Tap on a card first");
-      }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // Upload buffered taps when the app goes to the background
+      _uploadBufferedTaps();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
-        return SizedBox(
-          width: MediaQuery.of(context).size.width - 20,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                bottom: 120,
-                child: GestureDetector(
-                  onTap: () async {
-                    // Add +10 Independent to the activity log on button press
-                    for (int i = 0; i < 10; i++) {
-                      await _updatePromptField(4,
-                          isLoop: true); // Assuming 4 is "Independent"
-                    }
-                    Fluttertoast.showToast(
-                        msg: "Looped 10 times: Activity log updated.",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.green,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
-                  },
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue, // Adjust the color as needed
-                    ),
-                    child: const Center(
-                      child: Text('+10', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 20,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            bottom: 120,
+            child: GestureDetector(
+              onTap: () async {
+                // Add +10 Independent to the activity log on button press
+                for (int i = 0; i < 10; i++) {
+                  // await _updatePromptField(4, isLoop: true);
+                  bufferTapEvent(
+                      4, // Index for "Independent"
+                      ref
+                          .watch(cardActivityProvider)
+                          .cardId, // Get the current cardID from provider
+                      ref
+                          .watch(cardActivityProvider)
+                          .showDistractor // Get the distractor state from provider
+                      );
+                  ref.read(cardActivityProvider).tapPrompt(4);
+                }
+                Fluttertoast.showToast(
+                    msg: "Looped 10 times: Activity log updated.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: lGray, // Adjust the color as needed
+                ),
+                child: const Center(
+                  child: Text('+10', style: TextStyle(color: Colors.white)),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (_, __) {
-                    return showLock
-                        ? _buildImageButtons()
-                        : _buildPurpleContainer();
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      }
-    
-  
+          Positioned(
+            bottom: 120,
+            left: 100,
+            child: GestureDetector(
+              onTap: () async {
+                _firestoreService.setCurrentlyLearningCard(
+                  ref.watch(cardActivityProvider).cardId,
+                );
+
+                // Add +10 Independent to the activity log on button press
+                for (int i = 0; i < 5; i++) {
+                  // await _updatePromptField(4, isLoop: true);
+                  bufferTapEvent(
+                      4, // Index for "Independent"
+                      ref
+                          .watch(cardActivityProvider)
+                          .cardId, // Get the current cardID from provider
+                      ref
+                          .watch(cardActivityProvider)
+                          .showDistractor // Get the distractor state from provider
+                      );
+
+                  ref.read(cardActivityProvider).tapPrompt(4);
+                }
+                Fluttertoast.showToast(
+                    msg: "Looped 5 times: Activity log updated.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: lGray, // Adjust the color as needed
+                ),
+                child: const Center(
+                  child: Text('+5', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (_, __) {
+                return showLock
+                    ? _buildImageButtons()
+                    : _buildPurpleContainer();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPurpleContainer() {
     return Align(
@@ -325,6 +388,12 @@ class _PromptButtonState extends ConsumerState<PromptButton>
   }
 
   Widget _buildImageButtons() {
+    final cardID = ref.watch(cardActivityProvider).cardId;
+    final withDistractor = widget.phaseCurrent > 1
+        ? true
+        : ref.watch(cardActivityProvider).showDistractor;
+    print('Distractor bool: $withDistractor, Phase is ${widget.phaseCurrent}');
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Align(
@@ -336,7 +405,10 @@ class _PromptButtonState extends ConsumerState<PromptButton>
             (index) => GestureDetector(
               onTap: () async {
                 try {
-                  await _updatePromptField(index);
+                  _firestoreService.setCurrentlyLearningCard(cardID);
+                  // await _updatePromptField(index);
+
+                  bufferTapEvent(index, cardID, withDistractor);
                   if (index == 4) {
                     FlameAudio.play('bell_congrats.mp3');
                     Confetti.launch(
@@ -344,6 +416,8 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                       options: const ConfettiOptions(
                           particleCount: 400, spread: 70, y: 0.6),
                     );
+
+                    ref.read(cardActivityProvider).tapPrompt(index);
 
                     widget.onRefresh?.call();
                   } else {
