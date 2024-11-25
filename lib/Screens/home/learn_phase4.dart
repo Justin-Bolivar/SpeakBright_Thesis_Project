@@ -69,8 +69,9 @@ class _Learn4State extends ConsumerState<Learn4> {
           String placeHolder = "____";
           if (sentence.isNotEmpty) {
             if (sentence.length > 1) {
-              sentence[1] = title;
-              words[1] = title;
+              _toggleSentencePrefix();
+              sentence.add(title);
+              words.add(title);
             } else {
               sentence.add(title);
               words.add(title);
@@ -286,29 +287,6 @@ class _Learn4State extends ConsumerState<Learn4> {
                     ],
                   ),
                 ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: mainpurple,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: _toggleSentencePrefix,
-              child: Text(
-                "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
               ),
             ),
           ),
