@@ -120,8 +120,9 @@ class _CommunicateState extends ConsumerState<Communicate> {
             String placeHolder = "____";
             if (sentence.isNotEmpty) {
               if (sentence.length > 1) {
-                sentence[1] = title;
-                words[1] = title;
+                _toggleSentencePrefix();
+                sentence.add(title);
+                words.add(title);
               } else {
                 sentence.add(title);
                 words.add(title);
@@ -229,7 +230,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
     bool showSentenceWidget = currentUserPhase > 1;
-    bool showSwitchWidget = currentUserPhase == 4;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -342,27 +342,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                if (showSwitchWidget)
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: mainpurple,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: _toggleSentencePrefix,
-                    child: Text(
-                      "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
               ],
             ),
           const SizedBox(height: 20),
