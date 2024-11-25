@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
 import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
@@ -74,7 +75,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
   }
 
   void selectPhase(BuildContext context) async {
-    List<int> options = [1, 2, 3, 4, 5];
+    List<int> options = [1, 2, 3, 4];
     int? _selectedValue = _currentPhase;
 
     await showDialog(
@@ -476,8 +477,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   children: [
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(GuardianCommunicate.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(GuardianCommunicate.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -516,8 +517,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(FavoritesView.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(CardRankingMenu.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -540,7 +541,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                               ),
                                               Expanded(
                                                 child: Text(
-                                                  'Favorite Cards',
+                                                  'Card Ranking',
                                                   style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 18,
@@ -555,7 +556,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 10,),
+                                SizedBox(
+                                  height: 10,
+                                ),
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
