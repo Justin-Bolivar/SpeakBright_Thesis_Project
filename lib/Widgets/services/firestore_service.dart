@@ -134,6 +134,8 @@ class FirestoreService {
 
   Future<void> updateStudentPhase(String studentID, int newPhase) async {
     try {
+      print("entered updateStudent $newPhase");
+
       // Step 1: Get the previous phase from the 'users' document
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -141,6 +143,8 @@ class FirestoreService {
           .get();
       int previousPhase =
           (userSnapshot.data() as Map<String, dynamic>)['phase'];
+
+      print("$previousPhase Previos");
 
       // Step 2: Update 'exitTimestamps' for the previous phase in 'activity_log'
       DocumentReference prevPhaseRef = FirebaseFirestore.instance
@@ -160,9 +164,9 @@ class FirestoreService {
           .collection('phase')
           .doc(newPhase.toString());
 
-      await newPhaseRef.update({
+      await newPhaseRef.set({
         'entryTimestamps': FieldValue.arrayUnion([DateTime.now()]),
-      });
+      }, SetOptions(merge: true));
 
       // Step 4: Update the 'phase' field in the 'users' document
       await FirebaseFirestore.instance
@@ -1052,7 +1056,6 @@ class FirestoreService {
         totalDistractorCount +=
             (sessionDoc['totalDistractorCount'] ?? 0) as int;
 
-        
         if (validSessionsCount >= 3) break;
       }
 
@@ -1066,16 +1069,19 @@ class FirestoreService {
       double cardIndependencePercentage = totalDistractorCount > 0
           ? (independentDistractorCount / totalDistractorCount * 100)
           : 0;
-
+      print("PHASE!! $phase");
       // Update the card document with the phase-specific independence data
       if (phase == 1) {
         await firestore.collection('cards').doc(cardID).update({
           'phase${phase}_independence': cardIndependencePercentage >= 70,
+          'phase1_completion': FieldValue.serverTimestamp(),
         });
       } else {
         await firestore.collection('cards').doc(cardID).update({
           'phase2_independence': cardIndependencePercentage >= 70,
           'phase3_independence': cardIndependencePercentage >= 70,
+          'phase2_completion': FieldValue.serverTimestamp(),
+          'phase3_completion': FieldValue.serverTimestamp(),
         });
       }
 

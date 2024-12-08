@@ -75,7 +75,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
   }
 
   void selectPhase(BuildContext context) async {
-    List<int> options = [1, 2, 3, 4, 5];
+    List<int> options = [1, 2, 3, 4];
     int? _selectedValue = _currentPhase;
 
     await showDialog(
