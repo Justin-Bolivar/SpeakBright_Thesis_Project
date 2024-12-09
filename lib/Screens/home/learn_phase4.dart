@@ -51,6 +51,7 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void _clearSentence() {
     setState(() {
+      pressSpeak = false;
       sentence.clear();
       words.clear();
     });
