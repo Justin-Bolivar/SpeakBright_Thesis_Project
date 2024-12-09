@@ -304,7 +304,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
                               // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  width: 50,
+                                  width: 60,
+                                  height: 60,
                                   decoration: BoxDecoration(
                                     color: mainpurple,
                                     borderRadius: BorderRadius.circular(10),
@@ -314,6 +315,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                                     icon: const Icon(
                                       Icons.volume_up,
                                       color: Colors.white,
+                                      size: 30,
                                     ),
                                   ),
                                 ),
@@ -322,7 +324,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
                                   height: 15,
                                 ),
                                 Container(
-                                  width: 50,
+                                  width: 60,
+                                  height: 60,
                                   decoration: BoxDecoration(
                                     color: mainpurple,
                                     borderRadius: BorderRadius.circular(10),
@@ -332,6 +335,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                                     icon: const Icon(
                                       Icons.delete_outline,
                                       color: Colors.white,
+                                      size: 30,
                                     ),
                                   ),
                                 ),

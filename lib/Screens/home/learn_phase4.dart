@@ -135,42 +135,40 @@ class _Learn4State extends ConsumerState<Learn4> {
     );
 
     try {
-      if (currentUserPhase == 4) {
-        String urlPhase4 =
-            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+      String urlPhase4 =
+          'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
-        final response = await http.post(
-          Uri.parse(urlPhase4),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'words': words}),
+      final response = await http.post(
+        Uri.parse(urlPhase4),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(<String, dynamic>{'words': words}),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        setState(() {
+          sentence.clear();
+          sentence.addAll(responseBody['sentence'].split(' '));
+          words.clear();
+        });
+
+        sentenceString = sentence.join(' ');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create sentence: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          setState(() {
-            sentence.clear();
-            sentence.addAll(responseBody['sentence'].split(' '));
-            words.clear();
-          });
-
-          sentenceString = sentence.join(' ');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create sentence: ${response.body}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Map<String, dynamic> errorResponse = jsonDecode(response.body);
-          String errorMessage =
-              errorResponse['detail'].replaceFirst('Error: ', '');
-          _ttsService.speak(errorMessage);
-          setState(() {
-            sentence.clear();
-            words.clear();
-          });
-        }
+        Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        String errorMessage =
+            errorResponse['detail'].replaceFirst('Error: ', '');
+        _ttsService.speak(errorMessage);
+        setState(() {
+          sentence.clear();
+          words.clear();
+        });
       }
 
       _firestoreService.storeSentence(sentence);
@@ -254,7 +252,8 @@ class _Learn4State extends ConsumerState<Learn4> {
                   Column(
                     children: [
                       Container(
-                        width: 50,
+                        width: 60,
+                        height: 60,
                         decoration: BoxDecoration(
                           color: mainpurple,
                           borderRadius: BorderRadius.circular(10),
@@ -264,6 +263,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                           icon: const Icon(
                             Icons.volume_up,
                             color: Colors.white,
+                            size: 30,
                           ),
                         ),
                       ),
@@ -271,7 +271,8 @@ class _Learn4State extends ConsumerState<Learn4> {
                         height: 15,
                       ),
                       Container(
-                        width: 50,
+                        width: 60,
+                        height: 60,
                         decoration: BoxDecoration(
                           color: mainpurple,
                           borderRadius: BorderRadius.circular(10),
@@ -281,6 +282,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                           icon: const Icon(
                             Icons.delete_outline,
                             color: Colors.white,
+                            size: 30,
                           ),
                         ),
                       ),
