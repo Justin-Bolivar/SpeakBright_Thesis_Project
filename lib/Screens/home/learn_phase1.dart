@@ -46,23 +46,23 @@ class _Learn1State extends ConsumerState<Learn1> {
       appBar: AppBar(
         leading: const BackButton(color: phase1Color),
         backgroundColor: learn1bg,
-        actions: [
-          PopupMenuButton<int>(
-            icon: Icon(Icons.category, color: phase1Color),
-            onSelected: (index) {
-              setState(() {
-                selectedCategory = index;
-              });
-            },
-            itemBuilder: (context) =>
-                List.generate(phase1Categories.length, (index) {
-              return PopupMenuItem<int>(
-                value: index,
-                child: Container(),
-              );
-            }),
-          ),
-        ],
+        // actions: [
+        //   PopupMenuButton<int>(
+        //     icon: Icon(Icons.category, color: phase1Color),
+        //     onSelected: (index) {
+        //       setState(() {
+        //         selectedCategory = index;
+        //       });
+        //     },
+        //     itemBuilder: (context) =>
+        //         List.generate(phase1Categories.length, (index) {
+        //       return PopupMenuItem<int>(
+        //         value: index,
+        //         child: Container(),
+        //       );
+        //     }),
+        //   ),
+        // ],
       ),
       backgroundColor: learn1bg,
       floatingActionButton: Align(
