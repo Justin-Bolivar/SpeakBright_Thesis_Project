@@ -35,7 +35,9 @@ class _Learn4State extends ConsumerState<Learn4> {
   List<String> categories = [];
   int currentUserPhase = 4;
   int selectedCategory = -1;
-  String _sentencePrefix = "I feel";
+  String sentencePrefix1 = "I feel";
+  String sentencePrefix2 = "I want";
+  bool pressSpeak = false;
 
   @override
   void initState() {
@@ -49,61 +51,112 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void _clearSentence() {
     setState(() {
+      pressSpeak = false;
       sentence.clear();
       words.clear();
     });
   }
 
-  void _addCardTitleToSentence(String title, String category) {
+  void addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (_sentencePrefix == "I feel") {
-        if (category == "Emotions") {
-          if (sentence.isNotEmpty) {
-            sentence[0] = title;
+      if (sentence.length >= 4) {
+        _clearSentence();
+      }
+      if (category == "Emotions") {
+        if (sentence.isNotEmpty) {
+          //if sentence has 2 Emotions replace first Emotion
+          if (sentence.length > 2) {
+            sentence[0] = "I feel";
+            sentence[1] = title;
             words[0] = title;
           } else {
-            sentence.add(title);
+            //else add as normal
+            sentence.addAll(["I feel", title]);
             words.add(title);
           }
         } else {
-          String placeHolder = "____";
-          if (sentence.isNotEmpty) {
-            if (sentence.length > 1) {
-              _toggleSentencePrefix();
-              sentence.add(title);
-              words.add(title);
-            } else {
-              sentence.add(title);
-              words.add(title);
-            }
-          } else {
-            sentence.add(placeHolder);
-            sentence.add(title);
-            words.add(placeHolder);
-            words.add(title);
-          }
+          //if sentence is empty add as normal
+          sentence.addAll(["I feel", title]);
+          words.add(title);
         }
-      } else if (_sentencePrefix == "I want") {
-        if (category != "Emotions") {
-          if (sentence.length > 1) {
+      } else {
+        if (sentence.isNotEmpty) {
+          //if sentence has 2 Objects replace first Object
+          if (sentence.length > 2) {
+            sentence[0] = "I want";
             sentence[1] = title;
-            words[1] = title;
+            words[0] = title;
           } else {
-            sentence.add(title);
+            //else add as normal
+            sentence.addAll(["I want", title]);
             words.add(title);
           }
         } else {
-          _toggleSentencePrefix();
-          sentence.add(title);
+          //if sentence is empty add as normal
+          sentence.addAll(["I want", title]);
           words.add(title);
         }
       }
+      // if (sentencePrefix1 == "I feel") {
+      //   if (category == "Emotions") {
+      //     // if sentence is not empty, replace the first word with the new emotion
+      //     if (sentence.isNotEmpty) {
+      //       sentence[0] = title;
+      //       words[0] = title;
+      //     } else {
+      //       // if sentence is empty add as normal
+      //       sentence.add(title);
+      //       words.add(title);
+      //     }
+      //   } else {
+      //     //not Emtion but Prefix1 is I feel
+      //     String placeHolder = "____";
+      //     if (sentence.isNotEmpty) {
+      //       //if sentence already has a word, replace the second word with the new card
+      //       if (sentence.length > 1) {
+      //         toggleSentencePrefix1();
+      //         sentence.add(title);
+      //         words.add(title);
+      //       } else {
+      //         sentence.add(title);
+      //         words.add(title);
+      //       }
+      //     } else {
+      //       sentence.add(placeHolder);
+      //       sentence.add(title);
+      //       words.add(placeHolder);
+      //       words.add(title);
+      //     }
+      //   }
+      // } else if (sentencePrefix1 == "I want") {
+      //   if (category != "Emotions") {
+      //     if (sentence.length > 1) {
+      //       sentence[1] = title;
+      //       words[1] = title;
+      //     } else {
+      //       sentence.add(title);
+      //       words.add(title);
+      //     }
+      //   } else {
+      //     toggleSentencePrefix1();
+      //     sentence.add(title);
+      //     words.add(title);
+      //   }
+      // }
     });
   }
 
-  void _toggleSentencePrefix() {
+  void toggleSentencePrefix1() {
     setState(() {
-      _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
+      sentencePrefix1 = sentencePrefix1 == "I feel" ? "I want" : "I feel";
+      words.clear();
+      sentence.clear();
+    });
+  }
+
+  void toggleSentencePrefix2() {
+    setState(() {
+      sentencePrefix2 = sentencePrefix2 == "I feel" ? "I want" : "I feel";
       words.clear();
       sentence.clear();
     });
@@ -135,47 +188,45 @@ class _Learn4State extends ConsumerState<Learn4> {
     );
 
     try {
-      if (currentUserPhase == 4) {
-        String urlPhase4 =
-            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+      String urlPhase4 =
+          'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
 
-        final response = await http.post(
-          Uri.parse(urlPhase4),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'words': words}),
+      final response = await http.post(
+        Uri.parse(urlPhase4),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(<String, dynamic>{'words': words}),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+        setState(() {
+          sentence.clear();
+          sentence.addAll(responseBody['sentence'].split(' '));
+          words.clear();
+        });
+
+        sentenceString = sentence.join(' ');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create sentence: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
         );
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          setState(() {
-            sentence.clear();
-            sentence.addAll(responseBody['sentence'].split(' '));
-            words.clear();
-          });
-
-          sentenceString = sentence.join(' ');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create sentence: ${response.body}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Map<String, dynamic> errorResponse = jsonDecode(response.body);
-          String errorMessage =
-              errorResponse['detail'].replaceFirst('Error: ', '');
-          _ttsService.speak(errorMessage);
-          setState(() {
-            sentence.clear();
-            words.clear();
-          });
-        }
+        Map<String, dynamic> errorResponse = jsonDecode(response.body);
+        String errorMessage =
+            errorResponse['detail'].replaceFirst('Error: ', '');
+        _ttsService.speak(errorMessage);
+        setState(() {
+          sentence.clear();
+          words.clear();
+        });
       }
 
-      _firestoreService.storeSentence(sentence);
+      //_firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
-      _clearSentence();
+      pressSpeak = true;
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -230,10 +281,13 @@ class _Learn4State extends ConsumerState<Learn4> {
                         color: kwhite,
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      child: sentence.isEmpty
+                      child: pressSpeak == false
                           ? Center(
                               child: Text(
-                                "$_sentencePrefix ______, I want ______",
+                                sentence.isEmpty
+                                    ? "Tap on cards to create a Sentence"
+                                    : sentence.join(
+                                        ' '), //"$sentencePrefix1 ${sentence.isNotEmpty ? sentence[0] : '______'}, $sentencePrefix2 ${sentence.length > 1 ? sentence[1] : '______'}",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -242,7 +296,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                             )
                           : Center(
                               child: Text(
-                                "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                sentence.join(' '),
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -254,7 +308,8 @@ class _Learn4State extends ConsumerState<Learn4> {
                   Column(
                     children: [
                       Container(
-                        width: 50,
+                        width: 60,
+                        height: 60,
                         decoration: BoxDecoration(
                           color: mainpurple,
                           borderRadius: BorderRadius.circular(10),
@@ -264,6 +319,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                           icon: const Icon(
                             Icons.volume_up,
                             color: Colors.white,
+                            size: 30,
                           ),
                         ),
                       ),
@@ -271,7 +327,8 @@ class _Learn4State extends ConsumerState<Learn4> {
                         height: 15,
                       ),
                       Container(
-                        width: 50,
+                        width: 60,
+                        height: 60,
                         decoration: BoxDecoration(
                           color: mainpurple,
                           borderRadius: BorderRadius.circular(10),
@@ -281,6 +338,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                           icon: const Icon(
                             Icons.delete_outline,
                             color: Colors.white,
+                            size: 30,
                           ),
                         ),
                       ),
@@ -378,11 +436,21 @@ class _Learn4State extends ConsumerState<Learn4> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _addCardTitleToSentence(cardTitle, category);
-                    _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(
-                        cardTitle, category, cardId);
-                    print('title: $cardTitle, cat: $category');
+                    if (pressSpeak == true) {
+                      _clearSentence();
+                      pressSpeak = false;
+                      addCardTitleToSentence(cardTitle, category);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
+                      print('title: $cardTitle, cat: $category');
+                    } else {
+                      addCardTitleToSentence(cardTitle, category);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
+                      print('title: $cardTitle, cat: $category');
+                    }
                   },
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId, '0');
