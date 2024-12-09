@@ -59,52 +59,90 @@ class _Learn4State extends ConsumerState<Learn4> {
 
   void addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (sentencePrefix1 == "I feel") {
-        if (category == "Emotions") {
-          // if sentence is not empty, replace the first word with the new emotion
-          if (sentence.isNotEmpty) {
-            sentence[0] = title;
+      if (sentence.length >= 4) {
+        _clearSentence();
+      }
+      if (category == "Emotions") {
+        if (sentence.isNotEmpty) {
+          //if sentence has 2 Emotions replace first Emotion
+          if (sentence.length > 2) {
+            sentence[0] = "I feel";
+            sentence[1] = title;
             words[0] = title;
           } else {
-            // if sentence is empty add as normal
-            sentence.add(title);
+            //else add as normal
+            sentence.addAll(["I feel", title]);
             words.add(title);
           }
         } else {
-          //not Emtion but Prefix1 is I feel
-          String placeHolder = "____";
-          if (sentence.isNotEmpty) {
-            //if sentence already has a word, replace the second word with the new card
-            if (sentence.length > 1) {
-              toggleSentencePrefix1();
-              sentence.add(title);
-              words.add(title);
-            } else {
-              sentence.add(title);
-              words.add(title);
-            }
-          } else {
-            sentence.add(placeHolder);
-            sentence.add(title);
-            words.add(placeHolder);
-            words.add(title);
-          }
+          //if sentence is empty add as normal
+          sentence.addAll(["I feel", title]);
+          words.add(title);
         }
-      } else if (sentencePrefix1 == "I want") {
-        if (category != "Emotions") {
-          if (sentence.length > 1) {
+      } else {
+        if (sentence.isNotEmpty) {
+          //if sentence has 2 Objects replace first Object
+          if (sentence.length > 2) {
+            sentence[0] = "I want";
             sentence[1] = title;
-            words[1] = title;
+            words[0] = title;
           } else {
-            sentence.add(title);
+            //else add as normal
+            sentence.addAll(["I want", title]);
             words.add(title);
           }
         } else {
-          toggleSentencePrefix1();
-          sentence.add(title);
+          //if sentence is empty add as normal
+          sentence.addAll(["I want", title]);
           words.add(title);
         }
       }
+      // if (sentencePrefix1 == "I feel") {
+      //   if (category == "Emotions") {
+      //     // if sentence is not empty, replace the first word with the new emotion
+      //     if (sentence.isNotEmpty) {
+      //       sentence[0] = title;
+      //       words[0] = title;
+      //     } else {
+      //       // if sentence is empty add as normal
+      //       sentence.add(title);
+      //       words.add(title);
+      //     }
+      //   } else {
+      //     //not Emtion but Prefix1 is I feel
+      //     String placeHolder = "____";
+      //     if (sentence.isNotEmpty) {
+      //       //if sentence already has a word, replace the second word with the new card
+      //       if (sentence.length > 1) {
+      //         toggleSentencePrefix1();
+      //         sentence.add(title);
+      //         words.add(title);
+      //       } else {
+      //         sentence.add(title);
+      //         words.add(title);
+      //       }
+      //     } else {
+      //       sentence.add(placeHolder);
+      //       sentence.add(title);
+      //       words.add(placeHolder);
+      //       words.add(title);
+      //     }
+      //   }
+      // } else if (sentencePrefix1 == "I want") {
+      //   if (category != "Emotions") {
+      //     if (sentence.length > 1) {
+      //       sentence[1] = title;
+      //       words[1] = title;
+      //     } else {
+      //       sentence.add(title);
+      //       words.add(title);
+      //     }
+      //   } else {
+      //     toggleSentencePrefix1();
+      //     sentence.add(title);
+      //     words.add(title);
+      //   }
+      // }
     });
   }
 
@@ -247,8 +285,9 @@ class _Learn4State extends ConsumerState<Learn4> {
                           ? Center(
                               child: Text(
                                 sentence.isEmpty
-                                    ? "$sentencePrefix1 ______, $sentencePrefix2 ______"
-                                    : "$sentencePrefix1 ${sentence.isNotEmpty ? sentence[0] : '______'}, $sentencePrefix2 ${sentence.length > 1 ? sentence[1] : '______'}",
+                                    ? "Tap on cards to create a Sentence"
+                                    : sentence.join(
+                                        ' '), //"$sentencePrefix1 ${sentence.isNotEmpty ? sentence[0] : '______'}, $sentencePrefix2 ${sentence.length > 1 ? sentence[1] : '______'}",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
