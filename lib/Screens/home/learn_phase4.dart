@@ -35,7 +35,9 @@ class _Learn4State extends ConsumerState<Learn4> {
   List<String> categories = [];
   int currentUserPhase = 4;
   int selectedCategory = -1;
-  String _sentencePrefix = "I feel";
+  String sentencePrefix1 = "I feel";
+  String sentencePrefix2 = "I want";
+  bool pressSpeak = false;
 
   @override
   void initState() {
@@ -54,22 +56,26 @@ class _Learn4State extends ConsumerState<Learn4> {
     });
   }
 
-  void _addCardTitleToSentence(String title, String category) {
+  void addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (_sentencePrefix == "I feel") {
+      if (sentencePrefix1 == "I feel") {
         if (category == "Emotions") {
+          // if sentence is not empty, replace the first word with the new emotion
           if (sentence.isNotEmpty) {
             sentence[0] = title;
             words[0] = title;
           } else {
+            // if sentence is empty add as normal
             sentence.add(title);
             words.add(title);
           }
         } else {
+          //not Emtion but Prefix1 is I feel
           String placeHolder = "____";
           if (sentence.isNotEmpty) {
+            //if sentence already has a word, replace the second word with the new card
             if (sentence.length > 1) {
-              _toggleSentencePrefix();
+              toggleSentencePrefix1();
               sentence.add(title);
               words.add(title);
             } else {
@@ -83,7 +89,7 @@ class _Learn4State extends ConsumerState<Learn4> {
             words.add(title);
           }
         }
-      } else if (_sentencePrefix == "I want") {
+      } else if (sentencePrefix1 == "I want") {
         if (category != "Emotions") {
           if (sentence.length > 1) {
             sentence[1] = title;
@@ -93,7 +99,7 @@ class _Learn4State extends ConsumerState<Learn4> {
             words.add(title);
           }
         } else {
-          _toggleSentencePrefix();
+          toggleSentencePrefix1();
           sentence.add(title);
           words.add(title);
         }
@@ -101,9 +107,17 @@ class _Learn4State extends ConsumerState<Learn4> {
     });
   }
 
-  void _toggleSentencePrefix() {
+  void toggleSentencePrefix1() {
     setState(() {
-      _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
+      sentencePrefix1 = sentencePrefix1 == "I feel" ? "I want" : "I feel";
+      words.clear();
+      sentence.clear();
+    });
+  }
+
+  void toggleSentencePrefix2() {
+    setState(() {
+      sentencePrefix2 = sentencePrefix2 == "I feel" ? "I want" : "I feel";
       words.clear();
       sentence.clear();
     });
@@ -171,9 +185,9 @@ class _Learn4State extends ConsumerState<Learn4> {
         });
       }
 
-      _firestoreService.storeSentence(sentence);
+      //_firestoreService.storeSentence(sentence);
       _ttsService.speak(sentenceString);
-      _clearSentence();
+      pressSpeak = true;
     } catch (e) {
       print('Error occurred: $e');
     } finally {
@@ -228,10 +242,12 @@ class _Learn4State extends ConsumerState<Learn4> {
                         color: kwhite,
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      child: sentence.isEmpty
+                      child: pressSpeak == false
                           ? Center(
                               child: Text(
-                                "$_sentencePrefix ______, I want ______",
+                                sentence.isEmpty
+                                    ? "$sentencePrefix1 ______, $sentencePrefix2 ______"
+                                    : "$sentencePrefix1 ${sentence.isNotEmpty ? sentence[0] : '______'}, $sentencePrefix2 ${sentence.length > 1 ? sentence[1] : '______'}",
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -240,7 +256,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                             )
                           : Center(
                               child: Text(
-                                "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                sentence.join(' '),
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -380,11 +396,21 @@ class _Learn4State extends ConsumerState<Learn4> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    _addCardTitleToSentence(cardTitle, category);
-                    _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(
-                        cardTitle, category, cardId);
-                    print('title: $cardTitle, cat: $category');
+                    if (pressSpeak == true) {
+                      _clearSentence();
+                      pressSpeak = false;
+                      addCardTitleToSentence(cardTitle, category);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
+                      print('title: $cardTitle, cat: $category');
+                    } else {
+                      addCardTitleToSentence(cardTitle, category);
+                      _ttsService.speak(cardTitle);
+                      _firestoreService.storeTappedCards(
+                          cardTitle, category, cardId);
+                      print('title: $cardTitle, cat: $category');
+                    }
                   },
                   onCardDelete: (String cardId) {
                     ref.read(cardProvider.notifier).deleteCard(cardId, '0');
