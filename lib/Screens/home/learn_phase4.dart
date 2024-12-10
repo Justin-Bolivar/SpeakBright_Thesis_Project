@@ -219,8 +219,7 @@ class _Learn4State extends ConsumerState<Learn4> {
             errorResponse['detail'].replaceFirst('Error: ', '');
         _ttsService.speak(errorMessage);
         setState(() {
-          sentence.clear();
-          words.clear();
+          _clearSentence();
         });
       }
 
