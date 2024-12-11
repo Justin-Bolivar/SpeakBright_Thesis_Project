@@ -47,9 +47,9 @@ class _CardItemState extends State<CardItem> {
           return const Center(child: WaitingDialog());
         }
 
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
+        // if (snapshot.hasError) {
+        //   return Text('Error: ${snapshot.error}');
+        // }
 
         bool isCurrentGuardian = snapshot.data ?? false;
 
@@ -184,7 +184,7 @@ class _CardItemState extends State<CardItem> {
           ),
         ),
         errorWidget: (context, url, error) {
-          print('Error loading image: $error');
+          //print('Error loading image: $error');
           return Icon(Icons.image_not_supported, color: color);
         },
       ),
