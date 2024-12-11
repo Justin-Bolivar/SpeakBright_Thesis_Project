@@ -23,7 +23,6 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
           includeMetadataChanges: true) // Important for online/offline tracking
       .handleError((error) {
     print('Error occurred: $error');
-
     //return Stream.value([]);
   }).map((snapshot) {
     // Check if the snapshot comes from cache or server

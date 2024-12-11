@@ -75,7 +75,9 @@ class _Learn1State extends ConsumerState<Learn1> {
               PromptButton(
                 phaseCurrent: currentUserPhase,
                 onRefresh: () {
-                  setState(() {ref.watch(cardActivityProvider);});
+                  setState(() {
+                    ref.watch(cardActivityProvider);
+                  });
                 },
               ),
             ],
