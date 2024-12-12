@@ -260,137 +260,137 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned(
-            bottom: 120,
-            child: GestureDetector(
-              onTap: () async {
-                // Add +10 Independent to the activity log on button press
-                for (int i = 0; i < 10; i++) {
-                  // await _updatePromptField(4, isLoop: true);
-                  bufferTapEvent(
-                    4, // Index for "Independent"
-                    ref
-                        .watch(cardActivityProvider)
-                        .cardId, // Get the current cardID from provider
-                    ref.watch(cardActivityProvider).showDistractor,
-                    ref.watch(cardActivityProvider).showDistractor2,
-                  );
-                  ref.read(cardActivityProvider).tapPrompt(4);
-                }
-                Fluttertoast.showToast(
-                    msg: "Looped Independent 10 times: Activity log updated.",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-              },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: lGray.withOpacity(0.2), // Adjust the color as needed
-                ),
-                child: const Center(
-                  child: Text('+10', style: TextStyle(color: lGray)),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 120,
-            left: 100,
-            child: GestureDetector(
-              onTap: () async {
-                _firestoreService.setCurrentlyLearningCard(
-                  ref.watch(cardActivityProvider).cardId,
-                );
+          // Positioned(
+          //   bottom: 120,
+          //   child: GestureDetector(
+          //     onTap: () async {
+          //       // Add +10 Independent to the activity log on button press
+          //       for (int i = 0; i < 10; i++) {
+          //         // await _updatePromptField(4, isLoop: true);
+          //         bufferTapEvent(
+          //           4, // Index for "Independent"
+          //           ref
+          //               .watch(cardActivityProvider)
+          //               .cardId, // Get the current cardID from provider
+          //           ref.watch(cardActivityProvider).showDistractor,
+          //           ref.watch(cardActivityProvider).showDistractor2,
+          //         );
+          //         ref.read(cardActivityProvider).tapPrompt(4);
+          //       }
+          //       Fluttertoast.showToast(
+          //           msg: "Looped Independent 10 times: Activity log updated.",
+          //           toastLength: Toast.LENGTH_SHORT,
+          //           gravity: ToastGravity.BOTTOM,
+          //           timeInSecForIosWeb: 1,
+          //           backgroundColor: Colors.green,
+          //           textColor: Colors.white,
+          //           fontSize: 16.0);
+          //     },
+          //     child: Container(
+          //       width: 60,
+          //       height: 60,
+          //       decoration: BoxDecoration(
+          //         shape: BoxShape.circle,
+          //         color: lGray.withOpacity(0.2), // Adjust the color as needed
+          //       ),
+          //       child: const Center(
+          //         child: Text('+10', style: TextStyle(color: lGray)),
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          // Positioned(
+          //   bottom: 120,
+          //   left: 100,
+          //   child: GestureDetector(
+          //     onTap: () async {
+          //       _firestoreService.setCurrentlyLearningCard(
+          //         ref.watch(cardActivityProvider).cardId,
+          //       );
 
-                // Add +10 Independent to the activity log on button press
-                for (int i = 0; i < 5; i++) {
-                  // await _updatePromptField(4, isLoop: true);
-                  bufferTapEvent(
-                    4, // Index for "Independent"
-                    ref
-                        .watch(cardActivityProvider)
-                        .cardId, // Get the current cardID from provider
-                    ref
-                        .watch(cardActivityProvider)
-                        .showDistractor, // Get the distractor state from provider
-                    ref.watch(cardActivityProvider).showDistractor2,
-                  );
+          //       // Add +10 Independent to the activity log on button press
+          //       for (int i = 0; i < 5; i++) {
+          //         // await _updatePromptField(4, isLoop: true);
+          //         bufferTapEvent(
+          //           4, // Index for "Independent"
+          //           ref
+          //               .watch(cardActivityProvider)
+          //               .cardId, // Get the current cardID from provider
+          //           ref
+          //               .watch(cardActivityProvider)
+          //               .showDistractor, // Get the distractor state from provider
+          //           ref.watch(cardActivityProvider).showDistractor2,
+          //         );
 
-                  ref.read(cardActivityProvider).tapPrompt(4);
-                }
-                Fluttertoast.showToast(
-                    msg: "Looped Independent 5 times: Activity log updated.",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-              },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: lGray.withOpacity(0.2), // Adjust the color as needed
-                ),
-                child: const Center(
-                  child: Text('+5', style: TextStyle(color: lGray)),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 120,
-            right: 100,
-            child: GestureDetector(
-              onTap: () async {
-                _firestoreService.setCurrentlyLearningCard(
-                  ref.watch(cardActivityProvider).cardId,
-                );
+          //         ref.read(cardActivityProvider).tapPrompt(4);
+          //       }
+          //       Fluttertoast.showToast(
+          //           msg: "Looped Independent 5 times: Activity log updated.",
+          //           toastLength: Toast.LENGTH_SHORT,
+          //           gravity: ToastGravity.BOTTOM,
+          //           timeInSecForIosWeb: 1,
+          //           backgroundColor: Colors.green,
+          //           textColor: Colors.white,
+          //           fontSize: 16.0);
+          //     },
+          //     child: Container(
+          //       width: 60,
+          //       height: 60,
+          //       decoration: BoxDecoration(
+          //         shape: BoxShape.circle,
+          //         color: lGray.withOpacity(0.2), // Adjust the color as needed
+          //       ),
+          //       child: const Center(
+          //         child: Text('+5', style: TextStyle(color: lGray)),
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          // Positioned(
+          //   bottom: 120,
+          //   right: 100,
+          //   child: GestureDetector(
+          //     onTap: () async {
+          //       _firestoreService.setCurrentlyLearningCard(
+          //         ref.watch(cardActivityProvider).cardId,
+          //       );
 
-                // Add +10 Independent to the activity log on button press
-                for (int i = 0; i < 5; i++) {
-                  // await _updatePromptField(4, isLoop: true);
-                  bufferTapEvent(
-                    3, // Index for "verbal"
-                    ref
-                        .watch(cardActivityProvider)
-                        .cardId, // Get the current cardID from provider
-                    ref.watch(cardActivityProvider).showDistractor,
-                    ref.watch(cardActivityProvider).showDistractor2,
-                  );
+          //       // Add +10 Independent to the activity log on button press
+          //       for (int i = 0; i < 5; i++) {
+          //         // await _updatePromptField(4, isLoop: true);
+          //         bufferTapEvent(
+          //           3, // Index for "verbal"
+          //           ref
+          //               .watch(cardActivityProvider)
+          //               .cardId, // Get the current cardID from provider
+          //           ref.watch(cardActivityProvider).showDistractor,
+          //           ref.watch(cardActivityProvider).showDistractor2,
+          //         );
 
-                  ref.read(cardActivityProvider).tapPrompt(4);
-                }
-                Fluttertoast.showToast(
-                    msg: "Looped Verbal 5 times: Activity log updated.",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-              },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: lGray.withOpacity(0.2), // Adjust the color as needed
-                ),
-                child: const Center(
-                  child: Text('+5', style: TextStyle(color: lGray)),
-                ),
-              ),
-            ),
-          ),
+          //         ref.read(cardActivityProvider).tapPrompt(4);
+          //       }
+          //       Fluttertoast.showToast(
+          //           msg: "Looped Verbal 5 times: Activity log updated.",
+          //           toastLength: Toast.LENGTH_SHORT,
+          //           gravity: ToastGravity.BOTTOM,
+          //           timeInSecForIosWeb: 1,
+          //           backgroundColor: Colors.green,
+          //           textColor: Colors.white,
+          //           fontSize: 16.0);
+          //     },
+          //     child: Container(
+          //       width: 60,
+          //       height: 60,
+          //       decoration: BoxDecoration(
+          //         shape: BoxShape.circle,
+          //         color: lGray.withOpacity(0.2), // Adjust the color as needed
+          //       ),
+          //       child: const Center(
+          //         child: Text('+5', style: TextStyle(color: lGray)),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Positioned(
             bottom: 0,
             child: AnimatedBuilder(
