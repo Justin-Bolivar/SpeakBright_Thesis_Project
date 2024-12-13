@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speakbright_mobile/Screens/home/communicate.dart';
-import 'package:speakbright_mobile/Screens/home/explore.dart';
+import 'package:speakbright_mobile/Screens/home/game.dart';
 import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
-import 'package:speakbright_mobile/Screens/home/play.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/header_container.dart';
 
@@ -67,12 +66,11 @@ class _StudentHomepageState extends ConsumerState<StudentHomepage> {
                           GlobalRouter.I.router.push(Communicate.route);
                           break;
                         case 2:
-                          // GlobalRouter.I.router.push(Play.route);
+                          GlobalRouter.I.router.push(Game.route);
 
                           break;
                         // case 3:
 
-                          
                         //   break;
                         default:
                           print('Unknown card tapped');

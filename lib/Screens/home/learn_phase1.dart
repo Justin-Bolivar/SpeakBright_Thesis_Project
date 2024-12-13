@@ -104,7 +104,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(30.0),
+                        padding: const EdgeInsets.fromLTRB(10,20,10,20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -130,10 +130,35 @@ class _Learn1State extends ConsumerState<Learn1> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 5),
+
+                      Container(
+                        height: 30, 
+                        width: 150, 
+                        decoration: BoxDecoration(
+                          color: phase1Color,
+                          borderRadius:
+                              BorderRadius.circular(20), 
+                        ),
+                        child: Center(
+                          child: Text(
+                            "${cardActivity.trial} out of 20 trials", 
+                            style: TextStyle(
+                              color: Colors.white, 
+                              fontSize: 15,
+                              fontFamily: 'Roboto', 
+                              fontWeight:FontWeight.w100
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
                       // card part
 
                       // Wrap the FutureBuilder inside the widget tree properly
+
                       FutureBuilder<List<CardModel>?>(
                         future: TopFavoriteCard
                             .fetchTopFavoriteAndDistractorCards(),
@@ -152,10 +177,11 @@ class _Learn1State extends ConsumerState<Learn1> {
 
                           if (cards == null || cards.isEmpty) {
                             return Center(
-                                child: Text(
-                              'No favorite card found.',
-                              style: TextStyle(color: phase1Color),
-                            ));
+                              child: Text(
+                                'No favorite card found.',
+                                style: TextStyle(color: phase1Color),
+                              ),
+                            );
                           }
 
                           final CardModel topFavoriteCard = cards[0];
@@ -163,79 +189,112 @@ class _Learn1State extends ConsumerState<Learn1> {
                               cards.length > 1 ? cards[1] : null;
 
                           bool showDistractor = cardActivity.showDistractor;
-                          print('LEARN 1PAGE: $showDistractor');
+                          bool showDistractor2 = cardActivity
+                              .showDistractor2; // 2nd distractor state
+
+                          print(
+                              'LEARN1 PAGE - showDistractor: $showDistractor, showDistractor2: $showDistractor2');
+
                           return Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: showDistractor == false
-                                ? Column(
+                            child: showDistractor2
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Phase1Card(
-                                        fontSize: 20,
-                                        card: topFavoriteCard,
-                                        onTap: () {
-                                          cardActivity
-                                              .setCardId(topFavoriteCard.id);
-                                          final cardTitle =
-                                              topFavoriteCard.title;
-                                          final category =
-                                              topFavoriteCard.category;
-                                          final cardId = topFavoriteCard.id;
-                                          print(
-                                              'Top Favorite - title: $cardTitle, cat: $category');
-                                          _ttsService.speak(cardTitle);
-                                          // _firestoreService
-                                          //     .storeTappedCards(
-                                          //         cardTitle,
-                                          //         category,
-                                          //         cardId);
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Phase1Card(
-                                        fontSize: 20,
-                                        card: topFavoriteCard,
-                                        onTap: () {
-                                          cardActivity
-                                              .setCardId(topFavoriteCard.id);
-                                          final cardTitle =
-                                              topFavoriteCard.title;
-                                          final category =
-                                              topFavoriteCard.category;
-                                          final cardId = topFavoriteCard.id;
-                                          print(
-                                              'Top Favorite - title: $cardTitle, cat: $category');
-
-                                          _ttsService.speak(cardTitle);
-                                          // _firestoreService
-                                          //     .storeTappedCards(
-                                          //         cardTitle,
-                                          //         category,
-                                          //         cardId);
-                                        },
-                                      ),
-                                      SizedBox(width: 25),
-                                      if (showDistractor &&
-                                          distractorCard != null)
-                                        Phase1Card(
-                                          widthFactor: 0.35,
-                                          heightFactor: 0.35,
-                                          card: distractorCard,
+                                      Expanded(
+                                        child: Phase1Card(
+                                          fontSize: 20,
+                                          card: topFavoriteCard,
                                           onTap: () {
+                                            cardActivity
+                                                .setCardId(topFavoriteCard.id);
                                             final cardTitle =
-                                                distractorCard.title;
+                                                topFavoriteCard.title;
                                             final category =
-                                                distractorCard.category;
+                                                topFavoriteCard.category;
                                             print(
-                                                'Distractor - title: $cardTitle, cat: $category');
+                                                'Top Favorite - title: $cardTitle, cat: $category');
                                             _ttsService.speak(cardTitle);
                                           },
                                         ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      if (distractorCard != null)
+                                        Expanded(
+                                          child: Phase1Card(
+                                            fontSize: 20,
+                                            card: distractorCard,
+                                            onTap: () {
+                                              final cardTitle =
+                                                  distractorCard.title;
+                                              final category =
+                                                  distractorCard.category;
+                                              print(
+                                                  'Distractor - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                        ),
                                     ],
-                                  ),
+                                  )
+                                : (showDistractor
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Phase1Card(
+                                            fontSize: 20,
+                                            card: topFavoriteCard,
+                                            onTap: () {
+                                              cardActivity.setCardId(
+                                                  topFavoriteCard.id);
+                                              final cardTitle =
+                                                  topFavoriteCard.title;
+                                              final category =
+                                                  topFavoriteCard.category;
+                                              print(
+                                                  'Top Favorite - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                          SizedBox(width: 25),
+                                          if (distractorCard != null)
+                                            Phase1Card(
+                                              widthFactor: 0.35,
+                                              heightFactor: 0.35,
+                                              card: distractorCard,
+                                              onTap: () {
+                                                final cardTitle =
+                                                    distractorCard.title;
+                                                final category =
+                                                    distractorCard.category;
+                                                print(
+                                                    'Distractor - title: $cardTitle, cat: $category');
+                                                _ttsService.speak(cardTitle);
+                                              },
+                                            ),
+                                        ],
+                                      )
+                                    : Column(
+                                        children: [
+                                          Phase1Card(
+                                            fontSize: 20,
+                                            card: topFavoriteCard,
+                                            onTap: () {
+                                              cardActivity.setCardId(
+                                                  topFavoriteCard.id);
+                                              final cardTitle =
+                                                  topFavoriteCard.title;
+                                              final category =
+                                                  topFavoriteCard.category;
+                                              print(
+                                                  'Top Favorite - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                        ],
+                                      )),
                           );
                         },
                       )

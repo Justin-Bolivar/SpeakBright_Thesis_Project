@@ -11,6 +11,7 @@ import "package:speakbright_mobile/Screens/guardian/favorites_view.dart";
 import "package:speakbright_mobile/Screens/guardian/student_profile.dart";
 import "package:speakbright_mobile/Screens/home/addcard.dart";
 import "package:speakbright_mobile/Screens/home/communicate.dart";
+import "package:speakbright_mobile/Screens/home/game.dart";
 import "package:speakbright_mobile/Screens/home/guardian_cardview.dart";
 import "package:speakbright_mobile/Screens/home/guardian_homepage.dart";
 import "package:speakbright_mobile/Screens/home/home.dart";
@@ -160,6 +161,13 @@ class GlobalRouter {
                 return const Learn4();
               }),
           GoRoute(
+              parentNavigatorKey: _rootNavigatorKey,
+              path: Game.route,
+              name: Game.name,
+              builder: (context, _) {
+                return const Game();
+              }),
+          GoRoute(
               //only for testing remove later
               parentNavigatorKey: _rootNavigatorKey,
               path: AddCardPage.route,
@@ -188,7 +196,6 @@ class GlobalRouter {
               builder: (context, _) {
                 return const RegistrationStudent();
               }),
-              
           GoRoute(
             parentNavigatorKey: _rootNavigatorKey,
             path: BuildProfile.route,
