@@ -18,7 +18,7 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('cards')
       .where('userId', isEqualTo: user.uid)
-      .orderBy('tapCount', descending: true)
+      //.orderBy('tapCount', descending: true)
       .snapshots()
       .handleError((error) {
     return Stream.value([]);
