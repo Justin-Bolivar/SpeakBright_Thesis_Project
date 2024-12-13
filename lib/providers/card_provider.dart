@@ -19,11 +19,20 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
       .collection('cards')
       .where('userId', isEqualTo: user.uid)
       //.orderBy('tapCount', descending: true)
-      .snapshots()
+      .snapshots(
+          includeMetadataChanges: true) // Important for online/offline tracking
       .handleError((error) {
-    return Stream.value([]);
-  }).map((snapshot) =>
-          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+    print('Error occurred: $error');
+    //return Stream.value([]);
+  }).map((snapshot) {
+    // Check if the snapshot comes from cache or server
+    if (snapshot.metadata.isFromCache) {
+      print('Data from cache');
+    } else {
+      print('Data from server');
+    }
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+  });
 });
 
 final cardsListProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
