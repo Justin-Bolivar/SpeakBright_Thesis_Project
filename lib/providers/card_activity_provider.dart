@@ -16,11 +16,14 @@ class CardActivityProvider extends ChangeNotifier {
   bool _showDistractor2 = false;
   int _independentTapCount = 0;
   int _trial = 0;
+  int _bufferSize = 20;
 
   String? get cardId => _cardId;
   bool get showDistractor => _showDistractor;
   bool get showDistractor2 => _showDistractor2;
   int get trial => _trial;
+  int get bufferSize => _bufferSize;
+
 
   // Firebase references
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -155,7 +158,10 @@ class CardActivityProvider extends ChangeNotifier {
 
   // Handle prompt taps
   Future<void> tapPrompt(int promptIndex) async {
-    if (_cardId == null) return;
+    if (_cardId == null) {
+      print("TAP PROMPT CARDID IS NULL");
+      return;
+    }
 
     // Track independent taps if the criteria are met
     if (promptIndex == 4) {
@@ -166,7 +172,7 @@ class CardActivityProvider extends ChangeNotifier {
     }
 
     // Show distractor if there are 5 consecutive independent taps
-    if (_independentTapCount >= 5) {
+    if (_independentTapCount >= 5 && _cardId != null) {
       bool showDistractor2CriteriaMet =
           await _checkRecentSessionsForShowDistractor2(_cardId!);
 
@@ -174,7 +180,6 @@ class CardActivityProvider extends ChangeNotifier {
         _showDistractor2 = true;
         _showDistractor = false;
         print('SHOW 2 DSTRTRR: $showDistractor2CriteriaMet');
-
       } else {
         bool showDistractorCriteriaMet =
             await _checkRecentSessionsForShowDistractor(_cardId!);
@@ -191,6 +196,12 @@ class CardActivityProvider extends ChangeNotifier {
     _trial = trialCount;
     notifyListeners();
   }
+
+  void setbufferSize(int size) {
+    _bufferSize = size;
+    notifyListeners();
+  }
+
 
   // Reset values if needed
   void reset() {

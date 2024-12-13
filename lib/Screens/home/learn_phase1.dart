@@ -103,7 +103,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(10,20,10,20),
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -131,22 +131,33 @@ class _Learn1State extends ConsumerState<Learn1> {
                       ),
                       const SizedBox(height: 5),
 
-                      Container(
-                        height: 30, 
-                        width: 150, 
-                        decoration: BoxDecoration(
-                          color: phase1Color,
-                          borderRadius:
-                              BorderRadius.circular(20), 
-                        ),
-                        child: Center(
-                          child: Text(
-                            "${cardActivity.trial} out of 20 trials", 
-                            style: TextStyle(
-                              color: Colors.white, 
-                              fontSize: 15,
-                              fontFamily: 'Roboto', 
-                              fontWeight:FontWeight.w100
+                      GestureDetector(
+                        onTap: () {
+                          // Check the current bufferSize and toggle its value
+                          if (cardActivity.bufferSize == 20) {
+                            cardActivity.setbufferSize(10);
+                          } else if (cardActivity.bufferSize == 10) {
+                            cardActivity.setbufferSize(20);
+                          }
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: cardActivity.bufferSize == 20
+                                ? phase1Color.withOpacity(0.5)
+                                : Color.fromARGB(204, 35, 78, 19),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w300,
+                              ),
                             ),
                           ),
                         ),

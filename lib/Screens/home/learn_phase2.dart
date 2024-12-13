@@ -106,6 +106,10 @@ class _Learn2State extends ConsumerState<Learn2> {
     final cardActivity = ref.watch(cardActivityProvider);
     final cardsAsyncValue = ref.watch(cardsListProviderPhase2);
     return Scaffold(
+      appBar: AppBar(
+        leading: const BackButton(color: phase2Color),
+        backgroundColor: Colors.white,
+      ),
       backgroundColor: kwhite,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
@@ -129,6 +133,35 @@ class _Learn2State extends ConsumerState<Learn2> {
               'assets/phase/phase2.png',
             ),
           ),
+          GestureDetector(
+                        onTap: () {
+                          // Check the current bufferSize and toggle its value
+                          if (cardActivity.bufferSize == 20) {
+                            cardActivity.setbufferSize(10);
+                          } else if (cardActivity.bufferSize == 10) {
+                            cardActivity.setbufferSize(20);
+                          }
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: cardActivity.bufferSize == 20? phase2Color.withOpacity(0.5):Color.fromARGB(204, 116, 27, 106),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Padding(
