@@ -11,9 +11,7 @@ import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
-import 'package:speakbright_mobile/Widgets/unlocked_phase.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:toastification/toastification.dart';
 
 class PromptButton extends ConsumerStatefulWidget {
@@ -541,7 +539,6 @@ class _PromptButtonState extends ConsumerState<PromptButton>
 
 ToastificationItem phase3Unlocked(BuildContext context) {
   return toastification.show(
-    // ignore: use_build_context_synchronously
     context: context,
     type: ToastificationType.success,
     style: ToastificationStyle.fillColored,
@@ -562,7 +559,6 @@ ToastificationItem phase3Unlocked(BuildContext context) {
 
 ToastificationItem phase2Unlocked(BuildContext context) {
   return toastification.show(
-    // ignore: use_build_context_synchronously
     context: context,
     type: ToastificationType.success,
     style: ToastificationStyle.fillColored,
@@ -583,7 +579,6 @@ ToastificationItem phase2Unlocked(BuildContext context) {
 
 ToastificationItem phase4Unlocked(BuildContext context) {
   return toastification.show(
-    // ignore: use_build_context_synchronously
     context: context,
     type: ToastificationType.success,
     style: ToastificationStyle.fillColored,

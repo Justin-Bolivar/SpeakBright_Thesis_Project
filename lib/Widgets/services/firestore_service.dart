@@ -2,13 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/unlocked_phase.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
-import 'package:toastification/toastification.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {
