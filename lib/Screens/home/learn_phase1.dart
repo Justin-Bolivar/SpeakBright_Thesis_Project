@@ -39,70 +39,30 @@ class _Learn1State extends ConsumerState<Learn1> {
 
   @override
   Widget build(BuildContext context) {
+    final cardActivity =
+        ref.watch(cardActivityProvider); // Access CardActivityProvider
 
-    final cardActivity = ref.watch(cardActivityProvider); // Access CardActivityProvider
-    
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: phase1Color),
         backgroundColor: learn1bg,
-        actions: [
-          PopupMenuButton<int>(
-            icon: Icon(Icons.category, color: phase1Color),
-            onSelected: (index) {
-              setState(() {
-                selectedCategory = index;
-              });
-            },
-            itemBuilder: (context) =>
-                List.generate(phase1Categories.length, (index) {
-              final category = phase1Categories[index];
-              int colorIndex = index % boxColors.length;
-              Color itemColor = boxColors[colorIndex];
-
-              return PopupMenuItem<int>(
-                value: index,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: selectedCategory == index
-                        ? itemColor
-                        : itemColor.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: selectedCategory == index
-                        ? [
-                            BoxShadow(
-                              color: itemColor,
-                              spreadRadius: 3,
-                              blurRadius: 6,
-                              offset: const Offset(0, 0),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        category,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        phase1Icons[index % phase1Icons.length],
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
+        // actions: [
+        //   PopupMenuButton<int>(
+        //     icon: Icon(Icons.category, color: phase1Color),
+        //     onSelected: (index) {
+        //       setState(() {
+        //         selectedCategory = index;
+        //       });
+        //     },
+        //     itemBuilder: (context) =>
+        //         List.generate(phase1Categories.length, (index) {
+        //       return PopupMenuItem<int>(
+        //         value: index,
+        //         child: Container(),
+        //       );
+        //     }),
+        //   ),
+        // ],
       ),
       backgroundColor: learn1bg,
       floatingActionButton: Align(
@@ -115,7 +75,9 @@ class _Learn1State extends ConsumerState<Learn1> {
               PromptButton(
                 phaseCurrent: currentUserPhase,
                 onRefresh: () {
-                  setState(() {});
+                  setState(() {
+                    ref.watch(cardActivityProvider);
+                  });
                 },
               ),
             ],
@@ -142,7 +104,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(30.0),
+                        padding: const EdgeInsets.fromLTRB(10,20,10,20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -168,292 +130,174 @@ class _Learn1State extends ConsumerState<Learn1> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 5),
+
+                      Container(
+                        height: 30, 
+                        width: 150, 
+                        decoration: BoxDecoration(
+                          color: phase1Color,
+                          borderRadius:
+                              BorderRadius.circular(20), 
+                        ),
+                        child: Center(
+                          child: Text(
+                            "${cardActivity.trial} out of 20 trials", 
+                            style: TextStyle(
+                              color: Colors.white, 
+                              fontSize: 15,
+                              fontFamily: 'Roboto', 
+                              fontWeight:FontWeight.w100
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
                       // card part
 
                       // Wrap the FutureBuilder inside the widget tree properly
-                      selectedCategory == 0
-                          ? FutureBuilder<List<CardModel>?>(
-                              future: TopFavoriteCard
-                                  .fetchTopFavoriteAndDistractorCards(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(child: WaitingDialog());
-                                }
 
-                                if (snapshot.hasError) {
-                                  return Center(
-                                      child: Text('Error: ${snapshot.error}'));
-                                }
+                      FutureBuilder<List<CardModel>?>(
+                        future: TopFavoriteCard
+                            .fetchTopFavoriteAndDistractorCards(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: WaitingDialog());
+                          }
 
-                                final List<CardModel>? cards = snapshot.data;
+                          if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          }
 
-                                if (cards == null || cards.isEmpty) {
-                                  return Center(
-                                      child: Text('No favorite card found.',style: TextStyle(color: phase1Color),));
-                                }
+                          final List<CardModel>? cards = snapshot.data;
 
-                                final CardModel topFavoriteCard = cards[0];
-                                final CardModel? distractorCard =
-                                    cards.length > 1 ? cards[1] : null;
+                          if (cards == null || cards.isEmpty) {
+                            return Center(
+                              child: Text(
+                                'No favorite card found.',
+                                style: TextStyle(color: phase1Color),
+                              ),
+                            );
+                          }
 
-                                return FutureBuilder<bool>(
-                                  future: _firestoreService
-                                      .showDistractor(topFavoriteCard.id),
-                                  builder: (context, distractorSnapshot) {
-                                    if (distractorSnapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(child: WaitingDialog());
-                                    }
+                          final CardModel topFavoriteCard = cards[0];
+                          final CardModel? distractorCard =
+                              cards.length > 1 ? cards[1] : null;
 
-                                    if (distractorSnapshot.hasError) {
-                                      return Center(
-                                          child: Text(
-                                              'Error: ${distractorSnapshot.error}'));
-                                    }
+                          bool showDistractor = cardActivity.showDistractor;
+                          bool showDistractor2 = cardActivity
+                              .showDistractor2; // 2nd distractor state
 
-                                    bool showDistractor =
-                                        distractorSnapshot.data ?? false;
+                          print(
+                              'LEARN1 PAGE - showDistractor: $showDistractor, showDistractor2: $showDistractor2');
 
-                                    // Set the values for cardId and showDistractor
-                                    
-
-                                    return Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: showDistractor == false
-                                          ? Column(
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topFavoriteCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topFavoriteCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
-                                                    final cardTitle =
-                                                        topFavoriteCard.title;
-                                                    final category =
-                                                        topFavoriteCard
-                                                            .category;
-                                                    final cardId =
-                                                        topFavoriteCard.id;
-                                                     _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
-                                                    
-                                                    print(
-                                                        'Top Favorite - title: $cardTitle, cat: $category');
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardId);
-                                                    
-                                                  },
-                                                ),
-                                              ],
-                                            )
-                                          : Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topFavoriteCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topFavoriteCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
-                                                    final cardTitle =
-                                                        topFavoriteCard.title;
-                                                    final category =
-                                                        topFavoriteCard
-                                                            .category;
-                                                    final cardId =
-                                                        topFavoriteCard.id;
-                                                    _firestoreService.setCurrentlyLearningCard(cardId, phase1Categories[selectedCategory]);
-                                                    print(
-                                                        'Top Favorite - title: $cardTitle, cat: $category');
-
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardId);
-                                                   
-                                                  },
-                                                ),
-                                                SizedBox(width: 25),
-                                                if (showDistractor &&
-                                                    distractorCard != null)
-                                                  Phase1Card(
-                                                    widthFactor: 0.35,
-                                                    heightFactor: 0.35,
-                                                    card: distractorCard,
-                                                    onTap: () {
-                                                      final cardTitle =
-                                                          distractorCard.title;
-                                                      final category =
-                                                          distractorCard
-                                                              .category;
-                                                      print(
-                                                          'Distractor - title: $cardTitle, cat: $category');
-                                                      _ttsService
-                                                          .speak(cardTitle);
-                                                    },
-                                                  ),
-                                              ],
-                                            ),
-                                    );
-                                  },
-                                );
-                              },
-                            )
-                          : FutureBuilder<List<CardModel>?>( //other categery
-                              future: TopCategoryCard
-                                  .fetchTopCategoryAndDistractorCards(
-                                      phase1Categories[selectedCategory]),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(child: WaitingDialog());
-                                }
-
-                                if (snapshot.hasError) {
-                                  return Center(
-                                      child: Text('Error: ${snapshot.error}'));
-                                }
-
-                                final List<CardModel>? cards = snapshot.data;
-
-                                if (cards == null || cards.isEmpty) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(50.0),
-                                      child: Text(
-                                        'Category ${phase1Categories[selectedCategory]} must have at least 10 cards :(',
-                                        style: TextStyle(
-                                            fontSize: 20, color: Colors.white),
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: showDistractor2
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                        child: Phase1Card(
+                                          fontSize: 20,
+                                          card: topFavoriteCard,
+                                          onTap: () {
+                                            cardActivity
+                                                .setCardId(topFavoriteCard.id);
+                                            final cardTitle =
+                                                topFavoriteCard.title;
+                                            final category =
+                                                topFavoriteCard.category;
+                                            print(
+                                                'Top Favorite - title: $cardTitle, cat: $category');
+                                            _ttsService.speak(cardTitle);
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }
-
-                                final CardModel topCategoryCard = cards[0];
-                                final CardModel? distractorCard =
-                                    cards.length > 1 ? cards[1] : null;
-
-                                return FutureBuilder<bool>(
-                                  future: _firestoreService
-                                      .showDistractor(topCategoryCard.id),
-                                  builder: (context, distractorSnapshot) {
-                                    if (distractorSnapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(child: WaitingDialog());
-                                    }
-
-                                    if (distractorSnapshot.hasError) {
-                                      return Center(
-                                          child: Text(
-                                              'Error: ${distractorSnapshot.error}'));
-                                    }
-
-                                    bool showDistractor =
-                                        distractorSnapshot.data ?? false;
-
-                                    // Set the values for cardId and showDistractor
-                                    
-                                    return Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: showDistractor == false
-                                          ? Column(
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topCategoryCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topCategoryCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
-
-                                                    final cardTitle =
-                                                        topCategoryCard.title;
-                                                    final category =
-                                                        topCategoryCard
-                                                            .category;
-                                                    final cardIdCategory =
-                                                        topCategoryCard.id;
-                                                    print(
-                                                        'Top Category - title: $cardTitle, cat: $category');
-                                                    _firestoreService.setCurrentlyLearningCard(cardIdCategory, phase1Categories[selectedCategory]);
-
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardIdCategory);
-                                                  },
-                                                ),
-                                              ],
-                                            )
-                                          : Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Phase1Card(
-                                                  fontSize: 20,
-                                                  card: topCategoryCard,
-                                                  onTap: () {
-                                                    cardActivity.setCardId(topCategoryCard.id);
-                                                    cardActivity.setShowDistractor(showDistractor);
-                                                    final cardTitle =
-                                                        topCategoryCard.title;
-                                                    final category =
-                                                        topCategoryCard
-                                                            .category;
-                                                    final cardIdCategory =
-                                                        topCategoryCard.id;
-                                                    print(
-                                                        'Top Category - title: $cardTitle, cat: $category');
-                                                    _firestoreService.setCurrentlyLearningCard(cardIdCategory, phase1Categories[selectedCategory]);
-
-                                                    _ttsService
-                                                        .speak(cardTitle);
-                                                    _firestoreService
-                                                        .storeTappedCards(
-                                                            cardTitle,
-                                                            category,
-                                                            cardIdCategory);
-                                                  },
-                                                ),
-                                                SizedBox(width: 25),
-                                                if (showDistractor &&
-                                                    distractorCard != null)
-                                                  Phase1Card(
-                                                    widthFactor: 0.35,
-                                                    heightFactor: 0.35,
-                                                    card: distractorCard,
-                                                    onTap: () {
-                                                      final cardTitle =
-                                                          distractorCard.title;
-                                                      final category =
-                                                          distractorCard
-                                                              .category;
-                                                      print(
-                                                          'Distractor - title: $cardTitle, cat: $category');
-                                                      _ttsService
-                                                          .speak(cardTitle);
-                                                    },
-                                                  ),
-                                              ],
+                                      SizedBox(width: 10),
+                                      if (distractorCard != null)
+                                        Expanded(
+                                          child: Phase1Card(
+                                            fontSize: 20,
+                                            card: distractorCard,
+                                            onTap: () {
+                                              final cardTitle =
+                                                  distractorCard.title;
+                                              final category =
+                                                  distractorCard.category;
+                                              print(
+                                                  'Distractor - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                        ),
+                                    ],
+                                  )
+                                : (showDistractor
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Phase1Card(
+                                            fontSize: 20,
+                                            card: topFavoriteCard,
+                                            onTap: () {
+                                              cardActivity.setCardId(
+                                                  topFavoriteCard.id);
+                                              final cardTitle =
+                                                  topFavoriteCard.title;
+                                              final category =
+                                                  topFavoriteCard.category;
+                                              print(
+                                                  'Top Favorite - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                          SizedBox(width: 25),
+                                          if (distractorCard != null)
+                                            Phase1Card(
+                                              widthFactor: 0.35,
+                                              heightFactor: 0.35,
+                                              card: distractorCard,
+                                              onTap: () {
+                                                final cardTitle =
+                                                    distractorCard.title;
+                                                final category =
+                                                    distractorCard.category;
+                                                print(
+                                                    'Distractor - title: $cardTitle, cat: $category');
+                                                _ttsService.speak(cardTitle);
+                                              },
                                             ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
+                                        ],
+                                      )
+                                    : Column(
+                                        children: [
+                                          Phase1Card(
+                                            fontSize: 20,
+                                            card: topFavoriteCard,
+                                            onTap: () {
+                                              cardActivity.setCardId(
+                                                  topFavoriteCard.id);
+                                              final cardTitle =
+                                                  topFavoriteCard.title;
+                                              final category =
+                                                  topFavoriteCard.category;
+                                              print(
+                                                  'Top Favorite - title: $cardTitle, cat: $category');
+                                              _ttsService.speak(cardTitle);
+                                            },
+                                          ),
+                                        ],
+                                      )),
+                          );
+                        },
+                      )
                     ],
                   ),
                 ),

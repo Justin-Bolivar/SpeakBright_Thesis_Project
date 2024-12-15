@@ -7,16 +7,18 @@ import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 class TopFavoriteCard {
   static Future<List<CardModel>?> fetchTopFavoriteAndDistractorCards() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return null; // Exit early if no user is logged in
+    if (userId == null) return null;
 
-    CollectionReference favoritesCollection =
-        FirebaseFirestore.instance.collection('favorites');
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference favoritesCollection = firestore.collection('favorites');
     CollectionReference currentlyLearningCollection =
-        FirebaseFirestore.instance.collection('currently_learning');
-
+        firestore.collection('currently_learning');
 
     try {
-      // Fetch the currently learning card (if any)
+      String? targetCardId;
+      bool isCurrentlyLearningPhase1Independence = false;
+
+      // Step 1: Check the currently learning card first
       QuerySnapshot currentlyLearningSnapshot =
           await currentlyLearningCollection
               .doc(userId)
@@ -24,106 +26,98 @@ class TopFavoriteCard {
               .limit(1)
               .get();
 
-      QueryDocumentSnapshot? currentlyLearningDoc =
-          currentlyLearningSnapshot.docs.isNotEmpty
-              ? currentlyLearningSnapshot.docs.first
-              : null;
-
-      String? currentlyLearningCardId;
-      bool isCurrentlyLearningPhase1Independence = false;
-
-      if (currentlyLearningDoc != null) {
+      if (currentlyLearningSnapshot.docs.isNotEmpty) {
+        QueryDocumentSnapshot currentlyLearningDoc =
+            currentlyLearningSnapshot.docs.first;
         Map<String, dynamic>? data =
             currentlyLearningDoc.data() as Map<String, dynamic>?;
-        currentlyLearningCardId = data?['cardId'];
-
-        print(currentlyLearningCardId);
+        String? currentlyLearningCardId = data?['cardId'];
 
         if (currentlyLearningCardId != null) {
-          // Fetch card info for the currently learning card
-          QuerySnapshot cardSnapshot = await FirebaseFirestore.instance
+          DocumentSnapshot cardSnapshot = await firestore
               .collection('cards')
-              .where('cardId', isEqualTo: currentlyLearningCardId)
-              .limit(1)
+              .doc(currentlyLearningCardId)
               .get();
 
-          if (cardSnapshot.docs.isNotEmpty) {
-            DocumentSnapshot cardDoc = cardSnapshot.docs.first;
-            Map<String, dynamic>? cardDocData =
-                cardDoc.data() as Map<String, dynamic>?;
+          if (cardSnapshot.exists) {
+            Map<String, dynamic>? cardData =
+                cardSnapshot.data() as Map<String, dynamic>?;
             isCurrentlyLearningPhase1Independence =
-                cardDocData?['phase1_independence'] ?? true;
+                cardData?['phase1_independence'] ?? true;
+
+            // If the currently learning card is NOT phase1_independence, use it as the target card
+            if (!isCurrentlyLearningPhase1Independence) {
+              targetCardId = currentlyLearningCardId;
+
+              print(
+                  '!isCurrentlyLearningPhase1Independence and target card is $targetCardId');
+            }
           }
         }
       }
 
-      // If there's no currently learning card or it's phase1_independence true, use the top favorite
-      String targetCardId;
-      bool targetCardPhase1Independence = true;
-
-      if (currentlyLearningCardId != null &&
-          !isCurrentlyLearningPhase1Independence) {
-        targetCardId = currentlyLearningCardId;
-        targetCardPhase1Independence = false;
-      } else {
-        // Fetch favorite cards and their ranks
+      // Step 2: If no valid currently learning card, fetch from top favorites
+      if (targetCardId == null) {
         QuerySnapshot favoritesSnapshot = await favoritesCollection
             .doc(userId)
             .collection('cards')
             .orderBy('rank')
             .get();
 
-        if (favoritesSnapshot.docs.isEmpty) {
-          return null;
+        for (var doc in favoritesSnapshot.docs) {
+          
+          String cardId = doc.id;
+          DocumentSnapshot cardSnapshot =
+              await firestore.collection('cards').doc(cardId).get();
+
+          if (!cardSnapshot.exists) {
+            print('Card not found for $cardId');
+            continue;
+          }
+
+          Map<String, dynamic>? cardData =
+              cardSnapshot.data() as Map<String, dynamic>?;
+
+          // Only consider cards with phase1_independence set to false
+          bool isPhase1Independence = cardData?['phase1_independence'] ?? false;
+          if (!isPhase1Independence) {
+            targetCardId = cardId;
+            break; // Stop the loop once we find a suitable card
+          }
         }
 
-        // Find the top-ranked favorite card (rank 1)
-        var topFavoriteDoc = favoritesSnapshot.docs.first;
-        targetCardId = topFavoriteDoc.id;
-        Map<String, dynamic>? topFavoriteData =
-            topFavoriteDoc.data() as Map<String, dynamic>?;
-        targetCardPhase1Independence =
-            topFavoriteData?['phase1_independence'] ?? true;
+        // If no valid favorite card found, return null
+        if (targetCardId == null) return null;
       }
 
-      // Fetch all cards to find the distractor
-      QuerySnapshot cardsSnapshot = await FirebaseFirestore.instance
+      // Step 3: Fetch potential distractor cards
+      QuerySnapshot cardsSnapshot = await firestore
           .collection('cards')
           .where('userId', isEqualTo: userId)
           .get();
 
       List<CardModel> validCards = [];
-
-      // Get the distractor card (any favorite card except the target card)
       for (var cardDoc in cardsSnapshot.docs) {
         Map<String, dynamic>? cardData =
             cardDoc.data() as Map<String, dynamic>?;
-
-        if (cardDoc.id != targetCardId) {
-          bool phase1Independence = cardData?['phase1_independence'] ?? false;
-
-          if (!phase1Independence) {
-            validCards.add(CardModel.fromFirestore(cardDoc));
-          }
+        // Exclude the target card and any cards with phase1_independence set to true
+        if (cardDoc.id != targetCardId &&
+            !(cardData?['phase1_independence'] ?? false)) {
+          validCards.add(CardModel.fromFirestore(cardDoc));
         }
       }
 
-      // Return the favorite (target) card and distractor cards
       List<CardModel> result = [];
-      CardModel? targetCardModel;
-
-      // Fetch target card details
-      DocumentSnapshot targetCardDoc = await FirebaseFirestore.instance
-          .collection('cards')
-          .doc(targetCardId)
-          .get();
+      // Fetch the target card details
+      DocumentSnapshot targetCardDoc =
+          await firestore.collection('cards').doc(targetCardId).get();
 
       if (targetCardDoc.exists) {
-        targetCardModel = CardModel.fromFirestore(targetCardDoc);
-        result.add(targetCardModel); // Add target card (favorite)
+        CardModel targetCardModel = CardModel.fromFirestore(targetCardDoc);
+        result.add(targetCardModel);
       }
 
-      // Add a random distractor card (if available)
+      // Add a distractor card if available
       if (validCards.isNotEmpty) {
         result.add(validCards[0]);
       }

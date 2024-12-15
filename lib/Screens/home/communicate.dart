@@ -36,7 +36,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
   List<String> categories = [];
   int currentUserPhase = 1;
   int selectedCategory = -1;
-  String _sentencePrefix = "I feel";
+  String sentencePrefix = "I feel";
+  bool pressSpeak = false;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
 
   void _clearSentence() {
     setState(() {
+      pressSpeak = false;
       sentence.clear();
       words.clear();
 
@@ -64,35 +66,49 @@ class _CommunicateState extends ConsumerState<Communicate> {
     });
   }
 
-  void _toggleSentencePrefix() {
-    setState(() {
-      _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
-      words.clear();
-      sentence.clear();
-    });
-  }
+  // void _toggleSentencePrefix() {
+  //   setState(() {
+  //     _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
+  //     words.clear();
+  //     sentence.clear();
+  //   });
+  // }
 
-  void _addCardTitleToSentence3(String title, String category) {
-    setState(() {
-      if (sentence.length > 1) {
-        sentence[sentence.length - 1] = title;
-      } else {
-        sentence.add(title);
-      }
-    });
-  }
+  // void _addCardTitleToSentence3(String title, String category) {
+  //   setState(() {
+  //     if (sentence.length > 1) {
+  //       sentence[sentence.length - 1] = title;
+  //     } else {
+  //       sentence.add(title);
+  //     }
+  //   });
+  // }
 
-  void _addCardTitleToSentence2(String title, String category) {
+  // void _addCardTitleToSentence2(String title, String category) {
+  //   setState(() {
+  //     if (category == "Activities") {
+  //       if (sentence.length > 1) {
+  //         sentence[sentence.length - 1] = "to $title";
+  //         words[words.length - 1] = "to $title";
+  //       } else {
+  //         sentence.add("to $title");
+  //         words.add(title);
+  //       }
+  //     } else {
+  //       if (sentence.length > 1) {
+  //         sentence[sentence.length - 1] = title;
+  //         words[words.length - 1] = title;
+  //       } else {
+  //         sentence.add(title);
+  //         words.add(title);
+  //       }
+  //     }
+  //   });
+  // }
+
+  void addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (category == "Activities") {
-        if (sentence.length > 1) {
-          sentence[sentence.length - 1] = "to $title";
-          words[words.length - 1] = "to $title";
-        } else {
-          sentence.add("to $title");
-          words.add(title);
-        }
-      } else {
+      if (currentUserPhase == 2 || currentUserPhase == 3) {
         if (sentence.length > 1) {
           sentence[sentence.length - 1] = title;
           words[words.length - 1] = title;
@@ -100,51 +116,42 @@ class _CommunicateState extends ConsumerState<Communicate> {
           sentence.add(title);
           words.add(title);
         }
-      }
-    });
-  }
-
-  void _addCardTitleToSentence4(String title, String category) {
-    setState(() {
-      if (currentUserPhase == 4) {
-        if (_sentencePrefix == "I feel") {
-          if (category == "Emotions") {
-            if (sentence.isNotEmpty) {
-              sentence[0] = title;
+      } else {
+        if (sentence.length >= 4) {
+          _clearSentence();
+        }
+        if (category == "Emotions") {
+          if (sentence.isNotEmpty) {
+            //if sentence has 2 Emotions replace first Emotion
+            if (sentence.length > 2) {
+              sentence[0] = "I feel";
+              sentence[1] = title;
               words[0] = title;
             } else {
-              sentence.add(title);
+              //else add as normal
+              sentence.addAll(["I feel", title]);
               words.add(title);
             }
           } else {
-            String placeHolder = "____";
-            if (sentence.isNotEmpty) {
-              if (sentence.length > 1) {
-                sentence[1] = title;
-                words[1] = title;
-              } else {
-                sentence.add(title);
-                words.add(title);
-              }
-            } else {
-              sentence.add(placeHolder);
-              sentence.add(title);
-              words.add(placeHolder);
-              words.add(title);
-            }
+            //if sentence is empty add as normal
+            sentence.addAll(["I feel", title]);
+            words.add(title);
           }
-        } else if (_sentencePrefix == "I want") {
-          if (category != "Emotions") {
-            if (sentence.length > 1) {
+        } else {
+          if (sentence.isNotEmpty) {
+            //if sentence has 2 Objects replace first Object
+            if (sentence.length > 2) {
+              sentence[0] = "I want";
               sentence[1] = title;
-              words[1] = title;
+              words[0] = title;
             } else {
-              sentence.add(title);
+              //else add as normal
+              sentence.addAll(["I want", title]);
               words.add(title);
             }
           } else {
-            _toggleSentencePrefix();
-            sentence.add(title);
+            //if sentence is empty add as normal
+            sentence.addAll(["I want", title]);
             words.add(title);
           }
         }
@@ -213,10 +220,14 @@ class _CommunicateState extends ConsumerState<Communicate> {
             _clearSentence();
           });
         }
-      } else {
+
+        //_firestoreService.storeSentence(sentence);
         _ttsService.speak(sentenceString);
-        _firestoreService.storeSentence(sentence);
-        _clearSentence();
+        pressSpeak = true;
+      } else {
+        //_firestoreService.storeSentence(sentence);
+        _ttsService.speak(sentenceString);
+        pressSpeak = true;
       }
     } catch (e) {
       print('Error occurred: $e');
@@ -229,7 +240,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
     bool showSentenceWidget = currentUserPhase > 1;
-    bool showSwitchWidget = currentUserPhase == 4;
 
     return Scaffold(
       backgroundColor: kwhite,
@@ -287,9 +297,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                             ),
                             child: Center(
                               child: Text(
-                                currentUserPhase == 2 || currentUserPhase == 3
-                                    ? sentence.join(' ')
-                                    : "$_sentencePrefix ${sentence.isNotEmpty ? sentence[0] : '______'}, I want ${sentence.length > 1 ? sentence[1] : '______'}",
+                                sentence.join(' '),
                                 style: const TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -298,71 +306,52 @@ class _CommunicateState extends ConsumerState<Communicate> {
                             ),
                           ),
                         ),
-                        if (showSentenceWidget)
-                          Container(
-                            child: Column(
-                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Container(
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    color: mainpurple,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: IconButton(
-                                    onPressed: _sendSentenceAndSpeak,
-                                    icon: const Icon(
-                                      Icons.volume_up,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                        //if (showSentenceWidget)
+                        Column(
+                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: mainpurple,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: IconButton(
+                                onPressed: _sendSentenceAndSpeak,
+                                icon: const Icon(
+                                  Icons.volume_up,
+                                  color: Colors.white,
+                                  size: 30,
                                 ),
-                                const SizedBox(
-                                  // width: 30,
-                                  height: 15,
-                                ),
-                                Container(
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    color: mainpurple,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: IconButton(
-                                    onPressed: _clearSentence,
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                            const SizedBox(
+                              // width: 30,
+                              height: 15,
+                            ),
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: mainpurple,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: IconButton(
+                                onPressed: _clearSentence,
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                if (showSwitchWidget)
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: mainpurple,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: _toggleSentencePrefix,
-                    child: Text(
-                      "Switch to ${_sentencePrefix == "I feel" ? "I want" : "I feel"}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
               ],
             ),
           const SizedBox(height: 20),
@@ -486,19 +475,16 @@ class _CommunicateState extends ConsumerState<Communicate> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                    if (currentUserPhase > 1) {
-                      if (currentUserPhase == 2) {
-                        _addCardTitleToSentence2(cardTitle, category);
-                      } else if (currentUserPhase == 3) {
-                        _addCardTitleToSentence3(cardTitle, category);
-                      } else if (currentUserPhase == 4) {
-                        _addCardTitleToSentence4(cardTitle, category);
-                      }
+                    if (pressSpeak == true) {
+                      _clearSentence();
+                      pressSpeak = false;
+                      addCardTitleToSentence(cardTitle, category);
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);
                       print('title: $cardTitle, cat: $category');
                     } else {
+                      addCardTitleToSentence(cardTitle, category);
                       _ttsService.speak(cardTitle);
                       _firestoreService.storeTappedCards(
                           cardTitle, category, cardId);

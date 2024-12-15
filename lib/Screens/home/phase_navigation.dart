@@ -10,6 +10,7 @@ import 'package:speakbright_mobile/Screens/home/learn_phase4.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
+import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 
 class PhaseNav extends ConsumerStatefulWidget {
   const PhaseNav({super.key});
@@ -29,7 +30,10 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   void initState() {
     super.initState();
     _currentPhaseFuture = FirestoreService().fetchPhase();
+    ref.read(cardActivityProvider).reset();
+    // FirestoreService().updatePhase3Independence();
     // FirestoreService().updatePhase1Independence();
+    // FirestoreService().updatePhase2Independence();
   }
 
   @override
@@ -53,21 +57,23 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                 ),
               ),
             ),
-            Positioned(
+            const Positioned(
               top: 50,
               left: 65,
               child: Column(
                 children: [
                   Text(
                     'PHASES',
-                    style: GoogleFonts.rubikSprayPaint(
+                    style: TextStyle(
+                      //GoogleFonts.rubikSprayPaint(
                       color: Colors.white,
                       fontSize: 48,
                     ),
                   ),
                   Text(
                     'To unlock phases, modify in student profile',
-                    style: GoogleFonts.roboto(
+                    style: TextStyle(
+                        //GoogleFonts.roboto(
                         fontStyle: FontStyle.normal,
                         fontWeight: FontWeight.normal,
                         fontSize: 10,
@@ -81,7 +87,6 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
               right: 110,
               child: InkWell(
                 onTap: () {
-                  FirestoreService().updatePhase1Independence();
                   GlobalRouter.I.router.push(Learn1.route);
                 },
                 child: Image.asset('assets/phase/P1.png', height: 115),
@@ -134,8 +139,6 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
           ? () => Fluttertoast.showToast(msg: "Oops Phase locked")
           : () => {
                 GlobalRouter.I.router.push(routeName),
-                FirestoreService().updatePhase2Independence(),
-                FirestoreService().updatePhase3Independence()
               },
       child: Image.asset(
           isLocked
