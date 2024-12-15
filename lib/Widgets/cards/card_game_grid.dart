@@ -100,6 +100,10 @@ class _CardGameGridState extends State<CardGameGrid> {
             // Reset selection
             _selectedCards.clear();
             _allowSelection = true;
+
+            if (_allMatched) {
+              _showEndLevelDialog();
+            }
           });
         });
       }
@@ -111,6 +115,7 @@ class _CardGameGridState extends State<CardGameGrid> {
       _level++;
       _shuffleCards();
     });
+    Navigator.of(context).pop();
   }
 
   void _resetGame() {
@@ -118,37 +123,48 @@ class _CardGameGridState extends State<CardGameGrid> {
       _level = 1;
       _shuffleCards();
     });
+    Navigator.of(context).pop();
+  }
+
+  void _showEndLevelDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(_level < 3 ? 'Level Complete!' : 'Congratulations!'),
+          content: Text(_level < 3
+              ? 'You have completed level $_level. Ready for the next level?'
+              : 'You have completed all levels. Play again?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text(_level < 3 ? 'Next Level' : 'Play Again'),
+              onPressed: _level < 3 ? _nextLevel : _resetGame,
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        GridView.builder(
-          padding: const EdgeInsets.all(16.0),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
-          ),
-          itemCount: _duplicatedCards.length,
-          itemBuilder: (context, index) {
-            return CardGameItem(
-              card: _duplicatedCards[index],
-              colorIndex: index,
-              revealed: _revealedCards[index] || _matchedCards[index],
-              onTap: () => _onCardTap(index),
-            );
-          },
-        ),
-        if (_allMatched)
-          Center(
-            child: ElevatedButton(
-              onPressed: _level < 3 ? _nextLevel : _resetGame,
-              child: Text(_level < 3 ? 'Next Level' : 'Play Again'),
-            ),
-          ),
-      ],
+    return GridView.builder(
+      padding: const EdgeInsets.all(16.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+      ),
+      itemCount: _duplicatedCards.length,
+      itemBuilder: (context, index) {
+        return CardGameItem(
+          card: _duplicatedCards[index],
+          colorIndex: index,
+          revealed: _revealedCards[index] || _matchedCards[index],
+          onTap: () => _onCardTap(index),
+        );
+      },
     );
   }
 }
