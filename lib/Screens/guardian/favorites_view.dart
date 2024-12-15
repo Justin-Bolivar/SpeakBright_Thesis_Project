@@ -88,14 +88,16 @@ class _FavoritesViewState extends ConsumerState<FavoritesView> {
                 child: _cards.isEmpty
                     ? Center(child: Text('Add Favorite Cards First!'))
                     : Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: ReorderableListView(
+                        padding: const EdgeInsets.all(20.0),
+                        child: ReorderableListView(
                           children: _cards.map((DocumentSnapshot card) {
-                            final colorIndex = _cards.indexOf(card) % boxColors.length;
+                            final colorIndex =
+                                _cards.indexOf(card) % boxColors.length;
                             return ListTile(
                               key: Key(card.id),
                               tileColor: boxColors[colorIndex],
-                              leading: Text((_cards.indexOf(card) + 1).toString()),
+                              leading:
+                                  Text((_cards.indexOf(card) + 1).toString()),
                               title: Text(card['title']),
                               trailing: const Icon(Icons.drag_handle),
                             );
@@ -105,13 +107,14 @@ class _FavoritesViewState extends ConsumerState<FavoritesView> {
                               if (oldIndex < newIndex) {
                                 newIndex -= 1;
                               }
-                              final DocumentSnapshot item = _cards.removeAt(oldIndex);
+                              final DocumentSnapshot item =
+                                  _cards.removeAt(oldIndex);
                               _cards.insert(newIndex, item);
                             });
                             _updateCardRanks();
                           },
                         ),
-                    ),
+                      ),
               ),
             ),
           ),

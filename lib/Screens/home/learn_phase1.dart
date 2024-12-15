@@ -41,7 +41,8 @@ class _Learn1State extends ConsumerState<Learn1> {
 
   @override
   Widget build(BuildContext context) {
-    final cardActivity = ref.watch(cardActivityProvider);
+    final cardActivity =
+        ref.watch(cardActivityProvider); // Access CardActivityProvider
 
     return Scaffold(
       appBar: AppBar(
