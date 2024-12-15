@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/cards/phase1Card.dart';
 import 'package:speakbright_mobile/Widgets/cards/top_favorite.dart';
@@ -43,25 +45,13 @@ class _Learn1State extends ConsumerState<Learn1> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: phase1Color),
+        leading: BackButton(
+          color: phase1Color,
+          onPressed: () {
+            GlobalRouter.I.router.push(PhaseNav.route);
+          },
+        ),
         backgroundColor: learn1bg,
-        // actions: [
-        //   PopupMenuButton<int>(
-        //     icon: Icon(Icons.category, color: phase1Color),
-        //     onSelected: (index) {
-        //       setState(() {
-        //         selectedCategory = index;
-        //       });
-        //     },
-        //     itemBuilder: (context) =>
-        //         List.generate(phase1Categories.length, (index) {
-        //       return PopupMenuItem<int>(
-        //         value: index,
-        //         child: Container(),
-        //       );
-        //     }),
-        //   ),
-        // ],
       ),
       backgroundColor: learn1bg,
       floatingActionButton: Align(

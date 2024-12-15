@@ -214,4 +214,11 @@ class CardActivityProvider extends ChangeNotifier {
         'RESET! showDistractor: $_showDistractor, showDistractor2: $_showDistractor2');
     notifyListeners();
   }
+
+   void resetCardID() {
+    _cardId = null;
+    print(
+        'CARD ID IS NULL');
+    notifyListeners();
+  }
 }

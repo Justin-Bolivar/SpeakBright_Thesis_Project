@@ -2,8 +2,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/Widgets/constants.dart';
+import 'package:speakbright_mobile/Widgets/unlocked_phase.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
+import 'package:toastification/toastification.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {
@@ -1097,9 +1102,10 @@ class FirestoreService {
     }
   }
 
-  Future<void> autoUpdatePhase(int currentPhase) async {
+  Future<bool> autoUpdatePhase(int currentPhase, {bool? isEmotion}) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final FirebaseAuth auth = FirebaseAuth.instance;
+    bool withEmotion = isEmotion ?? false;
 
     String uid = auth.currentUser?.uid ?? '';
     if (uid.isEmpty) {
@@ -1110,195 +1116,207 @@ class FirestoreService {
       switch (currentPhase) {
         case 1:
           print("CASE 1 ENTERED!");
-          // Fetch counts for phase 1 without Emotions
-          // int totalWithoutEmotions = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("category", isNotEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          int? totalWithoutEmotions = 0;
-          int? independentWithoutEmotions = 0;
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("category", isNotEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => totalWithoutEmotions = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
 
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("phase1_independence", isEqualTo: true)
-              .where("category", isNotEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => independentWithoutEmotions = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+          if (!withEmotion && await isPhaseLocked(2)) {
+            int? totalWithoutEmotions = 0;
+            int? independentWithoutEmotions = 0;
+            // Fetch counts for total cards without Emotions
+            totalWithoutEmotions = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("category", isNotEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
 
-          // int independentWithoutEmotions = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("phase1_independence", isEqualTo: true)
-          //         .where("category", isNotEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          int? totalWithEmotions = 0;
-          int? independentWithEmotions = 0;
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("category", isEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => totalWithEmotions = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+            // Fetch counts for independent cards without Emotions
+            independentWithoutEmotions = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("phase1_independence", isEqualTo: true)
+                    .where("category", isNotEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
+            print(
+                "totalWithoutEmotions: $totalWithoutEmotions | independentWithoutEmotions: $independentWithoutEmotions");
+            print(
+                "PERCENT: ${independentWithoutEmotions! / totalWithoutEmotions!}");
 
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("phase1_independence", isEqualTo: true)
-              .where("category", isEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => independentWithEmotions = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+            if (totalWithoutEmotions > 3 &&
+                ((independentWithoutEmotions / totalWithoutEmotions) * 100).round() >= 70){
+              await updateStudentPhase(uid, 2);
+              return true;
+            }
+          } else if (await isPhaseLocked(3)) {
+            int? totalWithEmotions = 0;
+            int? independentWithEmotions = 0;
 
-          // Fetch counts for phase 1 with Emotions
-          // int totalWithEmotions = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("category", isEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          // int independentWithEmotions = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("phase1_independence", isEqualTo: true)
-          //         .where("category", isEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          // Check if 70% of total cards without Emotions are independent
-          if (totalWithoutEmotions! > 0 &&
-              independentWithoutEmotions! / totalWithoutEmotions! >= 0.7) {
-            await updateStudentPhase(uid, 2);
+            // Fetch counts for total cards with Emotions
+            totalWithEmotions = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("category", isEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
+
+            // Fetch counts for independent cards with Emotions
+            independentWithEmotions = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("phase1_independence", isEqualTo: true)
+                    .where("category", isEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
+            print(
+                "totalWithEmotions: $totalWithEmotions | independentWithEmotions: $independentWithEmotions");
+            print("PERCENT: ${((independentWithEmotions! / totalWithEmotions!) * 100).round()}");
+
+            if (totalWithEmotions > 3 &&
+                ((independentWithEmotions / totalWithEmotions) * 100).round() >= 70 ) {
+              await updateStudentPhase(uid, 3);
+              return true;
+            }
           }
-          // Check if 70% of total cards with Emotions are independent
-          if (totalWithEmotions! > 0 &&
-              independentWithEmotions! / totalWithEmotions! >= 0.7) {
-            await updateStudentPhase(uid, 3);
-          }
+
           break;
 
         case 2:
         case 3:
-          int? phase2Total = 0;
-          int? phase2Independent = 0;
-          int? phase3Total = 0;
-          int? phase3Independent = 0;
+          if (await isPhaseLocked(4)) {
+            int? phase2Total = 0;
+            int? phase2Independent = 0;
+            int? phase3Total = 0;
+            int? phase3Independent = 0;
 
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("category", isNotEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => phase2Total = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("phase2_independence", isEqualTo: true)
-              .where("category", isNotEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => phase2Independent = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+            // Fetch counts for phase 2 (without Emotions)
+            phase2Total = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("category", isNotEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
 
-          // Fetch counts for phase 3 (Emotions)
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("category", isEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => phase3Total = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+            phase2Independent = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("phase2_independence", isEqualTo: true)
+                    .where("category", isNotEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
 
-          firestore
-              .collection("cards")
-              .where("userId", isEqualTo: uid)
-              .where("phase3_independence", isEqualTo: true)
-              .where("category", isEqualTo: "Emotions")
-              .count()
-              .get()
-              .then(
-                (res) => phase3Independent = (res.count),
-                onError: (e) => print("Error completing: $e"),
-              );
+            // Fetch counts for phase 3 (Emotions)
+            phase3Total = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("category", isEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
 
-          // Fetch counts for phase 2 (non-Emotions)
-          // int phase2Total = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("category", isNotEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          // int phase2Independent = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("phase2_independence", isEqualTo: true)
-          //         .where("category", isNotEqualTo: "Emotions")
-          //         .get())
-          //     .size;
+            phase3Independent = (await firestore
+                    .collection("cards")
+                    .where("userId", isEqualTo: uid)
+                    .where("phase3_independence", isEqualTo: true)
+                    .where("category", isEqualTo: "Emotions")
+                    .count()
+                    .get())
+                .count;
 
-          // // Fetch counts for phase 3 (Emotions)
-          // int phase3Total = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("category", isEqualTo: "Emotions")
-          //         .get())
-          //     .size;
-          // int phase3Independent = (await firestore
-          //         .collection("cards")
-          //         .where("userId", isEqualTo: uid)
-          //         .where("phase3_independence", isEqualTo: true)
-          //         .where("category", isEqualTo: "Emotions")
-          //         .get())
-          //     .size;
+            // Check if both Phase 2 and Phase 3 independence conditions are met
+            bool phase2Complete =
+                phase2Total! > 0 && phase2Independent! / phase2Total >= 0.7;
+            bool phase3Complete =
+                phase3Total! > 0 && phase3Independent! / phase3Total >= 0.7;
 
-          // Check if both Phase 2 and Phase 3 independence conditions are met
-          bool phase2Complete =
-              phase2Total! > 0 && phase2Independent! / phase2Total! >= 0.7;
-          bool phase3Complete =
-              phase3Total! > 0 && phase3Independent! / phase3Total! >= 0.7;
-
-          if (phase2Complete && phase3Complete) {
-            await updateStudentPhase(uid, 4);
+            if (phase2Complete && phase3Complete) {
+              await updateStudentPhase(uid, 4);
+              return true;
+            }
           }
+
           break;
 
         default:
-          break;
+          return false;
       }
     } catch (e) {
       print("Error in autoUpdatePhase: $e");
+      return false;
+    }
+    return false;
+  }
+
+  Future<bool> isEmotion(String? cardID) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      DocumentSnapshot cardDoc =
+          await firestore.collection('cards').doc(cardID).get();
+
+      if (!cardDoc.exists) {
+        print('Card with ID $cardID does not exist.');
+        return false;
+      }
+
+      Map<String, dynamic>? cardData = cardDoc.data() as Map<String, dynamic>?;
+
+      String? category = cardData?['category'];
+
+      return category == 'Emotions';
+    } catch (e) {
+      print('Error while checking card category: $e');
+      return false;
+    }
+  }
+
+  Future<int> getCurrentPhase() async {
+    try {
+      // Get the current authenticated user
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      String studentID = await Future.value(auth.currentUser?.uid ?? '');
+
+      if (studentID.isEmpty) {
+        throw Exception('User not logged in');
+      }
+
+      // Retrieve the user's document snapshot
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(studentID)
+          .get();
+
+      // Check if the document exists
+      if (userSnapshot.exists) {
+        // Extract the phase value safely
+        Map<String, dynamic>? userData =
+            userSnapshot.data() as Map<String, dynamic>?;
+
+        int phase =
+            userData?['phase'] ?? 0; // Default to 0 if phase is not found
+        return phase;
+      } else {
+        print("User document does not exist.");
+        return 1;
+      }
+    } catch (e) {
+      // Handle any errors
+      print("Error fetching phase: $e");
+      return 1; // Default phase value
+    }
+  }
+
+  Future<bool> isPhaseLocked(int phase) async {
+    try {
+      int currentPhase = await getCurrentPhase();
+      return currentPhase < phase;
+    } catch (e) {
+      print('Error while checking if phase $phase is unlocked: $e');
+      return true;
     }
   }
 }

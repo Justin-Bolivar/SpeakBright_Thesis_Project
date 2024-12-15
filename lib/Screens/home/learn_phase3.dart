@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
@@ -98,7 +100,10 @@ class _Learn3State extends ConsumerState<Learn3> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase3);
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: phase3Color),
+        leading: BackButton(color: phase3Color, onPressed: () {
+            GlobalRouter.I.router.push(PhaseNav.route);
+          },),
+          
         backgroundColor: Colors.white,
       ),
       backgroundColor: kwhite,

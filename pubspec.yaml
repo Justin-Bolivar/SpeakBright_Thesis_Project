@@ -61,6 +61,8 @@ dependencies:
   google_fonts: ^6.2.1
   rxdart: ^0.28.0
   accordion: ^2.6.0
+  toastification: ^2.3.0
+  iconsax_flutter: ^1.0.0
 
 dev_dependencies:
   flutter_test:
