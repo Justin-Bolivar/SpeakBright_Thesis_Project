@@ -25,6 +25,7 @@ class _CardGameGridState extends State<CardGameGrid> {
   final List<bool> _matchedCards = [];
   bool _allowSelection = true;
   bool _allMatched = false;
+  int _level = 1;
 
   @override
   void initState() {
@@ -36,16 +37,17 @@ class _CardGameGridState extends State<CardGameGrid> {
     final random = Random();
     Set<CardModel> selectedCards = {};
 
-    // Ensure we get 3 unique cards
-    while (selectedCards.length < 3) {
+    // Select cards based on the current level
+    int numCards = _level + 1;
+    while (selectedCards.length < numCards) {
       CardModel card = widget.cards[random.nextInt(widget.cards.length)];
       selectedCards.add(card);
     }
 
-    // Create 3 copies of each unique card
+    // Create duplicates of each selected card
     _duplicatedCards = [];
     for (var card in selectedCards) {
-      _duplicatedCards.addAll(List.filled(3, card));
+      _duplicatedCards.addAll(List.filled(2, card));
     }
 
     // Shuffle the list of duplicated cards
@@ -67,13 +69,12 @@ class _CardGameGridState extends State<CardGameGrid> {
       _revealedCards[index] = true;
       _selectedCards.add(_duplicatedCards[index]);
 
-      if (_selectedCards.length == 3) {
+      if (_selectedCards.length == 2) {
         _allowSelection = false;
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
-            // Check if ALL three selected cards match
-            bool allMatch = _selectedCards[0].id == _selectedCards[1].id &&
-                _selectedCards[1].id == _selectedCards[2].id;
+            // Check if both selected cards match
+            bool allMatch = _selectedCards[0].id == _selectedCards[1].id;
 
             if (allMatch) {
               Confetti.launch(context,
@@ -105,8 +106,16 @@ class _CardGameGridState extends State<CardGameGrid> {
     });
   }
 
+  void _nextLevel() {
+    setState(() {
+      _level++;
+      _shuffleCards();
+    });
+  }
+
   void _resetGame() {
     setState(() {
+      _level = 1;
       _shuffleCards();
     });
   }
@@ -118,7 +127,7 @@ class _CardGameGridState extends State<CardGameGrid> {
         GridView.builder(
           padding: const EdgeInsets.all(16.0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
+            crossAxisCount: 2,
             crossAxisSpacing: 16.0,
             mainAxisSpacing: 16.0,
           ),
@@ -135,8 +144,8 @@ class _CardGameGridState extends State<CardGameGrid> {
         if (_allMatched)
           Center(
             child: ElevatedButton(
-              onPressed: _resetGame,
-              child: Text('Play Again'),
+              onPressed: _level < 3 ? _nextLevel : _resetGame,
+              child: Text(_level < 3 ? 'Next Level' : 'Play Again'),
             ),
           ),
       ],
