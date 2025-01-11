@@ -68,6 +68,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                       //GoogleFonts.rubikSprayPaint(
                       color: Colors.white,
                       fontSize: 48,
+                      fontFamily: 'RubikSprayPaint',
                     ),
                   ),
                   Text(
