@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
-import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';

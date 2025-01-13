@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
 class FavoritesView extends ConsumerStatefulWidget {
