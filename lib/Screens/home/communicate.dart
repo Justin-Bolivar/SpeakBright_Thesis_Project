@@ -239,6 +239,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
+    final recommendedCards = ref.watch(recommendedCardsProvider);
     bool showSentenceWidget = currentUserPhase > 1;
 
     return Scaffold(
@@ -467,6 +468,45 @@ class _CommunicateState extends ConsumerState<Communicate> {
               },
             ),
           ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Recommended Cards',
+            ),
+          ),
+          if (recommendedCards.isEmpty)
+            const Center(child: Text('No recommended cards available'))
+          else
+            Expanded(
+              child: CardGrid(
+                cards: recommendedCards,
+                isRecommended: true,
+                onCardTap: (String cardTitle, String category, String cardId) {
+                  
+                  _clearSentence();
+                  addCardTitleToSentence(cardTitle, category);
+                  _ttsService.speak(cardTitle);
+                  _firestoreService.storeTappedCards(
+                      cardTitle, category, cardId);
+                  print('Recommended card tapped: $cardTitle, $category');
+                },
+                onCardDelete: (String cardId) {
+                  ref.read(cardProvider.notifier).deleteCard(cardId, '0');
+                },
+                selectedCategory:selectedCategory == -1
+                      ? "All"
+                      : categories[selectedCategory],
+              ),
+            ),
+
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'All Cards',
+            ),
+          ),
+          const SizedBox(height: 8,),
+
           Expanded(
             child: cardsAsyncValue.when(
               data: (cards) {

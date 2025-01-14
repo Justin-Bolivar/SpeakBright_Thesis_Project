@@ -2,8 +2,11 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/Widgets/services/temporal_prefixspan.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
+import 'package:intl/intl.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {
@@ -55,60 +58,220 @@ class FirestoreService {
     }
   }
 
+  // Future<void> storeTappedCards(
+  //     String cardTitle, String category, String cardId) async {
+  //   updateRecentCard(cardId);
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //   if (user == null) {
+  //     throw Exception('No user is currently signed in.');
+  //   }
+
+  //   final CollectionReference usersCollection =
+  //       FirebaseFirestore.instance.collection('card_basket');
+  //   final DocumentReference userDoc = usersCollection.doc(user.uid);
+
+  //   await userDoc.set({
+  //     'userID': user.uid,
+  //     'email': user.email,
+  //   }, SetOptions(merge: true));
+
+  //   final CollectionReference sessionsCollection =
+  //       userDoc.collection('sessions');
+
+  //   // find lastest session
+  //   final DateTime now = DateTime.now();
+  //   final QuerySnapshot querySnapshot = await sessionsCollection
+  //       .where('sessionTime',
+  //           isGreaterThan:
+  //               Timestamp.fromDate(now.subtract(const Duration(minutes: 1))))
+  //       .orderBy('sessionTime', descending: true)
+  //       .limit(1)
+  //       .get();
+
+  //   DocumentReference sessionDoc;
+
+  //   if (querySnapshot.docs.isNotEmpty) {
+  //     sessionDoc = querySnapshot.docs.first.reference;
+  //   } else {
+  //     final Map<String, dynamic> newSessionData = {
+  //       'sessionID': sessionsCollection.doc().id,
+  //       'sessionTime': Timestamp.fromDate(now),
+  //     };
+  //     sessionDoc = await sessionsCollection.add(newSessionData);
+  //   }
+
+  //   await sessionDoc.collection('cardsTapped').add({
+  //     'cardTitle': cardTitle,
+  //     'category': category,
+  //     'timeTapped': Timestamp.fromDate(now),
+  //   });
+  // }
+
+// ----------- ADAPTIVE CARD RECOMMENDATION ------------
   Future<void> storeTappedCards(
       String cardTitle, String category, String cardId) async {
-    updateRecentCard(cardId);
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
 
-    final CollectionReference usersCollection =
-        FirebaseFirestore.instance.collection('card_basket');
-    final DocumentReference userDoc = usersCollection.doc(user.uid);
+    // Define Firestore references
+    final CollectionReference activityCollection =
+        FirebaseFirestore.instance.collection('communicate_log');
+    final DocumentReference userDoc = activityCollection.doc(user.uid);
 
     await userDoc.set({
       'userID': user.uid,
       'email': user.email,
     }, SetOptions(merge: true));
 
-    final CollectionReference sessionsCollection =
-        userDoc.collection('sessions');
-
-    // find lastest session
+    // Format date to 'YYYYMMDD' i used this as a doc ID hence the formattingg
+    // edit time
+    // DateTime testTime = DateTime(2025, 1, 11, 19, 30);
     final DateTime now = DateTime.now();
-    final QuerySnapshot querySnapshot = await sessionsCollection
-        .where('sessionTime',
-            isGreaterThan:
-                Timestamp.fromDate(now.subtract(const Duration(minutes: 1))))
-        .orderBy('sessionTime', descending: true)
-        .limit(1)
+    final dateKey =
+        "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
+
+    final CollectionReference dateInDaysCollection =
+        userDoc.collection('date_in_days');
+    final DocumentReference dateDoc = dateInDaysCollection.doc(dateKey);
+
+    // Fetch the current day's document, if it exists
+    try {
+      final docSnapshot = await dateDoc.get();
+      List<dynamic> sequence = [];
+
+      if (docSnapshot.exists) {
+        // If the document exists, retrieve the existing sequence
+        final existingData = docSnapshot.data() as Map<String, dynamic>;
+        sequence = existingData['sequence'] as List<dynamic>? ?? [];
+      }
+
+      // Check if the card ID is already in the sequence for the day
+      final cardIndex =
+          sequence.indexWhere((entry) => entry['cardID'] == cardId);
+
+      if (cardIndex != -1) {
+        // Card already exists in the sequence, check time difference
+        final previousTimestamp =
+            (sequence[cardIndex]['timestamp'] as Timestamp).toDate();
+        final timeDifference = now.difference(previousTimestamp).inMinutes;
+
+        // Only update the frequency if the time difference is less than 60 minutes
+        if (timeDifference < 60) {
+          sequence[cardIndex]['frequency'] += 1;
+          // Update the timestamp to the most recent tap time
+          sequence[cardIndex]['timestamp'] = Timestamp.fromDate(now);
+        }
+      } else {
+        // If it's the first time the card is tapped, add it to the sequence
+        sequence.add({
+          'cardID': cardId,
+          'cardTitle': cardTitle,
+          'timestamp': Timestamp.fromDate(now),
+          'frequency': 1,
+        });
+      }
+
+      // Update the Firestore document with the new sequence
+      await dateDoc.set({
+        'timestamp': Timestamp.fromDate(now),
+        'sequence': sequence,
+      }, SetOptions(merge: true));
+
+      print("Tapped card data stored successfully.");
+    } catch (e) {
+      print("Error storing tapped card data: $e");
+    }
+  }
+
+// Fetch sequence to be used in PrefixSpan
+  Future<List<List<Map<String, dynamic>>>> fetchSequenceData(
+      String userID) async {
+    print('entering fetchSequenceData');
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day)
+        .subtract(const Duration(days: 7)); 
+
+    final collection = FirebaseFirestore.instance
+        .collection('communicate_log')
+        .doc(userID)
+        .collection('date_in_days');
+
+    final snapshot = await collection
+        .where('timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(
+                startDate)) 
         .get();
+    List<List<Map<String, dynamic>>> sequenceDatabase = [];
 
-    DocumentReference sessionDoc;
+    for (var doc in snapshot.docs) {
+      var sequence = doc['sequence'];
+      if (sequence != null) {
+        sequenceDatabase.add(List<Map<String, dynamic>>.from(sequence));
+      }
+    }
+    if (sequenceDatabase.isEmpty) {
+      return []; 
+    }
+    return sequenceDatabase;
+  }
 
-    if (querySnapshot.docs.isNotEmpty) {
-      sessionDoc = querySnapshot.docs.first.reference;
-    } else {
-      final Map<String, dynamic> newSessionData = {
-        'sessionID': sessionsCollection.doc().id,
-        'sessionTime': Timestamp.fromDate(now),
-      };
-      sessionDoc = await sessionsCollection.add(newSessionData);
+  Future<List<String>> getCardRecommendations() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is currently signed in.');
     }
 
-    await sessionDoc.collection('cardsTapped').add({
-      'cardTitle': cardTitle,
-      'category': category,
-      'timeTapped': Timestamp.fromDate(now),
-    });
+    final userID = user.uid; 
+    const supportThreshold = 1;
+    final sequenceDatabase = await fetchSequenceData(userID);
+    TemporalPrefixSpan prefixSpan = TemporalPrefixSpan(sequenceDatabase: sequenceDatabase);
+    List<String> recommendedCards = prefixSpan.mineFrequentSequences(supportThreshold);
+
+    return recommendedCards;
   }
+
+// void testRecommendation() async {
+//   User? user = FirebaseAuth.instance.currentUser;
+//   if (user == null) {
+//       throw Exception('No user is currently signed in.');
+//     }
+
+//   final userID = user.uid; // Replace with the actual userID
+//   const supportThreshold = 1; // Set the support threshold based on your needs
+
+//   // Fetch recommendations based on the current time window and support threshold
+//   List<String> recommendations = await getCardRecommendations();
+
+//   print("Recommended Cards: $recommendations");
+// }
+
+// List<List<Map<String, dynamic>>> _processSequences(List<Map<String, dynamic>> sequences) {
+//   // Process the raw data into temporal sequences structure expected by PrefixSpan
+//   List<List<Map<String, dynamic>>> sequenceDatabase = [];
+
+//   // Group sequence data by the day or any other logic you'd like
+//   List<Map<String, dynamic>> currentSequence = [];
+
+//   for (var sequence in sequences) {
+//     currentSequence.add(sequence);
+//     // Assuming timestamp is being used to group
+//     if (currentSequence.length == 10) { // An arbitrary number for now; adjust based on your needs
+//       sequenceDatabase.add(currentSequence);
+//       currentSequence = [];
+//     }
+//   }
+//   return sequenceDatabase;
+// }
+
+// END OF ADAPTIVE CARD RECO
 
   void tapCountIncrement(String cardId) {
     FirebaseFirestore.instance.collection('cards').doc(cardId).update({
       'tapCount': FieldValue.increment(1),
     });
-  }
+  } //IS THIS USED??
 
   Future<String?> getCurrentUserName() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -1139,7 +1302,9 @@ class FirestoreService {
                 "PERCENT: ${independentWithoutEmotions! / totalWithoutEmotions!}");
 
             if (totalWithoutEmotions > 3 &&
-                ((independentWithoutEmotions / totalWithoutEmotions) * 100).round() >= 70){
+                ((independentWithoutEmotions / totalWithoutEmotions) * 100)
+                        .round() >=
+                    70) {
               await updateStudentPhase(uid, 2);
               return true;
             }
@@ -1167,10 +1332,12 @@ class FirestoreService {
                 .count;
             print(
                 "totalWithEmotions: $totalWithEmotions | independentWithEmotions: $independentWithEmotions");
-            print("PERCENT: ${((independentWithEmotions! / totalWithEmotions!) * 100).round()}");
+            print(
+                "PERCENT: ${((independentWithEmotions! / totalWithEmotions!) * 100).round()}");
 
             if (totalWithEmotions > 3 &&
-                ((independentWithEmotions / totalWithEmotions) * 100).round() >= 70 ) {
+                ((independentWithEmotions / totalWithEmotions) * 100).round() >=
+                    70) {
               await updateStudentPhase(uid, 3);
               return true;
             }
