@@ -127,7 +127,9 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
             //     ),
             //   ),
             // ),
-            SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Row(
               children: [
                 Padding(
@@ -248,7 +250,9 @@ class _GuardianCommunicateState extends ConsumerState<GuardianCommunicate> {
                   onCardTap:
                       (String cardTitle, String category, String cardId) {},
                   onCardDelete: (String cardId) {
-                    ref.read(cardProvider.notifier).deleteCard(cardId, studentID);
+                    ref
+                        .read(cardProvider.notifier)
+                        .deleteCard(cardId, studentID);
                   },
                   selectedCategory: selectedCategory == -1
                       ? "All"

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, avoid_print
+
 import 'package:flutter/material.dart';
 
 class TemporalPrefixSpan {
@@ -24,23 +26,23 @@ class TemporalPrefixSpan {
           timestamp.year,
           timestamp.month,
           timestamp.day,
-          now.subtract(Duration(minutes: 30)).hour,
-          now.subtract(Duration(minutes: 30)).minute,
+          now.subtract(const Duration(minutes: 30)).hour,
+          now.subtract(const Duration(minutes: 30)).minute,
         );
 
         DateTime endDateTime = DateTime(
           timestamp.year,
           timestamp.month,
           timestamp.day,
-          now.add(Duration(minutes: 30)).hour,
-          now.add(Duration(minutes: 30)).minute,
+          now.add(const Duration(minutes: 30)).hour,
+          now.add(const Duration(minutes: 30)).minute,
         );
 
         return timestamp.isAfter(startDateTime) &&
             timestamp.isBefore(endDateTime);
       }).toList();
 
-      print('filteredSequence: ${filteredSequence}');
+      print('filteredSequence: $filteredSequence');
 
       if (filteredSequence.isNotEmpty) {
         // Get frequent cardIDs
@@ -62,7 +64,7 @@ class TemporalPrefixSpan {
         });
       }
     }
-    print('recommended cards: ${recommendedCards}');
+    print('recommended cards: $recommendedCards');
     return recommendedCards;
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
@@ -10,12 +12,12 @@ class CardGameItem extends StatefulWidget {
   final VoidCallback onTap;
 
   const CardGameItem({
-    Key? key,
+    super.key,
     required this.card,
     required this.colorIndex,
     required this.revealed,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   _CardGameItemState createState() => _CardGameItemState();

@@ -113,7 +113,6 @@ class TopFavoriteCard {
         // Iterate over categories to find the target card
         for (var categoryEntry in categories) {
           String category = categoryEntry['category'];
-          int rank = categoryEntry['rank'];
 
           // Fetch cards in the categoryRanking collection
           QuerySnapshot categorySnapshot = await firestore
@@ -179,7 +178,7 @@ class TopFavoriteCard {
         if (targetCardSnapshot.exists) {
           Map<String, dynamic>? targetCardData =
               targetCardSnapshot.data() as Map<String, dynamic>?;
-          targetCategory = targetCardData?['category']; 
+          targetCategory = targetCardData?['category'];
         }
       }
 
@@ -203,7 +202,7 @@ class TopFavoriteCard {
             cardDoc.id != targetCardId) {
           // Collect fallback cards
           fallbackCards.add(CardModel.fromFirestore(cardDoc));
-        } else if(cardDoc.id != targetCardId){
+        } else if (cardDoc.id != targetCardId) {
           fallbackCards.add(CardModel.fromFirestore(cardDoc));
         }
       }

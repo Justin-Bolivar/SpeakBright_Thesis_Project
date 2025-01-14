@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase1.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase2.dart';

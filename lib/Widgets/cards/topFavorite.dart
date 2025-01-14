@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
@@ -16,7 +18,7 @@ class TopFavoriteCard {
           .get();
 
       List<CardModel> validCards = [];
-      
+
       // Map favorite card IDs to their ranks for ordering
       Map<String, int> favoriteCardRanks = {
         for (var doc in favoritesSnapshot.docs) doc.id: doc['rank'] ?? 0
@@ -40,7 +42,8 @@ class TopFavoriteCard {
       }
 
       // Sort validCards by rank
-      validCards.sort((a, b) => (favoriteCardRanks[a.id] ?? 0).compareTo(favoriteCardRanks[b.id] ?? 0));
+      validCards.sort((a, b) => (favoriteCardRanks[a.id] ?? 0)
+          .compareTo(favoriteCardRanks[b.id] ?? 0));
 
       return validCards.isNotEmpty ? validCards : null;
     } catch (e) {

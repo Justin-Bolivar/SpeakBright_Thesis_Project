@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,7 +62,7 @@ class AddCardPage extends ConsumerWidget {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 5,
-                      offset: Offset(0, 0),
+                      offset: const Offset(0, 0),
                     ),
                   ],
                 ),
@@ -71,7 +73,7 @@ class AddCardPage extends ConsumerWidget {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.08,
                       ),
-                      Text(
+                      const Text(
                         'Add New Objects',
                         style: TextStyle(
                           color: scoreYellow,
@@ -159,7 +161,7 @@ class AddCardPage extends ConsumerWidget {
                       // ),
 
                       Padding(
-                        padding: EdgeInsets.only(left: 20, right: 20),
+                        padding: const EdgeInsets.only(left: 20, right: 20),
                         child: Row(
                           children: [
                             SizedBox(
@@ -215,7 +217,7 @@ class AddCardPage extends ConsumerWidget {
                               ),
                             ),
                             // const SizedBox(width: 10),
-                            Spacer(), //between
+                            const Spacer(), //between
                             SizedBox(
                               height: 80,
                               width: MediaQuery.of(context).size.width * 0.30,
@@ -281,13 +283,13 @@ class AddCardPage extends ConsumerWidget {
                                 context,
                                 ref,
                               ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: addGreen,
+                          ),
                           child: Text(
                             'Add +',
                             style: GoogleFonts.rubikSprayPaint(
                                 color: kwhite, fontSize: 20, letterSpacing: .5),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: addGreen,
                           )),
 
                       //skip button

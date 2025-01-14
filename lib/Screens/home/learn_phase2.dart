@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -109,19 +111,22 @@ class _Learn2State extends ConsumerState<Learn2> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase2);
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(color: phase2Color, onPressed: () {
+        leading: BackButton(
+          color: phase2Color,
+          onPressed: () {
             GlobalRouter.I.router.push(PhaseNav.route);
-          },),
+          },
+        ),
         backgroundColor: Colors.white,
       ),
       backgroundColor: kwhite,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: EdgeInsets.only(bottom: 0),
+          padding: const EdgeInsets.only(bottom: 0),
           child: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               PromptButton(phaseCurrent: currentUserPhase),
@@ -138,34 +143,36 @@ class _Learn2State extends ConsumerState<Learn2> {
             ),
           ),
           GestureDetector(
-                        onTap: () {
-                          // Check the current bufferSize and toggle its value
-                          if (cardActivity.bufferSize == 20) {
-                            cardActivity.setbufferSize(10);
-                          } else if (cardActivity.bufferSize == 10) {
-                            cardActivity.setbufferSize(20);
-                          }
-                        },
-                        child: Container(
-                          height: 30,
-                          width: 150,
-                          decoration: BoxDecoration(
-                            color: cardActivity.bufferSize == 20? phase2Color.withOpacity(0.5):Color.fromARGB(204, 116, 27, 106),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+            onTap: () {
+              // Check the current bufferSize and toggle its value
+              if (cardActivity.bufferSize == 20) {
+                cardActivity.setbufferSize(10);
+              } else if (cardActivity.bufferSize == 10) {
+                cardActivity.setbufferSize(20);
+              }
+            },
+            child: Container(
+              height: 30,
+              width: 150,
+              decoration: BoxDecoration(
+                color: cardActivity.bufferSize == 20
+                    ? phase2Color.withOpacity(0.5)
+                    : const Color.fromARGB(204, 116, 27, 106),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Padding(
@@ -187,7 +194,7 @@ class _Learn2State extends ConsumerState<Learn2> {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       child: sentence.isEmpty
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 "TAP CARDS TO CREATE A SENTENCE",
                                 style: TextStyle(
@@ -220,42 +227,40 @@ class _Learn2State extends ConsumerState<Learn2> {
                             ),
                     ),
                   ),
-                  Container(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _sendSentenceAndSpeak,
-                            icon: const Icon(
-                              Icons.volume_up,
-                              color: Colors.white,
-                            ),
+                  Column(
+                    children: [
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: IconButton(
+                          onPressed: _sendSentenceAndSpeak,
+                          icon: const Icon(
+                            Icons.volume_up,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(
-                          height: 15,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _clearSentence,
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                            ),
+                        child: IconButton(
+                          onPressed: _clearSentence,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
