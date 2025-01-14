@@ -66,97 +66,56 @@ class _CommunicateState extends ConsumerState<Communicate> {
     });
   }
 
-  // void _toggleSentencePrefix() {
-  //   setState(() {
-  //     _sentencePrefix = _sentencePrefix == "I feel" ? "I want" : "I feel";
-  //     words.clear();
-  //     sentence.clear();
-  //   });
-  // }
-
-  // void _addCardTitleToSentence3(String title, String category) {
-  //   setState(() {
-  //     if (sentence.length > 1) {
-  //       sentence[sentence.length - 1] = title;
-  //     } else {
-  //       sentence.add(title);
-  //     }
-  //   });
-  // }
-
-  // void _addCardTitleToSentence2(String title, String category) {
-  //   setState(() {
-  //     if (category == "Activities") {
-  //       if (sentence.length > 1) {
-  //         sentence[sentence.length - 1] = "to $title";
-  //         words[words.length - 1] = "to $title";
-  //       } else {
-  //         sentence.add("to $title");
-  //         words.add(title);
-  //       }
-  //     } else {
-  //       if (sentence.length > 1) {
-  //         sentence[sentence.length - 1] = title;
-  //         words[words.length - 1] = title;
-  //       } else {
-  //         sentence.add(title);
-  //         words.add(title);
-  //       }
-  //     }
-  //   });
-  // }
-
   void addCardTitleToSentence(String title, String category) {
     setState(() {
-      if (currentUserPhase == 2 || currentUserPhase == 3) {
-        if (sentence.length > 1) {
-          sentence[sentence.length - 1] = title;
-          words[words.length - 1] = title;
-        } else {
-          sentence.add(title);
-          words.add(title);
-        }
+      if (sentence.length >= 4) {
+        _clearSentence();
+      }
+
+      String prefix = "";
+      String formattedTitle = title;
+
+      // Determine prefix and format title based on category
+      if (category == "Emotions") {
+        prefix = "I feel";
+      } else if (category == "Activities") {
+        prefix = "I want";
+        // Add "to" before the activity title
+        formattedTitle = "to $title";
       } else {
-        if (sentence.length >= 4) {
-          _clearSentence();
-        }
-        if (category == "Emotions") {
-          if (sentence.isNotEmpty) {
-            //if sentence has 2 Emotions replace first Emotion
-            if (sentence.length > 2) {
-              sentence[0] = "I feel";
-              sentence[1] = title;
-              words[0] = title;
-            } else {
-              //else add as normal
-              sentence.addAll(["I feel", title]);
-              words.add(title);
-            }
-          } else {
-            //if sentence is empty add as normal
-            sentence.addAll(["I feel", title]);
-            words.add(title);
-          }
+        prefix = "I want";
+        // Add "a" or "an" based on the title
+        if (_startsWithVowel(title)) {
+          formattedTitle = "an $title";
         } else {
-          if (sentence.isNotEmpty) {
-            //if sentence has 2 Objects replace first Object
-            if (sentence.length > 2) {
-              sentence[0] = "I want";
-              sentence[1] = title;
-              words[0] = title;
-            } else {
-              //else add as normal
-              sentence.addAll(["I want", title]);
-              words.add(title);
-            }
-          } else {
-            //if sentence is empty add as normal
-            sentence.addAll(["I want", title]);
-            words.add(title);
-          }
+          formattedTitle = "a $title";
         }
       }
+
+      if (sentence.isNotEmpty) {
+        // Replace the first card title if the sentence already has 2 parts
+        if (sentence.length > 2) {
+          sentence[0] = prefix;
+          sentence[1] = formattedTitle;
+          words[0] = formattedTitle;
+        } else {
+          // Add the new title with the prefix
+          sentence.addAll([prefix, formattedTitle]);
+          words.add(formattedTitle);
+        }
+      } else {
+        // If the sentence is empty, add the new title with the prefix
+        sentence.addAll([prefix, formattedTitle]);
+        words.add(formattedTitle);
+      }
     });
+  }
+
+// Helper function to check if a word starts with a vowel
+  bool _startsWithVowel(String word) {
+    if (word.isEmpty) return false;
+    final vowels = ['a', 'e', 'i', 'o', 'u'];
+    return vowels.contains(word[0].toLowerCase());
   }
 
   @override
@@ -165,80 +124,128 @@ class _CommunicateState extends ConsumerState<Communicate> {
     super.dispose();
   }
 
-  Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = sentence.join(' ');
-    String pronoun = "I";
-    words.add(pronoun);
-    print(words);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: LoadingAnimationWidget.staggeredDotsWave(
-            color: kLightPruple,
-            size: 50.0,
-          ),
-        );
-      },
-    );
-
-    try {
-      if (currentUserPhase == 4) {
-        String urlPhase4 =
-            'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
-
-        final response = await http.post(
-          Uri.parse(urlPhase4),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: jsonEncode(<String, dynamic>{'words': words}),
-        );
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-          setState(() {
-            sentence.clear();
-            sentence.addAll(responseBody['sentence'].split(' '));
-            words.clear();
-          });
-
-          sentenceString = sentence.join(' ');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create sentence: ${response.body}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          Map<String, dynamic> errorResponse = jsonDecode(response.body);
-          String errorMessage =
-              errorResponse['detail'].replaceFirst('Error: ', '');
-          _ttsService.speak(errorMessage);
-          setState(() {
-            _clearSentence();
-          });
-        }
-
-        //_firestoreService.storeSentence(sentence);
-        _ttsService.speak(sentenceString);
-        pressSpeak = true;
-      } else {
-        //_firestoreService.storeSentence(sentence);
-        _ttsService.speak(sentenceString);
-        pressSpeak = true;
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    } finally {
-      Navigator.of(context).pop();
+  void constructSentenceAndSpeak(List<String> sentence) {
+    if (sentence.isEmpty) {
+      _ttsService.speak("The sentence list is empty.");
+      pressSpeak = true;
+      return;
     }
+
+    List<String> emotions = [];
+    List<String> objects = [];
+
+    for (int i = 0; i < sentence.length - 1; i += 2) {
+      if (sentence[i] == "I feel") {
+        emotions.add(sentence[i + 1]);
+      } else if (sentence[i] == "I want") {
+        objects.add(sentence[i + 1]);
+      }
+    }
+
+    String emotionPart = "";
+    if (emotions.isNotEmpty) {
+      if (emotions.length == 1) {
+        emotionPart = "I am ${emotions[0]}";
+      } else {
+        String lastEmotion = emotions.removeLast();
+        emotionPart = "I am ${emotions.join(', ')} and $lastEmotion";
+      }
+    }
+
+    String objectPart = "";
+    if (objects.isNotEmpty) {
+      if (objects.length == 1) {
+        objectPart = "I want ${objects[0]}";
+      } else {
+        String lastObject = objects.removeLast();
+        objectPart = "I want ${objects.join(', ')} and $lastObject";
+      }
+    }
+
+    String finalSentence = "$emotionPart $objectPart".trim();
+    setState(() {
+      sentence.clear();
+      sentence.addAll(finalSentence.split(' '));
+    });
+    _ttsService.speak(finalSentence);
+    pressSpeak = true;
   }
+
+  // Future<void> _sendSentenceAndSpeak() async {
+  //   String sentenceString = sentence.join(' ');
+  //   String pronoun = "I";
+  //   words.add(pronoun);
+  //   print(words);
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return Center(
+  //         child: LoadingAnimationWidget.staggeredDotsWave(
+  //           color: kLightPruple,
+  //           size: 50.0,
+  //         ),
+  //       );
+  //     },
+  //   );
+
+  //   try {
+  //     if (currentUserPhase == 4) {
+  //       String urlPhase4 =
+  //           'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+
+  //       final response = await http.post(
+  //         Uri.parse(urlPhase4),
+  //         headers: {'Content-Type': 'application/json; charset=UTF-8'},
+  //         body: jsonEncode(<String, dynamic>{'words': words}),
+  //       );
+
+  //       if (response.statusCode == 200) {
+  //         Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+  //         setState(() {
+  //           sentence.clear();
+  //           sentence.addAll(responseBody['sentence'].split(' '));
+  //           words.clear();
+  //         });
+
+  //         sentenceString = sentence.join(' ');
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text('Failed to create sentence: ${response.body}'),
+  //             backgroundColor: Colors.red,
+  //           ),
+  //         );
+  //         Map<String, dynamic> errorResponse = jsonDecode(response.body);
+  //         String errorMessage =
+  //             errorResponse['detail'].replaceFirst('Error: ', '');
+  //         _ttsService.speak(errorMessage);
+  //         setState(() {
+  //           _clearSentence();
+  //         });
+  //       }
+
+  //       //_firestoreService.storeSentence(sentence);
+  //       _ttsService.speak(sentenceString);
+  //       pressSpeak = true;
+  //     } else {
+  //       //_firestoreService.storeSentence(sentence);
+  //       _ttsService.speak(sentenceString);
+  //       pressSpeak = true;
+  //     }
+  //   } catch (e) {
+  //     print('Error occurred: $e');
+  //   } finally {
+  //     Navigator.of(context).pop();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsStreamProvider);
+    final recommendedCards = ref.watch(recommendedCardsProvider);
     bool showSentenceWidget = currentUserPhase > 1;
 
     return Scaffold(
@@ -318,7 +325,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: IconButton(
-                                onPressed: _sendSentenceAndSpeak,
+                                onPressed: () =>
+                                    constructSentenceAndSpeak(sentence),
                                 icon: const Icon(
                                   Icons.volume_up,
                                   color: Colors.white,
@@ -466,6 +474,53 @@ class _CommunicateState extends ConsumerState<Communicate> {
                 );
               },
             ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Recommended Cards',
+            ),
+          ),
+          if (recommendedCards.isEmpty)
+            const Center(child: Text('No recommended cards available'))
+          else
+            Expanded(
+              child: CardGrid(
+                cards: recommendedCards,
+                isRecommended: true,
+                onCardTap: (String cardTitle, String category, String cardId) {
+                  if (pressSpeak == true) {
+                    _clearSentence();
+                    pressSpeak = false;
+                    addCardTitleToSentence(cardTitle, category);
+                    _ttsService.speak(cardTitle);
+                    _firestoreService.storeTappedCards(
+                        cardTitle, category, cardId);
+                    print('title: $cardTitle, cat: $category');
+                  } else {
+                    addCardTitleToSentence(cardTitle, category);
+                    _ttsService.speak(cardTitle);
+                    _firestoreService.storeTappedCards(
+                        cardTitle, category, cardId);
+                    print('title: $cardTitle, cat: $category');
+                  }
+                },
+                onCardDelete: (String cardId) {
+                  ref.read(cardProvider.notifier).deleteCard(cardId, '0');
+                },
+                selectedCategory: selectedCategory == -1
+                    ? "All"
+                    : categories[selectedCategory],
+              ),
+            ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'All Cards',
+            ),
+          ),
+          const SizedBox(
+            height: 8,
           ),
           Expanded(
             child: cardsAsyncValue.when(
