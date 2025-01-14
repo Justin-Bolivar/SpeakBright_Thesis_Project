@@ -38,7 +38,6 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: sky,
@@ -58,21 +57,24 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                 ),
               ),
             ),
-            Positioned(
+            const Positioned(
               top: 50,
               left: 65,
               child: Column(
                 children: [
                   Text(
                     'PHASES',
-                    style: GoogleFonts.rubikSprayPaint(
+                    style: TextStyle(
+                      //GoogleFonts.rubikSprayPaint(
                       color: Colors.white,
                       fontSize: 48,
+                      fontFamily: 'RubikSprayPaint',
                     ),
                   ),
                   Text(
                     'To unlock phases, modify in student profile',
-                    style: GoogleFonts.roboto(
+                    style: TextStyle(
+                        //GoogleFonts.roboto(
                         fontStyle: FontStyle.normal,
                         fontWeight: FontWeight.normal,
                         fontSize: 10,

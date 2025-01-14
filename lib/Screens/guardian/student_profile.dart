@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
-import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
@@ -477,8 +476,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   children: [
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(GuardianCommunicate.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(GuardianCommunicate.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -517,8 +516,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: InkWell(
-                                        onTap: () =>
-                                            GlobalRouter.I.router.push(CardRankingMenu.route),
+                                        onTap: () => GlobalRouter.I.router
+                                            .push(CardRankingMenu.route),
                                         child: Container(
                                           height: 80,
                                           decoration: BoxDecoration(
@@ -556,7 +555,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 10,),
+                                SizedBox(
+                                  height: 10,
+                                ),
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(

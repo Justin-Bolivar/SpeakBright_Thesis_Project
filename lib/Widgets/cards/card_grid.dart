@@ -8,6 +8,7 @@ class CardGrid extends StatelessWidget {
   final Function(String) onCardDelete;
   final String selectedCategory;
   final int? phase;
+  final bool isRecommended;
 
   const CardGrid({
     super.key,
@@ -16,11 +17,14 @@ class CardGrid extends StatelessWidget {
     required this.onCardTap,
     required this.onCardDelete,
     required this.selectedCategory,
+    this.isRecommended = false,
   });
 
   @override
   Widget build(BuildContext context) {
     List<CardModel> filteredCards = cards.where((card) {
+
+      
 
       if (phase == 2) {
         return card.phase1_independence == true && card.category != "Emotions";
@@ -33,6 +37,10 @@ class CardGrid extends StatelessWidget {
 
       if (selectedCategory != "All" && card.category != selectedCategory) {
         return false;
+      }
+
+      if (isRecommended) {
+        return true; 
       }
 
       return true;

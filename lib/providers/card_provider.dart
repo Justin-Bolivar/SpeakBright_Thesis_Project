@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
+import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 
 final cardProvider =
     StateNotifierProvider<CardNotifier, List<CardModel>>((ref) {
@@ -18,12 +19,21 @@ final cardsStreamProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('cards')
       .where('userId', isEqualTo: user.uid)
-      .orderBy('tapCount', descending: true)
-      .snapshots()
+      //.orderBy('tapCount', descending: true)
+      .snapshots(
+          includeMetadataChanges: true) // Important for online/offline tracking
       .handleError((error) {
-    return Stream.value([]);
-  }).map((snapshot) =>
-          snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
+    print('Error occurred: $error');
+    //return Stream.value([]);
+  }).map((snapshot) {
+    // Check if the snapshot comes from cache or server
+    if (snapshot.metadata.isFromCache) {
+      print('Data from cache');
+    } else {
+      print('Data from server');
+    }
+    return snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+  });
 });
 
 final cardsListProvider = StreamProvider.autoDispose<List<CardModel>>((ref) {
@@ -127,6 +137,45 @@ final cardsGuardianProvider =
           snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList());
 });
 
+
+// RECOMMENDED CARDS
+final recommendedCardsProvider =
+    StateNotifierProvider<RecommendedCardsNotifier, List<CardModel>>((ref) {
+  return RecommendedCardsNotifier(); // Directly create an instance
+});
+
+
+
+class RecommendedCardsNotifier extends StateNotifier<List<CardModel>> {
+  final FirestoreService _firestoreService = FirestoreService();
+  RecommendedCardsNotifier() : super([]) {
+    loadRecommendedCards();
+  }
+
+  Future<void> loadRecommendedCards() async {
+    try {
+      // Fetch recommended card IDs
+      List<String> recommendedCardIDs = await _firestoreService.getCardRecommendations();
+
+      if (recommendedCardIDs.isEmpty) {
+        state = [];
+        return;
+      }
+
+      // Query Firestore for card details using the recommended IDs
+      final snapshot = await FirebaseFirestore.instance
+          .collection('cards')
+          .where(FieldPath.documentId, whereIn: recommendedCardIDs)
+          .get();
+
+      // Convert Firestore documents to `CardModel`
+      state = snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      print("Error fetching recommended cards: $e");
+      state = []; // Gracefully handle errors
+    }
+  }
+}
 class CardNotifier extends StateNotifier<List<CardModel>> {
   CardNotifier() : super([]);
 

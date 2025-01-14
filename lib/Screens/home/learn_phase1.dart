@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/cards/phase1Card.dart';
 import 'package:speakbright_mobile/Widgets/cards/top_favorite.dart';
@@ -39,29 +41,18 @@ class _Learn1State extends ConsumerState<Learn1> {
 
   @override
   Widget build(BuildContext context) {
-    final cardActivity = ref.watch(cardActivityProvider);
+    final cardActivity =
+        ref.watch(cardActivityProvider); // Access CardActivityProvider
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: phase1Color),
+        leading: BackButton(
+          color: phase1Color,
+          onPressed: () {
+            GlobalRouter.I.router.push(PhaseNav.route);
+          },
+        ),
         backgroundColor: learn1bg,
-        // actions: [
-        //   PopupMenuButton<int>(
-        //     icon: Icon(Icons.category, color: phase1Color),
-        //     onSelected: (index) {
-        //       setState(() {
-        //         selectedCategory = index;
-        //       });
-        //     },
-        //     itemBuilder: (context) =>
-        //         List.generate(phase1Categories.length, (index) {
-        //       return PopupMenuItem<int>(
-        //         value: index,
-        //         child: Container(),
-        //       );
-        //     }),
-        //   ),
-        // ],
       ),
       backgroundColor: learn1bg,
       floatingActionButton: Align(
@@ -103,7 +94,7 @@ class _Learn1State extends ConsumerState<Learn1> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(10,20,10,20),
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -131,22 +122,33 @@ class _Learn1State extends ConsumerState<Learn1> {
                       ),
                       const SizedBox(height: 5),
 
-                      Container(
-                        height: 30, 
-                        width: 150, 
-                        decoration: BoxDecoration(
-                          color: phase1Color,
-                          borderRadius:
-                              BorderRadius.circular(20), 
-                        ),
-                        child: Center(
-                          child: Text(
-                            "${cardActivity.trial} out of 20 trials", 
-                            style: TextStyle(
-                              color: Colors.white, 
-                              fontSize: 15,
-                              fontFamily: 'Roboto', 
-                              fontWeight:FontWeight.w100
+                      GestureDetector(
+                        onTap: () {
+                          // Check the current bufferSize and toggle its value
+                          if (cardActivity.bufferSize == 20) {
+                            cardActivity.setbufferSize(10);
+                          } else if (cardActivity.bufferSize == 10) {
+                            cardActivity.setbufferSize(20);
+                          }
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: cardActivity.bufferSize == 20
+                                ? phase1Color.withOpacity(0.5)
+                                : Color.fromARGB(204, 35, 78, 19),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w300,
+                              ),
                             ),
                           ),
                         ),
