@@ -105,7 +105,7 @@ class _Learn3State extends ConsumerState<Learn3> {
         leading: BackButton(
           color: phase3Color,
           onPressed: () {
-            GlobalRouter.I.router.push(PhaseNav.route);
+            GlobalRouter.I.router.pop();
           },
         ),
         backgroundColor: Colors.white,
@@ -270,8 +270,6 @@ class _Learn3State extends ConsumerState<Learn3> {
                     cardActivity.setCardId(cardId);
                     _addCardTitleToSentence(cardTitle);
                     _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(
-                        cardTitle, category, cardId);
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {

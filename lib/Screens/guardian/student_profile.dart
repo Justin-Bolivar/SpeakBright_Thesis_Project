@@ -96,7 +96,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "How ready is ",
+                            "Move ",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -112,7 +112,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 20)),
                           const Text(
-                            " for next phase?",
+                            " to next phase?",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -124,29 +124,29 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       const SizedBox(
                         height: 25,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
-                          // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
-                          buildFutureWidget(
-                              getStudentReadiness(studentID, _currentPhase),
-                              'Failed to fetch readiness',
-                              textStyle: const TextStyle(
-                                  color: scoreYellow,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      const Text(
-                        "Student needs more time in the current phase (sample)",
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontFamily: 'Roboto',
-                          color: lGray,
-                        ),
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
+                      //     // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
+                      //     buildFutureWidget(
+                      //         getStudentReadiness(studentID, _currentPhase),
+                      //         'Failed to fetch readiness',
+                      //         textStyle: const TextStyle(
+                      //             color: scoreYellow,
+                      //             fontFamily: 'Roboto',
+                      //             fontSize: 21,
+                      //             fontWeight: FontWeight.w600)),
+                      //   ],
+                      // ),
+                      // const Text(
+                      //   "Student needs more time in the current phase (sample)",
+                      //   style: TextStyle(
+                      //     fontStyle: FontStyle.italic,
+                      //     fontFamily: 'Roboto',
+                      //     color: lGray,
+                      //   ),
+                      // ),
                       Padding(
                         padding: const EdgeInsets.only(top: 50.0),
                         child: Row(
@@ -342,15 +342,15 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       buildFutureWidget(
                           _firestoreService.fetchStudentName(studentID),
                           'Failed to fetch student name'),
-                      Text(
-                        studentID,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          color: kwhite,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 8,
-                        ),
-                      ),
+                      // Text(
+                      //   studentID,
+                      //   style: const TextStyle(
+                      //     fontFamily: 'Roboto',
+                      //     color: kwhite,
+                      //     fontWeight: FontWeight.w100,
+                      //     fontSize: 8,
+                      //   ),
+                      // ),
                     ]),
                   ),
                 ),

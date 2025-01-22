@@ -39,6 +39,12 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+          color: Colors.white,
+          onPressed: () {
+            GlobalRouter.I.router.pop();
+          },
+        ),
         backgroundColor: sky,
         shadowColor: lGray,
       ),

@@ -46,7 +46,7 @@ class _Learn1State extends ConsumerState<Learn1> {
         leading: BackButton(
           color: phase1Color,
           onPressed: () {
-            GlobalRouter.I.router.push(PhaseNav.route);
+            GlobalRouter.I.router.pop(PhaseNav.route);
           },
         ),
         backgroundColor: learn1bg,
