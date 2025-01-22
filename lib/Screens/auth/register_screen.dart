@@ -71,43 +71,39 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Flexible(
-                child: ElevatedButton(
-                  onPressed: () {
-                    onSubmit();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainpurple,
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 18),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text("Register"),
+              ElevatedButton(
+                onPressed: () {
+                  onSubmit();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: mainpurple,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontSize: 18),
+                  minimumSize: const Size(double.infinity, 50),
                 ),
+                child: const Text("Register"),
               ),
               const SizedBox(height: 30),
               Center(
-                child: Flexible(
-                  child: MouseRegion(
-                    child: GestureDetector(
-                        onTap: () {
-                          GlobalRouter.I.router.go(LoginScreen.route);
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: 'Already have an Guardian account? ',
-                                  style: TextStyle(color: mainpurple)),
-                              TextSpan(
-                                  text: 'Login here',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: mainpurple)),
-                            ],
-                          ),
-                        )),
-                  ),
+                child: MouseRegion(
+                  child: GestureDetector(
+                      onTap: () {
+                        GlobalRouter.I.router.go(LoginScreen.route);
+                      },
+                      child: RichText(
+                        text: const TextSpan(
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: 'Already have an Guardian account? ',
+                                style: TextStyle(color: mainpurple)),
+                            TextSpan(
+                                text: 'Login here',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: mainpurple)),
+                          ],
+                        ),
+                      )),
                 ),
               ),
               const SizedBox(height: 60),
@@ -127,88 +123,121 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Image.asset('assets/SpeakBright_P.png',
                     width: 300, height: 180),
                 const SizedBox(height: 8),
-                Flexible(
-                  child: TextFormField(
-                    decoration: decoration.copyWith(
-                        labelText: "Name",
-                        prefixIcon: const Icon(
-                          Icons.person,
-                          color: mainpurple,
-                        )),
-                    focusNode: nameFn,
-                    controller: name,
-                    validator: MultiValidator([
-                      RequiredValidator(errorText: 'Please enter your name'),
-                    ]).call,
-                  ),
+                TextFormField(
+                  decoration: decoration.copyWith(
+                      labelText: "Name",
+                      prefixIcon: const Icon(
+                        Icons.person,
+                        color: mainpurple,
+                      )),
+                  focusNode: nameFn,
+                  controller: name,
+                  validator: MultiValidator([
+                    RequiredValidator(errorText: 'Please enter your name'),
+                  ]).call,
                 ),
                 const SizedBox(height: 8),
-                Flexible(
-                  child: TextFormField(
-                    decoration: decoration.copyWith(
-                      labelText: "Birthday",
+                TextFormField(
+                  decoration: decoration.copyWith(
+                    labelText: "Birthday",
+                    prefixIcon: const Icon(
+                      Icons.cake,
+                      color: mainpurple,
+                    ),
+                  ),
+                  readOnly: true,
+                  controller: TextEditingController(
+                    text: selectedBirthday?.toString().split(' ')[0] ?? '',
+                  ),
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedBirthday ?? DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null && picked != selectedBirthday) {
+                      setState(() {
+                        selectedBirthday = picked;
+                      });
+                    }
+                  },
+                  validator: (value) {
+                    if (selectedBirthday == null) {
+                      return 'Please select your birthday';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                TextFormField(
+                  decoration: decoration.copyWith(
+                      labelText: "Email",
                       prefixIcon: const Icon(
-                        Icons.cake,
+                        Icons.person,
+                        color: mainpurple,
+                      )),
+                  focusNode: usernameFn,
+                  controller: username,
+                  onEditingComplete: () {
+                    passwordFn.requestFocus();
+                  },
+                  validator: MultiValidator([
+                    RequiredValidator(
+                        errorText: 'Please fill out the username'),
+                    EmailValidator(errorText: "Please select a valid email"),
+                  ]).call,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                TextFormField(
+                  keyboardType: TextInputType.visiblePassword,
+                  obscureText: obfuscate,
+                  decoration: decoration.copyWith(
+                      labelText: "Password",
+                      prefixIcon: const Icon(
+                        Icons.password,
                         color: mainpurple,
                       ),
-                    ),
-                    readOnly: true,
-                    controller: TextEditingController(
-                      text: selectedBirthday?.toString().split(' ')[0] ?? '',
-                    ),
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedBirthday ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != selectedBirthday) {
-                        setState(() {
-                          selectedBirthday = picked;
-                        });
-                      }
-                    },
-                    validator: (value) {
-                      if (selectedBirthday == null) {
-                        return 'Please select your birthday';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Flexible(
-                  child: TextFormField(
-                    decoration: decoration.copyWith(
-                        labelText: "Email",
-                        prefixIcon: const Icon(
-                          Icons.person,
+                      suffixIcon: IconButton(
                           color: mainpurple,
-                        )),
-                    focusNode: usernameFn,
-                    controller: username,
-                    onEditingComplete: () {
-                      passwordFn.requestFocus();
-                    },
-                    validator: MultiValidator([
-                      RequiredValidator(
-                          errorText: 'Please fill out the username'),
-                      EmailValidator(errorText: "Please select a valid email"),
-                    ]).call,
-                  ),
+                          onPressed: () {
+                            setState(() {
+                              obfuscate = !obfuscate;
+                            });
+                          },
+                          icon: Icon(obfuscate
+                              ? Icons.remove_red_eye_rounded
+                              : CupertinoIcons.eye_slash))),
+                  focusNode: passwordFn,
+                  controller: password,
+                  onEditingComplete: () {
+                    password2Fn.requestFocus();
+                  },
+                  validator: MultiValidator([
+                    RequiredValidator(errorText: "Password is required"),
+                    MinLengthValidator(12,
+                        errorText:
+                            "Password must be at least 12 characters long"),
+                    MaxLengthValidator(128,
+                        errorText: "Password cannot exceed 72 characters"),
+                    PatternValidator(
+                        r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+?\-=[\]{};':,.<>]).*$",
+                        errorText:
+                            'Password must contain at least one symbol, one uppercase letter, one lowercase letter, and one number.')
+                  ]).call,
                 ),
                 const SizedBox(
                   height: 8,
                 ),
-                Flexible(
-                  child: TextFormField(
+                TextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     obscureText: obfuscate,
                     decoration: decoration.copyWith(
-                        labelText: "Password",
+                        labelText: "Confirm Password",
                         prefixIcon: const Icon(
                           Icons.password,
                           color: mainpurple,
@@ -223,78 +252,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             icon: Icon(obfuscate
                                 ? Icons.remove_red_eye_rounded
                                 : CupertinoIcons.eye_slash))),
-                    focusNode: passwordFn,
-                    controller: password,
+                    focusNode: password2Fn,
+                    controller: password2,
                     onEditingComplete: () {
-                      password2Fn.requestFocus();
+                      password2Fn.unfocus();
                     },
-                    validator: MultiValidator([
-                      RequiredValidator(errorText: "Password is required"),
-                      MinLengthValidator(12,
-                          errorText:
-                              "Password must be at least 12 characters long"),
-                      MaxLengthValidator(128,
-                          errorText: "Password cannot exceed 72 characters"),
-                      PatternValidator(
-                          r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+?\-=[\]{};':,.<>]).*$",
-                          errorText:
-                              'Password must contain at least one symbol, one uppercase letter, one lowercase letter, and one number.')
-                    ]).call,
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Flexible(
-                  child: TextFormField(
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText: obfuscate,
-                      decoration: decoration.copyWith(
-                          labelText: "Confirm Password",
-                          prefixIcon: const Icon(
-                            Icons.password,
-                            color: mainpurple,
-                          ),
-                          suffixIcon: IconButton(
-                              color: mainpurple,
-                              onPressed: () {
-                                setState(() {
-                                  obfuscate = !obfuscate;
-                                });
-                              },
-                              icon: Icon(obfuscate
-                                  ? Icons.remove_red_eye_rounded
-                                  : CupertinoIcons.eye_slash))),
-                      focusNode: password2Fn,
-                      controller: password2,
-                      onEditingComplete: () {
-                        password2Fn.unfocus();
-                      },
-                      validator: (v) {
-                        String? doesMatchPasswords =
-                            password.text == password2.text
-                                ? null
-                                : "Passwords doesn't match";
-                        if (doesMatchPasswords != null) {
-                          return doesMatchPasswords;
-                        } else {
-                          return MultiValidator([
-                            RequiredValidator(
-                                errorText: "Password is required"),
-                            MinLengthValidator(12,
-                                errorText:
-                                    "Password must be at least 12 characters long"),
-                            MaxLengthValidator(128,
-                                errorText:
-                                    "Password cannot exceed 72 characters"),
-                            PatternValidator(
-                                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+?\-=[\]{};':,.<>]).*$",
-                                errorText:
-                                    'Password must contain at least one symbol, one uppercase letter, one lowercase letter, and one number.'),
-                          ]).call(v);
-                        }
-                      }),
-                ),
+                    validator: (v) {
+                      String? doesMatchPasswords =
+                          password.text == password2.text
+                              ? null
+                              : "Passwords doesn't match";
+                      if (doesMatchPasswords != null) {
+                        return doesMatchPasswords;
+                      } else {
+                        return MultiValidator([
+                          RequiredValidator(errorText: "Password is required"),
+                          MinLengthValidator(12,
+                              errorText:
+                                  "Password must be at least 12 characters long"),
+                          MaxLengthValidator(128,
+                              errorText:
+                                  "Password cannot exceed 72 characters"),
+                          PatternValidator(
+                              r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+?\-=[\]{};':,.<>]).*$",
+                              errorText:
+                                  'Password must contain at least one symbol, one uppercase letter, one lowercase letter, and one number.'),
+                        ]).call(v);
+                      }
+                    }),
               ],
             ),
           ),

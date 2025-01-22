@@ -29,7 +29,6 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
     super.initState();
     _userName = 'Unknown User';
     _fetchUserName();
-    
   }
 
   Future<void> _fetchUserName() async {
@@ -218,7 +217,7 @@ class _GuardianHomepageState extends ConsumerState<GuardianHomepage> {
                           width: MediaQuery.of(context).size.width * 0.23,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: Color.fromRGBO(167, 110, 166, 0.3),
+                            color: const Color.fromRGBO(167, 110, 166, 0.3),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: DottedBorder(

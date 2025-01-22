@@ -1,12 +1,9 @@
 // ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakbright_mobile/Widgets/services/temporal_prefixspan.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
-import 'package:intl/intl.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {
@@ -191,7 +188,7 @@ class FirestoreService {
     print('entering fetchSequenceData');
     final now = DateTime.now();
     final startDate = DateTime(now.year, now.month, now.day)
-        .subtract(const Duration(days: 7)); 
+        .subtract(const Duration(days: 7));
 
     final collection = FirebaseFirestore.instance
         .collection('communicate_log')
@@ -200,8 +197,7 @@ class FirestoreService {
 
     final snapshot = await collection
         .where('timestamp',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(
-                startDate)) 
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
         .get();
     List<List<Map<String, dynamic>>> sequenceDatabase = [];
 
@@ -212,7 +208,7 @@ class FirestoreService {
       }
     }
     if (sequenceDatabase.isEmpty) {
-      return []; 
+      return [];
     }
     return sequenceDatabase;
   }
@@ -223,11 +219,13 @@ class FirestoreService {
       throw Exception('No user is currently signed in.');
     }
 
-    final userID = user.uid; 
+    final userID = user.uid;
     const supportThreshold = 1;
     final sequenceDatabase = await fetchSequenceData(userID);
-    TemporalPrefixSpan prefixSpan = TemporalPrefixSpan(sequenceDatabase: sequenceDatabase);
-    List<String> recommendedCards = prefixSpan.mineFrequentSequences(supportThreshold);
+    TemporalPrefixSpan prefixSpan =
+        TemporalPrefixSpan(sequenceDatabase: sequenceDatabase);
+    List<String> recommendedCards =
+        prefixSpan.mineFrequentSequences(supportThreshold);
 
     return recommendedCards;
   }

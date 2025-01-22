@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +66,7 @@ class _FavoritesViewState extends ConsumerState<Play> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('TEMPORARY, FOR TESTING'),
+        title: const Text('TEMPORARY, FOR TESTING'),
       ),
       body: Stack(
         children: [
@@ -86,7 +88,7 @@ class _FavoritesViewState extends ConsumerState<Play> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: _cards.isEmpty
-                    ? Center(child: Text('Add Favorite Cards First!'))
+                    ? const Center(child: Text('Add Favorite Cards First!'))
                     : Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: ReorderableListView(
