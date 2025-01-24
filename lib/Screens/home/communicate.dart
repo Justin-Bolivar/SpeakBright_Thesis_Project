@@ -52,14 +52,6 @@ class _CommunicateState extends ConsumerState<Communicate> {
       pressSpeak = false;
       sentence.clear();
       words.clear();
-
-      if (currentUserPhase == 2) {
-        sentence.add("I want");
-        sentence.add("____");
-      } else if (currentUserPhase == 3) {
-        sentence.add("I feel");
-        sentence.add("____");
-      }
     });
   }
 
@@ -582,10 +574,8 @@ class _CommunicateState extends ConsumerState<Communicate> {
         currentUserPhase = userDoc.get('phase');
         if (currentUserPhase == 2) {
           sentence.clear();
-          sentence.add("I want");
         } else if (currentUserPhase == 3) {
           sentence.clear();
-          sentence.add("I feel");
         }
       });
     } else {
