@@ -148,6 +148,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       await activityLogRef.set({
         'email': user.email,
         'userID': user.uid,
+        'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
       // Ensure the phase document exists (if not, create it)
@@ -156,6 +157,10 @@ class _PromptButtonState extends ConsumerState<PromptButton>
         print("Phase document not found, creating new phase document");
         await phaseRef.set({'createdAt': FieldValue.serverTimestamp()});
       }
+
+      await phaseRef.set({
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       final trialRef = phaseRef.collection('session').doc();
 
