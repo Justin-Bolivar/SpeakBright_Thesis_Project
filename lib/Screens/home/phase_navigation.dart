@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase1.dart';
 import 'package:speakbright_mobile/Screens/home/learn_phase2.dart';
@@ -40,6 +39,12 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+          color: Colors.white,
+          onPressed: () {
+            GlobalRouter.I.router.pop();
+          },
+        ),
         backgroundColor: sky,
         shadowColor: lGray,
       ),
@@ -68,6 +73,7 @@ class _PhaseNavState extends ConsumerState<PhaseNav> {
                       //GoogleFonts.rubikSprayPaint(
                       color: Colors.white,
                       fontSize: 48,
+                      fontFamily: 'RubikSprayPaint',
                     ),
                   ),
                   Text(

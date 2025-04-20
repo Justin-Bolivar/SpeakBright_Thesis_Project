@@ -1,10 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
-
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
@@ -33,10 +30,9 @@ class _Learn4State extends ConsumerState<Learn4> {
   List<String> sentence = [];
   List<String> words = [];
   List<String> categories = [];
+  String finalSentence = "";
   int currentUserPhase = 4;
   int selectedCategory = -1;
-  String sentencePrefix1 = "I feel";
-  String sentencePrefix2 = "I want";
   bool pressSpeak = false;
 
   @override
@@ -62,104 +58,51 @@ class _Learn4State extends ConsumerState<Learn4> {
       if (sentence.length >= 4) {
         _clearSentence();
       }
+
+      String prefix = "";
+      String formattedTitle = title;
+
+      // Determine prefix and format title based on category
       if (category == "Emotions") {
-        if (sentence.isNotEmpty) {
-          //if sentence has 2 Emotions replace first Emotion
-          if (sentence.length > 2) {
-            sentence[0] = "I feel";
-            sentence[1] = title;
-            words[0] = title;
-          } else {
-            //else add as normal
-            sentence.addAll(["I feel", title]);
-            words.add(title);
-          }
-        } else {
-          //if sentence is empty add as normal
-          sentence.addAll(["I feel", title]);
-          words.add(title);
-        }
+        prefix = "I feel";
+      } else if (category == "Activities") {
+        prefix = "I want";
+        // Add "to" before the activity title
+        formattedTitle = "to $title";
       } else {
-        if (sentence.isNotEmpty) {
-          //if sentence has 2 Objects replace first Object
-          if (sentence.length > 2) {
-            sentence[0] = "I want";
-            sentence[1] = title;
-            words[0] = title;
-          } else {
-            //else add as normal
-            sentence.addAll(["I want", title]);
-            words.add(title);
-          }
+        prefix = "I want";
+        // Add "a" or "an" based on the title
+        if (_startsWithVowel(title)) {
+          formattedTitle = "an $title";
         } else {
-          //if sentence is empty add as normal
-          sentence.addAll(["I want", title]);
-          words.add(title);
+          formattedTitle = "a $title";
         }
       }
-      // if (sentencePrefix1 == "I feel") {
-      //   if (category == "Emotions") {
-      //     // if sentence is not empty, replace the first word with the new emotion
-      //     if (sentence.isNotEmpty) {
-      //       sentence[0] = title;
-      //       words[0] = title;
-      //     } else {
-      //       // if sentence is empty add as normal
-      //       sentence.add(title);
-      //       words.add(title);
-      //     }
-      //   } else {
-      //     //not Emtion but Prefix1 is I feel
-      //     String placeHolder = "____";
-      //     if (sentence.isNotEmpty) {
-      //       //if sentence already has a word, replace the second word with the new card
-      //       if (sentence.length > 1) {
-      //         toggleSentencePrefix1();
-      //         sentence.add(title);
-      //         words.add(title);
-      //       } else {
-      //         sentence.add(title);
-      //         words.add(title);
-      //       }
-      //     } else {
-      //       sentence.add(placeHolder);
-      //       sentence.add(title);
-      //       words.add(placeHolder);
-      //       words.add(title);
-      //     }
-      //   }
-      // } else if (sentencePrefix1 == "I want") {
-      //   if (category != "Emotions") {
-      //     if (sentence.length > 1) {
-      //       sentence[1] = title;
-      //       words[1] = title;
-      //     } else {
-      //       sentence.add(title);
-      //       words.add(title);
-      //     }
-      //   } else {
-      //     toggleSentencePrefix1();
-      //     sentence.add(title);
-      //     words.add(title);
-      //   }
-      // }
+
+      if (sentence.isNotEmpty) {
+        // Replace the first card title if the sentence already has 2 parts
+        if (sentence.length > 2) {
+          sentence[0] = prefix;
+          sentence[1] = formattedTitle;
+          words[0] = formattedTitle;
+        } else {
+          // Add the new title with the prefix
+          sentence.addAll([prefix, formattedTitle]);
+          words.add(formattedTitle);
+        }
+      } else {
+        // If the sentence is empty, add the new title with the prefix
+        sentence.addAll([prefix, formattedTitle]);
+        words.add(formattedTitle);
+      }
     });
   }
 
-  void toggleSentencePrefix1() {
-    setState(() {
-      sentencePrefix1 = sentencePrefix1 == "I feel" ? "I want" : "I feel";
-      words.clear();
-      sentence.clear();
-    });
-  }
-
-  void toggleSentencePrefix2() {
-    setState(() {
-      sentencePrefix2 = sentencePrefix2 == "I feel" ? "I want" : "I feel";
-      words.clear();
-      sentence.clear();
-    });
+// Helper function to check if a word starts with a vowel
+  bool _startsWithVowel(String word) {
+    if (word.isEmpty) return false;
+    final vowels = ['a', 'e', 'i', 'o', 'u'];
+    return vowels.contains(word[0].toLowerCase());
   }
 
   @override
@@ -168,76 +111,132 @@ class _Learn4State extends ConsumerState<Learn4> {
     super.dispose();
   }
 
-  Future<void> _sendSentenceAndSpeak() async {
-    String sentenceString = "I";
-    String pronoun = "I";
-    words.add(pronoun);
-    print(words);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: LoadingAnimationWidget.staggeredDotsWave(
-            color: kLightPruple,
-            size: 50.0,
-          ),
-        );
-      },
-    );
-
-    try {
-      String urlPhase4 =
-          'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
-
-      final response = await http.post(
-        Uri.parse(urlPhase4),
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{'words': words}),
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-        setState(() {
-          sentence.clear();
-          sentence.addAll(responseBody['sentence'].split(' '));
-          words.clear();
-        });
-
-        sentenceString = sentence.join(' ');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to create sentence: ${response.body}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        Map<String, dynamic> errorResponse = jsonDecode(response.body);
-        String errorMessage =
-            errorResponse['detail'].replaceFirst('Error: ', '');
-        _ttsService.speak(errorMessage);
-        setState(() {
-          _clearSentence();
-        });
-      }
-
-      //_firestoreService.storeSentence(sentence);
-      _ttsService.speak(sentenceString);
+  void constructSentenceAndSpeak(List<String> sentence) {
+    if (sentence.isEmpty) {
+      _ttsService.speak("The sentence list is empty.");
       pressSpeak = true;
-    } catch (e) {
-      print('Error occurred: $e');
-    } finally {
-      Navigator.of(context).pop();
+      return;
     }
+
+    List<String> emotions = [];
+    List<String> objects = [];
+
+    for (int i = 0; i < sentence.length - 1; i += 2) {
+      if (sentence[i] == "I feel") {
+        emotions.add(sentence[i + 1]);
+      } else if (sentence[i] == "I want") {
+        objects.add(sentence[i + 1]);
+      }
+    }
+
+    String emotionPart = "";
+    if (emotions.isNotEmpty) {
+      if (emotions.length == 1) {
+        emotionPart = "I am ${emotions[0]}";
+      } else {
+        String lastEmotion = emotions.removeLast();
+        emotionPart = "I am ${emotions.join(', ')} and $lastEmotion";
+      }
+    }
+
+    String objectPart = "";
+    if (objects.isNotEmpty) {
+      if (objects.length == 1) {
+        objectPart = "I want ${objects[0]}";
+      } else {
+        String lastObject = objects.removeLast();
+        objectPart = "I want ${objects.join(', ')} and $lastObject";
+      }
+    }
+
+    String finalSentence = "$emotionPart $objectPart".trim();
+    setState(() {
+      sentence.clear();
+      sentence.addAll(finalSentence.split(' '));
+    });
+    _ttsService.speak(finalSentence);
+    pressSpeak = true;
   }
+
+  // Future<void> _sendSentenceAndSpeak() async {
+  //   String sentenceString = "I";
+  //   String pronoun = "I";
+  //   words.add(pronoun);
+  //   print(words);
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return Center(
+  //         child: LoadingAnimationWidget.staggeredDotsWave(
+  //           color: kLightPruple,
+  //           size: 50.0,
+  //         ),
+  //       );
+  //     },
+  //   );
+
+  //   try {
+  //     String urlPhase4 =
+  //         'https://speakbright-api-sentence-creation.onrender.com/complete_sentence';
+
+  //     final response = await http.post(
+  //       Uri.parse(urlPhase4),
+  //       headers: {'Content-Type': 'application/json; charset=UTF-8'},
+  //       body: jsonEncode(<String, dynamic>{'words': words}),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+  //       setState(() {
+  //         sentence.clear();
+  //         sentence.addAll(responseBody['sentence'].split(' '));
+  //         words.clear();
+  //       });
+
+  //       sentenceString = sentence.join(' ');
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Failed to create sentence: ${response.body}'),
+  //           backgroundColor: Colors.red,
+  //         ),
+  //       );
+  //       Map<String, dynamic> errorResponse = jsonDecode(response.body);
+  //       String errorMessage =
+  //           errorResponse['detail'].replaceFirst('Error: ', '');
+  //       _ttsService.speak(errorMessage);
+  //       setState(() {
+  //         _clearSentence();
+  //       });
+  //     }
+
+  //     //_firestoreService.storeSentence(sentence);
+  //     _ttsService.speak(sentenceString);
+  //     pressSpeak = true;
+  //   } catch (e) {
+  //     print('Error occurred: $e');
+  //   } finally {
+  //     Navigator.of(context).pop();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase4);
     return Scaffold(
       backgroundColor: kwhite,
+      appBar: AppBar(
+        leading: BackButton(
+          color: phase4Color,
+          onPressed: () {
+            GlobalRouter.I.router.pop();
+          },
+        ),
+        backgroundColor: Colors.white,
+      ),
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -285,8 +284,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                               child: Text(
                                 sentence.isEmpty
                                     ? "Tap on cards to create a Sentence"
-                                    : sentence.join(
-                                        ' '), //"$sentencePrefix1 ${sentence.isNotEmpty ? sentence[0] : '______'}, $sentencePrefix2 ${sentence.length > 1 ? sentence[1] : '______'}",
+                                    : sentence.join(' '),
                                 style: TextStyle(
                                     color: kLightPruple,
                                     fontSize: 18.0,
@@ -314,7 +312,7 @@ class _Learn4State extends ConsumerState<Learn4> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: IconButton(
-                          onPressed: _sendSentenceAndSpeak,
+                          onPressed: () => constructSentenceAndSpeak(sentence),
                           icon: const Icon(
                             Icons.volume_up,
                             color: Colors.white,

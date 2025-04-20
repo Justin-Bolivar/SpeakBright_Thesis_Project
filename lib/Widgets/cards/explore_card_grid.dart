@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'explore_card_item.dart';
@@ -67,7 +69,7 @@ class _ExploreCardGridState extends State<ExploreCardGrid> {
       if (recommendationsData.isNotEmpty) {
         print("All cards: ${widget.cards.length}");
         print("not empty");
-        
+
         List<CardModel> recommendedCards = widget.cards
             .where((card) =>
                 recommendationsData.contains(card.title) &&

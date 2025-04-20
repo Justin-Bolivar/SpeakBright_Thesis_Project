@@ -1,6 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
+import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
@@ -97,14 +101,23 @@ class _Learn3State extends ConsumerState<Learn3> {
     final cardActivity = ref.watch(cardActivityProvider);
     final cardsAsyncValue = ref.watch(cardsListProviderPhase3);
     return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(
+          color: phase3Color,
+          onPressed: () {
+            GlobalRouter.I.router.pop();
+          },
+        ),
+        backgroundColor: Colors.white,
+      ),
       backgroundColor: kwhite,
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: EdgeInsets.only(bottom: 0),
+          padding: const EdgeInsets.only(bottom: 0),
           child: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               PromptButton(phaseCurrent: currentUserPhase),
@@ -118,6 +131,37 @@ class _Learn3State extends ConsumerState<Learn3> {
             padding: const EdgeInsets.only(left: 20, bottom: 5, top: 10),
             child: Image.asset(
               'assets/phase/phase3.png',
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              // Check the current bufferSize and toggle its value
+              if (cardActivity.bufferSize == 20) {
+                cardActivity.setbufferSize(10);
+              } else if (cardActivity.bufferSize == 10) {
+                cardActivity.setbufferSize(20);
+              }
+            },
+            child: Container(
+              height: 30,
+              width: 150,
+              decoration: BoxDecoration(
+                color: cardActivity.bufferSize == 20
+                    ? phase3Color.withOpacity(0.5)
+                    : const Color.fromARGB(204, 83, 105, 160),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  "${cardActivity.trial} of ${cardActivity.bufferSize} trials",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
             ),
           ),
           Padding(
@@ -141,7 +185,7 @@ class _Learn3State extends ConsumerState<Learn3> {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       child: sentence.isEmpty
-                          ? Center(
+                          ? const Center(
                               child: Text(
                                 "TAP CARDS TO CREATE A SENTENCE",
                                 style: TextStyle(
@@ -174,42 +218,40 @@ class _Learn3State extends ConsumerState<Learn3> {
                             ),
                     ),
                   ),
-                  Container(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _sendSentenceAndSpeak,
-                            icon: const Icon(
-                              Icons.volume_up,
-                              color: Colors.white,
-                            ),
+                  Column(
+                    children: [
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: IconButton(
+                          onPressed: _sendSentenceAndSpeak,
+                          icon: const Icon(
+                            Icons.volume_up,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(
-                          height: 15,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: mainpurple,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        Container(
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: mainpurple,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: IconButton(
-                            onPressed: _clearSentence,
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                            ),
+                        child: IconButton(
+                          onPressed: _clearSentence,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -225,11 +267,9 @@ class _Learn3State extends ConsumerState<Learn3> {
                   cards: cards,
                   onCardTap:
                       (String cardTitle, String category, String cardId) {
-                        cardActivity.setCardId(cardId);
+                    cardActivity.setCardId(cardId);
                     _addCardTitleToSentence(cardTitle);
                     _ttsService.speak(cardTitle);
-                    _firestoreService.storeTappedCards(
-                        cardTitle, category, cardId);
                     print('title: $cardTitle, cat: $category');
                   },
                   onCardDelete: (String cardId) {

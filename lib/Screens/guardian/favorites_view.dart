@@ -1,8 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
-import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
 class FavoritesView extends ConsumerStatefulWidget {
@@ -65,7 +66,7 @@ class _FavoritesViewState extends ConsumerState<FavoritesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorite Cards'),
+        title: const Text('Favorite Cards'),
       ),
       body: Stack(
         children: [
@@ -87,7 +88,7 @@ class _FavoritesViewState extends ConsumerState<FavoritesView> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: _cards.isEmpty
-                    ? Center(child: Text('Add Favorite Cards First!'))
+                    ? const Center(child: Text('Add Favorite Cards First!'))
                     : Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: ReorderableListView(

@@ -1,4 +1,4 @@
-// ignore_for_file: unrelated_type_equality_checks, avoid_print, no_leading_underscores_for_local_identifiers, prefer_const_constructors
+// ignore_for_file: unrelated_type_equality_checks, avoid_print, no_leading_underscores_for_local_identifiers, prefer_const_constructors, unused_element, use_build_context_synchronously, prefer_interpolation_to_compose_strings
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
-import 'package:speakbright_mobile/Screens/guardian/favorites_view.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
@@ -97,7 +96,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "How ready is ",
+                            "Move ",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -113,7 +112,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 20)),
                           const Text(
-                            " for next phase?",
+                            " to next phase?",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -125,29 +124,29 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       const SizedBox(
                         height: 25,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
-                          // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
-                          buildFutureWidget(
-                              getStudentReadiness(studentID, _currentPhase),
-                              'Failed to fetch readiness',
-                              textStyle: const TextStyle(
-                                  color: scoreYellow,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      const Text(
-                        "Student needs more time in the current phase (sample)",
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontFamily: 'Roboto',
-                          color: lGray,
-                        ),
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
+                      //     // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
+                      //     buildFutureWidget(
+                      //         getStudentReadiness(studentID, _currentPhase),
+                      //         'Failed to fetch readiness',
+                      //         textStyle: const TextStyle(
+                      //             color: scoreYellow,
+                      //             fontFamily: 'Roboto',
+                      //             fontSize: 21,
+                      //             fontWeight: FontWeight.w600)),
+                      //   ],
+                      // ),
+                      // const Text(
+                      //   "Student needs more time in the current phase (sample)",
+                      //   style: TextStyle(
+                      //     fontStyle: FontStyle.italic,
+                      //     fontFamily: 'Roboto',
+                      //     color: lGray,
+                      //   ),
+                      // ),
                       Padding(
                         padding: const EdgeInsets.only(top: 50.0),
                         child: Row(
@@ -197,7 +196,6 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
               ),
               actions: [
                 ElevatedButton(
-                  child: Text('Close'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -206,9 +204,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     foregroundColor:
                         WidgetStateProperty.all<Color>(Colors.white),
                   ),
+                  child: Text('Close'),
                 ),
                 ElevatedButton(
-                  child: Text('Save'),
                   onPressed: () async {
                     await _updateAndCloseDialog(_selectedValue!, context);
                   },
@@ -218,6 +216,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     foregroundColor:
                         WidgetStateProperty.all<Color>(Colors.white),
                   ),
+                  child: Text('Save'),
                 ),
               ],
             );
@@ -311,7 +310,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     String imagePath = _currentPhase != null
-        ? 'assets/phase/${_currentPhase}.png'
+        ? 'assets/phase/$_currentPhase.png'
         : 'assets/studcard_monster.png';
 
     return Scaffold(
@@ -343,15 +342,15 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       buildFutureWidget(
                           _firestoreService.fetchStudentName(studentID),
                           'Failed to fetch student name'),
-                      Text(
-                        studentID,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          color: kwhite,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 8,
-                        ),
-                      ),
+                      // Text(
+                      //   studentID,
+                      //   style: const TextStyle(
+                      //     fontFamily: 'Roboto',
+                      //     color: kwhite,
+                      //     fontWeight: FontWeight.w100,
+                      //     fontSize: 8,
+                      //   ),
+                      // ),
                     ]),
                   ),
                 ),
@@ -599,7 +598,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                                 MainAxisAlignment.spaceEvenly,
                                             children: List.generate(
                                                 5,
-                                                (index) => Container(
+                                                (index) => SizedBox(
                                                       width:
                                                           MediaQuery.of(context)
                                                                   .size
@@ -644,11 +643,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                                                       .connectionState ==
                                                                   ConnectionState
                                                                       .waiting) {
-                                                                return Container(
-                                                                  child: const Center(
-                                                                      child:
-                                                                          WaitingDialog()),
-                                                                );
+                                                                return const Center(
+                                                                    child:
+                                                                        WaitingDialog());
                                                               } else if (snapshot
                                                                   .hasData) {
                                                                 List<double>?
@@ -700,7 +697,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                                                 }
 
                                                                 return Text(
-                                                                  '${percentages[index]}',
+                                                                  percentages[
+                                                                      index],
                                                                   textAlign:
                                                                       TextAlign
                                                                           .center,

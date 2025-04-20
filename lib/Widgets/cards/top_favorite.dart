@@ -14,6 +14,8 @@ class TopFavoriteCard {
     CollectionReference currentlyLearningCollection =
         firestore.collection('currently_learning');
 
+    bool isFavoriteNull = false;
+
     try {
       String? targetCardId;
       bool isCurrentlyLearningPhase1Independence = false;
@@ -65,7 +67,6 @@ class TopFavoriteCard {
             .get();
 
         for (var doc in favoritesSnapshot.docs) {
-          
           String cardId = doc.id;
           DocumentSnapshot cardSnapshot =
               await firestore.collection('cards').doc(cardId).get();
@@ -87,7 +88,77 @@ class TopFavoriteCard {
         }
 
         // If no valid favorite card found, return null
-        if (targetCardId == null) return null;
+        if (targetCardId == null) isFavoriteNull = true;
+      }
+
+      if (isFavoriteNull) {
+        // Fetch main_category_ranking
+        DocumentSnapshot categoryRankingDoc = await firestore
+            .collection('main_category_ranking')
+            .doc(userId)
+            .get();
+
+        if (!categoryRankingDoc.exists) {
+          print('No main_category_ranking document found for user $userId');
+          return null;
+        }
+
+        List<dynamic>? categories =
+            (categoryRankingDoc.data() as Map<String, dynamic>)['categories'];
+        if (categories == null || categories.isEmpty) {
+          print('No categories found in main_category_ranking');
+          return null;
+        }
+
+        // Iterate over categories to find the target card
+        for (var categoryEntry in categories) {
+          String category = categoryEntry['category'];
+
+          // Fetch cards in the categoryRanking collection
+          QuerySnapshot categorySnapshot = await firestore
+              .collection('categoryRanking')
+              .doc(userId)
+              .collection(category)
+              .orderBy('rank')
+              .get();
+
+          if (categorySnapshot.docs.isEmpty) {
+            print('No cards found in categoryRanking for category $category');
+            continue;
+          }
+
+          for (var cardDoc in categorySnapshot.docs) {
+            // Check phase1_independence in the cards collection
+            DocumentSnapshot cardSnapshot =
+                await firestore.collection('cards').doc(cardDoc.id).get();
+
+            if (!cardSnapshot.exists) {
+              print('Card not found in cards collection for ID: ${cardDoc.id}');
+              continue;
+            }
+
+            Map<String, dynamic>? cardData =
+                cardSnapshot.data() as Map<String, dynamic>?;
+            bool isPhase1Independence =
+                cardData?['phase1_independence'] ?? false;
+
+            // Only select cards with phase1_independence == false
+            if (!isPhase1Independence) {
+              targetCardId = cardDoc.id;
+              print('Found targetCardId: $targetCardId in category: $category');
+              break; // Stop searching once a valid card is found
+            }
+          }
+
+          if (targetCardId != null) {
+            break; // Exit the outer loop once a card is found
+          }
+        }
+
+        if (targetCardId == null) {
+          print('No valid card found in any category');
+          return null;
+        }
       }
 
       // Step 3: Fetch potential distractor cards
@@ -97,14 +168,49 @@ class TopFavoriteCard {
           .get();
 
       List<CardModel> validCards = [];
+      String? targetCategory;
+
+// Fetch the category of the target card
+      if (targetCardId != null) {
+        DocumentSnapshot targetCardSnapshot =
+            await firestore.collection('cards').doc(targetCardId).get();
+
+        if (targetCardSnapshot.exists) {
+          Map<String, dynamic>? targetCardData =
+              targetCardSnapshot.data() as Map<String, dynamic>?;
+          targetCategory = targetCardData?['category'];
+        }
+      }
+
+      List<CardModel> fallbackCards = [];
+
       for (var cardDoc in cardsSnapshot.docs) {
         Map<String, dynamic>? cardData =
             cardDoc.data() as Map<String, dynamic>?;
-        // Exclude the target card and any cards with phase1_independence set to true
-        if (cardDoc.id != targetCardId &&
-            !(cardData?['phase1_independence'] ?? false)) {
+
+        String? cardCategory = cardData?['category'];
+
+        // Check if the card matches the target category or doesn't
+        bool isSameCategory = (cardCategory == targetCategory);
+        bool isPhase1Independence = cardData?['phase1_independence'] ?? false;
+
+        if (isSameCategory && cardDoc.id != targetCardId) {
+          // Prioritize cards in the same category as the target card
           validCards.add(CardModel.fromFirestore(cardDoc));
+        } else if (!isSameCategory &&
+            !isPhase1Independence &&
+            cardDoc.id != targetCardId) {
+          // Collect fallback cards
+          fallbackCards.add(CardModel.fromFirestore(cardDoc));
+        } else if (cardDoc.id != targetCardId) {
+          fallbackCards.add(CardModel.fromFirestore(cardDoc));
         }
+      }
+
+// If no cards match the same category, use randomized fallback cards
+      if (validCards.isEmpty) {
+        fallbackCards.shuffle(); // Randomize the order of fallback cards
+        validCards = fallbackCards;
       }
 
       List<CardModel> result = [];
@@ -117,7 +223,6 @@ class TopFavoriteCard {
         result.add(targetCardModel);
       }
 
-      // Add a distractor card if available
       if (validCards.isNotEmpty) {
         result.add(validCards[0]);
       }

@@ -1,11 +1,12 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class PlayCard extends StatefulWidget {
   final String cardId;
   final String? cardValue;
 
-  const PlayCard({Key? key, required this.cardId, required this.cardValue})
-      : super(key: key);
+  const PlayCard({super.key, required this.cardId, required this.cardValue});
 
   @override
   _PlayCardState createState() => _PlayCardState();
@@ -25,7 +26,7 @@ class _PlayCardState extends State<PlayCard> {
     return GestureDetector(
       onTap: flipCard,
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(8),
@@ -33,7 +34,7 @@ class _PlayCardState extends State<PlayCard> {
         child: Center(
           child: Text(
             widget.cardValue ?? '',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
       ),
