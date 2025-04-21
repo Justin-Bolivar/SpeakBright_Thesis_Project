@@ -85,7 +85,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
             return AlertDialog(
               //change phase
               content: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.3,
+                height: MediaQuery.of(context).size.height * 0.15,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
@@ -96,7 +96,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "How ready is ",
+                            "Move Student ",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -112,7 +112,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 20)),
                           const Text(
-                            " for next phase?",
+                            " to other phase?",
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 color: jblack,
@@ -121,34 +121,31 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                           )
                         ],
                       ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
-                          // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
-                          buildFutureWidget(
-                              getStudentReadiness(studentID, _currentPhase),
-                              'Failed to fetch readiness',
-                              textStyle: const TextStyle(
-                                  color: scoreYellow,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      const Text(
-                        "Student needs more time in the current phase (sample)",
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontFamily: 'Roboto',
-                          color: lGray,
-                        ),
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     // Text("Score: ", style: TextStyle(color: lGray, fontFamily: 'Roboto',fontSize: 18),),
+                      //     // Text("45", style: TextStyle(color: scoreYellow, fontFamily: 'Roboto',fontSize: 18, fontWeight: FontWeight.w600),),
+                      //     buildFutureWidget(
+                      //         getStudentReadiness(studentID, _currentPhase),
+                      //         'Failed to fetch readiness',
+                      //         textStyle: const TextStyle(
+                      //             color: scoreYellow,
+                      //             fontFamily: 'Roboto',
+                      //             fontSize: 21,
+                      //             fontWeight: FontWeight.w600)),
+                      //   ],
+                      // ),
+                      // const Text(
+                      //   "Student needs more time in the current phase (sample)",
+                      //   style: TextStyle(
+                      //     fontStyle: FontStyle.italic,
+                      //     fontFamily: 'Roboto',
+                      //     color: lGray,
+                      //   ),
+                      // ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 50.0),
+                        padding: const EdgeInsets.only(top: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -260,6 +257,44 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
             : "Student needs more time in the current phase";
 
     return Text(textMessage);
+  }
+
+  Widget buildCardContainer(String imageUrl, String label) {
+    return Container(
+      width: 180, 
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              imageUrl,
+              height: 100,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildFutureWidget<T>(Future<T> future, String errorMessage,
@@ -561,9 +596,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                 Align(
                                   alignment: Alignment.topLeft,
                                   child: Text(
-                                    "Student Progress",
+                                    "STUDENT PROGRESS",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.bold,
                                         fontSize: 18,
                                         color: jblack),
                                   ),
@@ -571,322 +606,309 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Container(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.90,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(14),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 0),
+                                FutureBuilder<bool>(
+                                  future: preloadCardData(studentID),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    return Expanded(
+                                      child: SingleChildScrollView(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Phase 1",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    color: phase1Color),
+                                              ),
+                                            ),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Recently Learning",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchRecentlyLearningSP(
+                                                      studentID),
+                                              emptyMessage: "No Recent Card.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "To be Learned",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchUnlearnedCardsSP(
+                                                      studentID),
+                                              emptyMessage:
+                                                  "No unlearned cards.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            const Divider(
+                                              color: Colors.grey,
+                                              thickness: 1,       
+                                              height: 20,        
+                                            ),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Phase 2",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    color: phase2Color),
+                                              ),
+                                            ),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Cards in Phase 2",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchPhase2CardsSP(
+                                                      studentID),
+                                              emptyMessage:
+                                                  "No Phase 2 dependent cards.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Phase 2 Independent Cards",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchPhase2IndependentCardsSP(
+                                                      studentID),
+                                              emptyMessage:
+                                                  "No Phase 2 independent cards.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            const Divider(
+                                              color: Colors.grey,
+                                              thickness: 1,       
+                                              height: 20,        
+                                            ),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Phase 3",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    color: phase3Color),
+                                              ),
+                                            ),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Cards in Phase 3",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchPhase3CardsSP(
+                                                      studentID),
+                                              emptyMessage:
+                                                  "No Phase 3 dependent cards.",
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                "Phase 3 Independent Cards",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 15,
+                                                    color: jblack),
+                                              ),
+                                            ),
+                                            genericCardScroller(
+                                              future: _firestoreService
+                                                  .fetchPhase3IndependentCardsSP(
+                                                      studentID),
+                                              emptyMessage:
+                                                  "No Phase 3 independent cards.",
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    // You can add child widgets here if needed
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: List.generate(
-                                                5,
-                                                (index) => Container(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.15,
-                                                      // height: MediaQuery.of(context).size.width *0.30,
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Image.asset(
-                                                              'assets/prompts/prompt_icon_$index.png',
-                                                              height: 40),
-                                                          SizedBox(
-                                                              height:
-                                                                  8), // Spacing between image and label
-                                                          Text(
-                                                            [
-                                                              'Independent',
-                                                              'Verbal',
-                                                              'Gestural',
-                                                              'Modeling',
-                                                              'Physical'
-                                                            ][index],
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                                fontSize: 12),
-                                                          ),
-                                                          SizedBox(
-                                                              height:
-                                                                  4), // Spacing between label and percentage
-                                                          FutureBuilder<
-                                                              List<double>>(
-                                                            future:
-                                                                frequencyProvider
-                                                                    .frequencies,
-                                                            builder: (context,
-                                                                snapshot) {
-                                                              if (snapshot
-                                                                      .connectionState ==
-                                                                  ConnectionState
-                                                                      .waiting) {
-                                                                return Container(
-                                                                  child: const Center(
-                                                                      child:
-                                                                          WaitingDialog()),
-                                                                );
-                                                              } else if (snapshot
-                                                                  .hasData) {
-                                                                List<double>?
-                                                                    frequencies =
-                                                                    snapshot
-                                                                        .data;
-                                                                if (frequencies ==
-                                                                        null ||
-                                                                    frequencies
-                                                                        .isEmpty) {
-                                                                  return Text(
-                                                                      'NA');
-                                                                }
-
-                                                                double
-                                                                    totalFrequency =
-                                                                    frequencies
-                                                                        .reduce((a,
-                                                                                b) =>
-                                                                            a +
-                                                                            b);
-
-                                                                List<String>
-                                                                    percentages =
-                                                                    frequencies.map(
-                                                                        (freq) {
-                                                                  if (freq ==
-                                                                      0) {
-                                                                    return '0.00%';
-                                                                  }
-                                                                  double
-                                                                      percentage =
-                                                                      (freq / totalFrequency) *
-                                                                          100;
-                                                                  return percentage
-                                                                          .toStringAsFixed(
-                                                                              2) +
-                                                                      '%';
-                                                                }).toList();
-
-                                                                // If all frequencies are 0, replace all percentages with '0.00%'
-                                                                if (totalFrequency ==
-                                                                    0) {
-                                                                  percentages = List.generate(
-                                                                      frequencies
-                                                                          .length,
-                                                                      (_) =>
-                                                                          '0.00%');
-                                                                }
-
-                                                                return Text(
-                                                                  '${percentages[index]}',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: [
-                                                                      Color.fromARGB(
-                                                                          255,
-                                                                          255,
-                                                                          85,
-                                                                          85),
-                                                                      Color.fromARGB(
-                                                                          255,
-                                                                          255,
-                                                                          176,
-                                                                          85),
-                                                                      Color.fromARGB(
-                                                                          255,
-                                                                          170,
-                                                                          225,
-                                                                          115),
-                                                                      Color.fromARGB(
-                                                                          255,
-                                                                          108,
-                                                                          140,
-                                                                          255),
-                                                                      Color.fromARGB(
-                                                                          255,
-                                                                          159,
-                                                                          124,
-                                                                          255)
-                                                                    ][index %
-                                                                        5], // Ensure index stays within bounds
-                                                                  ),
-                                                                );
-                                                              } else {
-                                                                return Text(
-                                                                    'An error occurred');
-                                                              }
-                                                            },
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )),
-                                          ),
-                                        ],
                                       ),
-                                    )),
-                                SizedBox(
-                                  height: 15,
+                                    );
+                                  },
                                 ),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    "Activity Log",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 18,
-                                        color: jblack),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: FutureBuilder<
-                                              List<Map<String, dynamic>>>(
-                                            future: fetchDatesWithCards(),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
-                                                return WaitingDialog();
-                                              } else if (snapshot.hasError) {
-                                                return Text(
-                                                    'Error: ${snapshot.error}');
-                                              } else if (!snapshot.hasData ||
-                                                  snapshot.data!.isEmpty) {
-                                                return Text(
-                                                    'No dates available');
-                                              } else {
-                                                return SingleChildScrollView(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: snapshot.data!
-                                                        .map((dateWithCards) {
-                                                      return Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Align(
-                                                                alignment: Alignment
-                                                                    .centerLeft,
-                                                                child: Text(
-                                                                  dateWithCards[
-                                                                      'date'],
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          13,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w300,
-                                                                      color:
-                                                                          jblack),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child:
-                                                                    Container(
-                                                                  margin: const EdgeInsets
-                                                                      .only(
-                                                                      left:
-                                                                          10.0),
-                                                                  height: 1,
-                                                                  color: Colors
-                                                                      .grey,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          SizedBox(height: 10),
-                                                          SingleChildScrollView(
-                                                            scrollDirection:
-                                                                Axis.horizontal,
-                                                            child: Row(
-                                                              children: dateWithCards[
-                                                                      'cards']
-                                                                  .map<Widget>(
-                                                                      (cardId) {
-                                                                return Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          right:
-                                                                              10),
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              8),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: Colors
-                                                                        .purple
-                                                                        .withOpacity(
-                                                                            0.1),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10),
-                                                                  ),
-                                                                  child: Text(
-                                                                    cardId,
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                        color:
-                                                                            jblack),
-                                                                  ),
-                                                                );
-                                                              }).toList(),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 20),
-                                                        ],
-                                                      );
-                                                    }).toList(),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
+
+                                // SizedBox(
+                                //   height: 15,
+                                // ),
+                                // Align(
+                                //   alignment: Alignment.centerLeft,
+                                //   child: Text(
+                                //     "Activity Log",
+                                //     style: TextStyle(
+                                //         fontWeight: FontWeight.bold,
+                                //         fontSize: 18,
+                                //         color: jblack),
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   height: 5,
+                                // ),
+                                // Expanded(
+                                //   child: SingleChildScrollView(
+                                //     child: Row(
+                                //       children: [
+                                //         Expanded(
+                                //           child: FutureBuilder<
+                                //               List<Map<String, dynamic>>>(
+                                //             future: fetchDatesWithCards(),
+                                //             builder: (context, snapshot) {
+                                //               if (snapshot.connectionState ==
+                                //                   ConnectionState.waiting) {
+                                //                 return WaitingDialog();
+                                //               } else if (snapshot.hasError) {
+                                //                 return Text(
+                                //                     'Error: ${snapshot.error}');
+                                //               } else if (!snapshot.hasData ||
+                                //                   snapshot.data!.isEmpty) {
+                                //                 return Text(
+                                //                     'No dates available');
+                                //               } else {
+                                //                 return SingleChildScrollView(
+                                //                   child: Column(
+                                //                     crossAxisAlignment:
+                                //                         CrossAxisAlignment
+                                //                             .start,
+                                //                     children: snapshot.data!
+                                //                         .map((dateWithCards) {
+                                //                       return Column(
+                                //                         crossAxisAlignment:
+                                //                             CrossAxisAlignment
+                                //                                 .start,
+                                //                         children: [
+                                //                           Row(
+                                //                             children: [
+                                //                               Align(
+                                //                                 alignment: Alignment
+                                //                                     .centerLeft,
+                                //                                 child: Text(
+                                //                                   dateWithCards[
+                                //                                       'date'],
+                                //                                   style: TextStyle(
+                                //                                       fontSize:
+                                //                                           13,
+                                //                                       fontWeight:
+                                //                                           FontWeight
+                                //                                               .w300,
+                                //                                       color:
+                                //                                           jblack),
+                                //                                 ),
+                                //                               ),
+                                //                               Expanded(
+                                //                                 child:
+                                //                                     Container(
+                                //                                   margin: const EdgeInsets
+                                //                                       .only(
+                                //                                       left:
+                                //                                           10.0),
+                                //                                   height: 1,
+                                //                                   color: Colors
+                                //                                       .grey,
+                                //                                 ),
+                                //                               ),
+                                //                             ],
+                                //                           ),
+                                //                           SizedBox(height: 10),
+                                //                           SingleChildScrollView(
+                                //                             scrollDirection:
+                                //                                 Axis.horizontal,
+                                //                             child: Row(
+                                //                               children: dateWithCards[
+                                //                                       'cards']
+                                //                                   .map<Widget>(
+                                //                                       (cardId) {
+                                //                                 return Container(
+                                //                                   margin: EdgeInsets
+                                //                                       .only(
+                                //                                           right:
+                                //                                               10),
+                                //                                   padding:
+                                //                                       EdgeInsets
+                                //                                           .all(
+                                //                                               8),
+                                //                                   decoration:
+                                //                                       BoxDecoration(
+                                //                                     color: Colors
+                                //                                         .purple
+                                //                                         .withOpacity(
+                                //                                             0.1),
+                                //                                     borderRadius:
+                                //                                         BorderRadius.circular(
+                                //                                             10),
+                                //                                   ),
+                                //                                   child: Text(
+                                //                                     cardId,
+                                //                                     style: TextStyle(
+                                //                                         fontSize:
+                                //                                             15,
+                                //                                         color:
+                                //                                             jblack),
+                                //                                   ),
+                                //                                 );
+                                //                               }).toList(),
+                                //                             ),
+                                //                           ),
+                                //                           SizedBox(height: 20),
+                                //                         ],
+                                //                       );
+                                //                     }).toList(),
+                                //                   ),
+                                //                 );
+                                //               }
+                                //             },
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // )
                               ],
                             ),
                           ),
@@ -983,5 +1005,55 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
       print('User document not found.');
       return 1;
     }
+  }
+
+  Future<bool> preloadCardData(String studentID) async {
+    await _firestoreService.fetchRecentlyLearningSP(studentID);
+    return true;
+  }
+
+  Widget genericCardScroller({
+    required Future<List<Map<String, dynamic>>> future,
+    String emptyMessage = "No cards to display.",
+  }) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 160,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              emptyMessage,
+              style: const TextStyle(
+                color: lGray,
+                fontWeight: FontWeight.w100,
+              ),
+            ),
+          );
+        }
+
+        final cards = snapshot.data!;
+
+        return SizedBox(
+          height: 180,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: cards.length,
+            itemBuilder: (context, index) {
+              final card = cards[index];
+              return buildCardContainer(card['imageUrl'], card['title']);
+            },
+          ),
+        );
+      },
+    );
   }
 }
