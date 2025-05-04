@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: avoid_print, use_build_context_synchronously, unused_field
 
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -148,6 +148,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       await activityLogRef.set({
         'email': user.email,
         'userID': user.uid,
+        'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
       // Ensure the phase document exists (if not, create it)
@@ -156,6 +157,10 @@ class _PromptButtonState extends ConsumerState<PromptButton>
         print("Phase document not found, creating new phase document");
         await phaseRef.set({'createdAt': FieldValue.serverTimestamp()});
       }
+
+      await phaseRef.set({
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       final trialRef = phaseRef.collection('session').doc();
 
@@ -240,10 +245,13 @@ class _PromptButtonState extends ConsumerState<PromptButton>
       await batch.commit();
       print("Batch write completed");
 
-      if (ref.watch(cardActivityProvider).showDistractor || ref.watch(cardActivityProvider).showDistractor2 ||
-          widget.phaseCurrent == 2 || widget.phaseCurrent == 3) {
+      if (ref.watch(cardActivityProvider).showDistractor ||
+          ref.watch(cardActivityProvider).showDistractor2 ||
+          widget.phaseCurrent == 2 ||
+          widget.phaseCurrent == 3) {
         bool isEmotion = await _firestoreService.isEmotion(targetCardId);
-        updateSuccess = await _firestoreService.autoUpdatePhase(widget.phaseCurrent, isEmotion: isEmotion);
+        updateSuccess = await _firestoreService
+            .autoUpdatePhase(widget.phaseCurrent, isEmotion: isEmotion);
 
         if (updateSuccess) {
           if (widget.phaseCurrent == 2 || widget.phaseCurrent == 3) {
@@ -483,7 +491,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                       toastLength: Toast.LENGTH_SHORT,
                       gravity: ToastGravity.CENTER,
                       timeInSecForIosWeb: 1,
-                      backgroundColor: Color.fromARGB(255, 215, 187, 26),
+                      backgroundColor: const Color.fromARGB(255, 215, 187, 26),
                       textColor: Colors.white,
                       fontSize: 16.0,
                     );

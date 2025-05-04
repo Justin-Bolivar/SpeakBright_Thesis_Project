@@ -1,12 +1,10 @@
 // ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:speakbright_mobile/Widgets/services/temporal_prefixspan.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
-import 'package:intl/intl.dart';
 
 class FirestoreService {
   Future<void> storeSentence(List<String> sentence) async {

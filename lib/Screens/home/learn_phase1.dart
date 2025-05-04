@@ -7,10 +7,8 @@ import 'package:speakbright_mobile/Screens/home/phase_navigation.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
 import 'package:speakbright_mobile/Widgets/cards/phase1Card.dart';
 import 'package:speakbright_mobile/Widgets/cards/top_favorite.dart';
-import 'package:speakbright_mobile/Widgets/cards/top_category.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
-import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 import 'package:speakbright_mobile/Widgets/services/tts_service.dart';
 import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
@@ -27,7 +25,6 @@ class Learn1 extends ConsumerStatefulWidget {
 
 class _Learn1State extends ConsumerState<Learn1> {
   final TTSService _ttsService = TTSService();
-  final FirestoreService _firestoreService = FirestoreService();
 
   // List<String> categories = [];
   int currentUserPhase = 1;
@@ -49,7 +46,7 @@ class _Learn1State extends ConsumerState<Learn1> {
         leading: BackButton(
           color: phase1Color,
           onPressed: () {
-            GlobalRouter.I.router.push(PhaseNav.route);
+            GlobalRouter.I.router.pop(PhaseNav.route);
           },
         ),
         backgroundColor: learn1bg,

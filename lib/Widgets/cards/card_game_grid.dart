@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_confetti/flutter_confetti.dart';
@@ -62,8 +64,9 @@ class _CardGameGridState extends State<CardGameGrid> {
   }
 
   void _onCardTap(int index) {
-    if (!_allowSelection || _revealedCards[index] || _matchedCards[index])
+    if (!_allowSelection || _revealedCards[index] || _matchedCards[index]) {
       return;
+    }
 
     setState(() {
       _revealedCards[index] = true;
@@ -138,8 +141,8 @@ class _CardGameGridState extends State<CardGameGrid> {
               : 'You have completed all levels. Play again?'),
           actions: <Widget>[
             TextButton(
-              child: Text(_level < 3 ? 'Next Level' : 'Play Again'),
               onPressed: _level < 3 ? _nextLevel : _resetGame,
+              child: Text(_level < 3 ? 'Next Level' : 'Play Again'),
             ),
           ],
         );

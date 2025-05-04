@@ -1,4 +1,4 @@
-// ignore_for_file: unrelated_type_equality_checks, avoid_print, no_leading_underscores_for_local_identifiers, prefer_const_constructors
+// ignore_for_file: unrelated_type_equality_checks, avoid_print, no_leading_underscores_for_local_identifiers, prefer_const_constructors, unused_element, use_build_context_synchronously, prefer_interpolation_to_compose_strings
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -193,7 +193,6 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
               ),
               actions: [
                 ElevatedButton(
-                  child: Text('Close'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -202,9 +201,9 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     foregroundColor:
                         WidgetStateProperty.all<Color>(Colors.white),
                   ),
+                  child: Text('Close'),
                 ),
                 ElevatedButton(
-                  child: Text('Save'),
                   onPressed: () async {
                     await _updateAndCloseDialog(_selectedValue!, context);
                   },
@@ -214,6 +213,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                     foregroundColor:
                         WidgetStateProperty.all<Color>(Colors.white),
                   ),
+                  child: Text('Save'),
                 ),
               ],
             );
@@ -345,7 +345,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     String imagePath = _currentPhase != null
-        ? 'assets/phase/${_currentPhase}.png'
+        ? 'assets/phase/$_currentPhase.png'
         : 'assets/studcard_monster.png';
 
     return Scaffold(
@@ -377,15 +377,15 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                       buildFutureWidget(
                           _firestoreService.fetchStudentName(studentID),
                           'Failed to fetch student name'),
-                      Text(
-                        studentID,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          color: kwhite,
-                          fontWeight: FontWeight.w100,
-                          fontSize: 8,
-                        ),
-                      ),
+                      // Text(
+                      //   studentID,
+                      //   style: const TextStyle(
+                      //     fontFamily: 'Roboto',
+                      //     color: kwhite,
+                      //     fontWeight: FontWeight.w100,
+                      //     fontSize: 8,
+                      //   ),
+                      // ),
                     ]),
                   ),
                 ),

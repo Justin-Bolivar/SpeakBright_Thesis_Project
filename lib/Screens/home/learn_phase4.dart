@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_grid.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/prompt/prompt_button.dart';
@@ -227,6 +228,15 @@ class _Learn4State extends ConsumerState<Learn4> {
     final cardsAsyncValue = ref.watch(cardsListProviderPhase4);
     return Scaffold(
       backgroundColor: kwhite,
+      appBar: AppBar(
+        leading: BackButton(
+          color: phase4Color,
+          onPressed: () {
+            GlobalRouter.I.router.pop();
+          },
+        ),
+        backgroundColor: Colors.white,
+      ),
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(

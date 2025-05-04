@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_local_variable
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,15 +43,13 @@ class TopCategoryCard {
         currentlyLearningCardId = data?['cardId'];
 
         Fluttertoast.showToast(
-        msg: "Fetched from Currently Learning",  
-        toastLength: Toast.LENGTH_SHORT,         
-        gravity: ToastGravity.BOTTOM,            
-        timeInSecForIosWeb: 1,                 
-        backgroundColor: ugYellow,          
-        textColor: lGray,               
-        fontSize: 16.0                          
-      );
-    
+            msg: "Fetched from Currently Learning",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: ugYellow,
+            textColor: lGray,
+            fontSize: 16.0);
 
         if (currentlyLearningCardId != null) {
           // Fetch card info for the currently learning card

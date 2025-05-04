@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, avoid_print
+
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';

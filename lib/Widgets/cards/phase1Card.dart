@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
@@ -13,13 +15,13 @@ class Phase1Card extends StatelessWidget {
   final double fontSize;
 
   const Phase1Card({
-    Key? key,
+    super.key,
     required this.card,
     required this.onTap,
     this.widthFactor = 0.5, // Default
     this.heightFactor = 0.5,
     this.fontSize = 18,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,14 +100,14 @@ class Phase1Card extends StatelessWidget {
         topLeft: Radius.circular(20),
         topRight: Radius.circular(20),
       ),
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * widthFactor,
         height: MediaQuery.of(context).size.height * (heightFactor * 0.8),
         child: CachedNetworkImage(
           imageUrl: card.imageUrl,
           fit: BoxFit.fill,
-          placeholder: (context, url) => Center(
-            child: const WaitingDialog(),
+          placeholder: (context, url) => const Center(
+            child: WaitingDialog(),
           ),
           errorWidget: (context, url, error) => Container(
             height: 150,
