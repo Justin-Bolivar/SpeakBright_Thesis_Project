@@ -153,7 +153,7 @@ class CardActivityProvider extends ChangeNotifier {
         (totalIndependentCount / totalTapsCount) * 100;
     print('Independence Percentage for $cardID: $independencePercentage%');
 
-    return independencePercentage >= 70;
+    return independencePercentage >= 50; //ms eva
   }
 
   // Handle prompt taps

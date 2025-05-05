@@ -3,7 +3,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:speakbright_mobile/Widgets/cards/card_model.dart';
+import 'package:speakbright_mobile/Widgets/services/card_transition.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
 
@@ -175,6 +177,51 @@ class RecommendedCardsNotifier extends StateNotifier<List<CardModel>> {
       state = []; // Gracefully handle errors
     }
   }
+
+  Future<void> updateRecommendedCardsWithToCard(String fromCard) async {
+    try {
+      // Fetch the recommended card IDs
+      List<String> recommendedCardIDs = await _firestoreService.getCardRecommendations();
+      print("Updated recommended cards: $recommendedCardIDs");
+
+      if (recommendedCardIDs.isEmpty) {
+        state = [];
+        return;
+      }
+
+      // Get the 'toCard' from Hive based on 'fromCard'
+      String? toCard = await _getToCardFromHive(fromCard);
+
+      // If 'toCard' exists and is in the recommended list, move it to the front
+      if (toCard != null && recommendedCardIDs.contains(toCard)) {
+        recommendedCardIDs.remove(toCard);
+        recommendedCardIDs.insert(0, toCard);
+      }
+
+      // Query Firestore for card details using the updated recommended IDs
+      final snapshot = await FirebaseFirestore.instance
+          .collection('cards')
+          .where(FieldPath.documentId, whereIn: recommendedCardIDs)
+          .get();
+
+      // Convert Firestore documents to `CardModel`
+      state = snapshot.docs.map((doc) => CardModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      print("Error updating recommended cards: $e");
+      state = []; // Gracefully handle errors
+    }
+  }
+
+  // Fetch the 'toCard' from Hive based on 'fromCard'
+  Future<String?> _getToCardFromHive(String fromCard) async {
+    var box = await Hive.openBox<CardTransition>('cardTransitions');
+    var transition = box.values.firstWhere(
+      (transition) => transition.fromCard == fromCard,
+      orElse: () => CardTransition(fromCard: '', toCard: ''),  // Return an empty CardTransition if not found
+    );
+    return transition.toCard.isNotEmpty ? transition.toCard : null;  // Return null if toCard is empty
+  }
+  
 }
 class CardNotifier extends StateNotifier<List<CardModel>> {
   CardNotifier() : super([]);

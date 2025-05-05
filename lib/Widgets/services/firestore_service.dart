@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:speakbright_mobile/Widgets/services/temporal_prefixspan.dart';
 import 'package:speakbright_mobile/providers/card_activity_provider.dart';
 
@@ -124,8 +125,8 @@ class FirestoreService {
 
     // Format date to 'YYYYMMDD' i used this as a doc ID hence the formattingg
     // edit time
-    // DateTime testTime = DateTime(2025, 1, 11, 19, 30);
-    final DateTime now = DateTime.now();
+    DateTime testTime = DateTime(2025, 4, 17, 17, 19);
+    final DateTime now = testTime; //DateTime.now();
     final dateKey =
         "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}";
 
@@ -182,13 +183,15 @@ class FirestoreService {
     }
   }
 
-// Fetch sequence to be used in PrefixSpan
   Future<List<List<Map<String, dynamic>>>> fetchSequenceData(
       String userID) async {
     print('entering fetchSequenceData');
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, now.day)
-        .subtract(const Duration(days: 7));
+    DateTime testTime = DateTime(2025, 4, 9, 17, 13);
+    // final now = DateTime.now();
+    // final startDate = DateTime(now.year, now.month, now.day)
+    //     .subtract(const Duration(days: 14));
+    final startDate =DateTime(2025, 4, 20, 17, 00).subtract(const Duration(days: 14));
+    final endDate = DateTime(2025, 4, 20, 17, 00);
 
     final collection = FirebaseFirestore.instance
         .collection('communicate_log')
@@ -196,14 +199,23 @@ class FirestoreService {
         .collection('date_in_days');
 
     final snapshot = await collection
-        .where('timestamp',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('timestamp',isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
         .get();
     List<List<Map<String, dynamic>>> sequenceDatabase = [];
+    print('DOC LENGTH: ${snapshot.docs.length}');
 
     for (var doc in snapshot.docs) {
       var sequence = doc['sequence'];
       if (sequence != null) {
+        for (var card in sequence) {
+          Timestamp timestamp = card['timestamp'];
+          String cardTitle = card['cardTitle'];
+          String formattedTimestamp =
+              DateFormat('MMM d, yyyy - h:mm a').format(timestamp.toDate());
+
+          print('Timestamp: $formattedTimestamp | Card: $cardTitle');
+        }
         sequenceDatabase.add(List<Map<String, dynamic>>.from(sequence));
       }
     }
@@ -218,14 +230,13 @@ class FirestoreService {
     if (user == null) {
       throw Exception('No user is currently signed in.');
     }
+    print('GET RECO ENTERED');
 
     final userID = user.uid;
-    const supportThreshold = 1;
     final sequenceDatabase = await fetchSequenceData(userID);
     TemporalPrefixSpan prefixSpan =
         TemporalPrefixSpan(sequenceDatabase: sequenceDatabase);
-    List<String> recommendedCards =
-        prefixSpan.mineFrequentSequences(supportThreshold);
+    List<String> recommendedCards = await prefixSpan.mineFrequentSequences();
 
     return recommendedCards;
   }
@@ -1478,5 +1489,146 @@ class FirestoreService {
       print('Error while checking if phase $phase is unlocked: $e');
       return true;
     }
+  }
+
+  // STUDENT PROGRESS FOR STUDENT PROFILE
+  String? _currentlyLearningCardID;
+  String? get currentlyLearningCardID => _currentlyLearningCardID;
+
+  Future<List<Map<String, dynamic>>> fetchRecentlyLearningSP(
+      String studentID) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('activity_log')
+        .doc(studentID)
+        .collection('phase')
+        .doc('1')
+        .collection('session')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (doc.docs.isEmpty) return [];
+
+    final trialPromptSnapshot = await doc.docs.first.reference
+        .collection('trialPrompt')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (trialPromptSnapshot.docs.isEmpty) return [];
+
+    _currentlyLearningCardID = trialPromptSnapshot.docs.first.data()['cardID'];
+    final cardID = trialPromptSnapshot.docs.first.data()['cardID'];
+
+    final cardDoc =
+        await FirebaseFirestore.instance.collection('cards').doc(cardID).get();
+
+    if (!cardDoc.exists) return [];
+
+    final cardData = cardDoc.data()!;
+    return [cardData];
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUnlearnedCardsSP(
+      String studentID) async {
+    if (_currentlyLearningCardID == null) return [];
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .where('userId', isEqualTo: studentID)
+        .where('phase1_independence', isEqualTo: false)
+        .where('phase2_independence', isEqualTo: false)
+        .where('phase3_independence', isEqualTo: false)
+        .get();
+
+    final results = querySnapshot.docs
+        .where((doc) => doc.id != _currentlyLearningCardID)
+        .map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPhase2CardsSP(
+      String studentID) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .where('userId', isEqualTo: studentID)
+        .where('category', isNotEqualTo: 'Emotions')
+        .where('phase1_independence', isEqualTo: true)
+        .where('phase2_independence', isEqualTo: false)
+        .where('phase3_independence', isEqualTo: false)
+        .get();
+
+    final results = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPhase2IndependentCardsSP(
+      String studentID) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .where('userId', isEqualTo: studentID)
+        .where('category', isNotEqualTo: 'Emotions')
+        .where('phase1_independence', isEqualTo: true)
+        .where('phase2_independence', isEqualTo: true)
+        .where('phase3_independence', isEqualTo: true)
+        .get();
+
+    final results = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPhase3CardsSP(
+      String studentID) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .where('userId', isEqualTo: studentID)
+        .where('phase1_independence', isEqualTo: true)
+        .where('phase2_independence', isEqualTo: false)
+        .where('phase3_independence', isEqualTo: false)
+        .where('category', isEqualTo: 'Emotions')
+        .get();
+
+    final results = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPhase3IndependentCardsSP(
+      String studentID) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('cards')
+        .where('userId', isEqualTo: studentID)
+        .where('phase1_independence', isEqualTo: true)
+        .where('phase2_independence', isEqualTo: true)
+        .where('phase3_independence', isEqualTo: true)
+        .where('category', isEqualTo: 'Emotions')
+        .get();
+
+    final results = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    return results;
   }
 }
