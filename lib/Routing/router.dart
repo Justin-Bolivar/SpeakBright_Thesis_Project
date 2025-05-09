@@ -116,7 +116,7 @@ class GlobalRouter {
                 ),
               ],
               builder: (context, state, child) {
-                return const Home();
+                return child;
               }),
           GoRoute(
               parentNavigatorKey: _rootNavigatorKey,

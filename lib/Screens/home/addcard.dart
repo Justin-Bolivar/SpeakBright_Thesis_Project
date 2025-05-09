@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print
-
+// ignore: must_be_immutable
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 
-// ignore: must_be_immutable
 class AddCardPage extends ConsumerWidget {
   AddCardPage({super.key});
 
@@ -18,21 +17,15 @@ class AddCardPage extends ConsumerWidget {
   static const String path = "/addcard";
   static const String name = "Add Card";
 
-  // String newCardTitle = '';
-  // String? imageUrl;
-  // String? selectedCategory;
   final newCardTitleProvider = StateProvider<String>((ref) => '');
   final selectedCategoryProvider = StateProvider<String?>((ref) => null);
   final imageUrlProvider = StateProvider<String?>((ref) => null);
   final isFavoriteProvider = StateProvider<bool>((ref) => false);
 
-  // State for the checkbox
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     String? imageUrl = ref.watch(imageUrlProvider);
     String? selectedCategory = ref.watch(selectedCategoryProvider);
-
     bool isFavorite = ref.watch(isFavoriteProvider);
 
     return Scaffold(
@@ -41,278 +34,307 @@ class AddCardPage extends ConsumerWidget {
           title: const Text(' '),
         ),
         body: Stack(
+          // Use Stack.fit.loose to prevent the stack from claiming touch events for the whole screen
+          fit: StackFit.loose,
           children: [
+            // Background image
             Positioned.fill(
                 child: Image.asset(
               'assets/add-bg.png',
               fit: BoxFit.cover,
             )),
-            Padding(
-              padding: const EdgeInsets.only(top: 80.0),
-              child: Center(
-                  child: Container(
-                alignment: Alignment.bottomCenter,
-                height: MediaQuery.of(context).size.height * 0.73,
-                width: MediaQuery.of(context).size.width * 0.80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 0),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(25.0),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.08,
-                      ),
-                      const Text(
-                        'Add New Objects',
-                        style: TextStyle(
-                          color: scoreYellow,
-                          fontStyle: FontStyle.normal,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 15,
-                          // fontWeight: FontWeight.w500
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: imageUrl == null
-                            ? Image.asset(
-                                'assets/add_image_icon.png',
-                                fit: BoxFit.cover,
-                                height: 150,
-                              )
-                            : Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                height: 150,
-                              ),
-                      ),
-                      TextField(
-                        onChanged: (value) {
-                          ref.read(newCardTitleProvider.notifier).state = value;
-                        },
-                        decoration:
-                            const InputDecoration(hintText: "Enter card title"),
-                      ),
-                      const SizedBox(height: 16),
-                      FutureBuilder<List<String>>(
-                        future: fetchCategories(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<List<String>> snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const SizedBox.shrink();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (snapshot.hasData) {
-                            List<String> categories = snapshot.data!;
 
-                            return DropdownButtonFormField<String>(
-                              value: selectedCategory,
-                              hint: const Text('Select Category'),
-                              items: categories.map<DropdownMenuItem<String>>(
-                                  (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (newValue) {
-                                ref
-                                    .read(selectedCategoryProvider.notifier)
-                                    .state = newValue;
-                              },
-                            );
-                          } else {
-                            return const Text('No categories available');
-                          }
-                        },
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: CheckboxListTile(
-                          title: const Text(
-                            "Is object student's favorite?",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          value: isFavorite,
-                          onChanged: (bool? value) {
-                            ref.read(isFavoriteProvider.notifier).state =
-                                value ?? false;
-                          },
-                          activeColor: mainpurple,
-                          checkColor: Colors.white,
-                        ),
-                      ),
-
-                      // SizedBox(
-                      //   height: MediaQuery.of(context).size.height * 0.05,
-                      // ),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              height: 80,
-                              width: MediaQuery.of(context).size.width * 0.30,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Colors.blue,
-                                          Color.fromARGB(137, 24, 51, 186),
-                                        ],
-                                      ),
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () =>
-                                            _pickImage(ImageSource.camera, ref),
-                                        icon: const Icon(
-                                          Icons.camera_alt_rounded,
-                                          color: Color.fromARGB(255, 7, 14, 93),
-                                        ),
-                                        label: const Text(
-                                          'Camera',
-                                          style: TextStyle(
-                                              color: Color.fromARGB(
-                                                  255, 7, 14, 93)),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          elevation: 0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Image.asset(
-                                      'assets/camera.png',
-                                      fit: BoxFit.cover,
-                                      height: 60,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // const SizedBox(width: 10),
-                            const Spacer(), //between
-                            SizedBox(
-                              height: 80,
-                              width: MediaQuery.of(context).size.width * 0.30,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Colors.yellow,
-                                          Colors.orange,
-                                        ],
-                                      ),
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () => _pickImage(
-                                            ImageSource.gallery, ref),
-                                        icon: const Icon(
-                                          Icons.photo_library,
-                                          color:
-                                              Color.fromARGB(255, 137, 61, 7),
-                                        ),
-                                        label: const Text(
-                                          'Gallery',
-                                          style: TextStyle(
-                                              color: Color.fromARGB(
-                                                  255, 137, 61, 7)),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          elevation: 0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Image.asset(
-                                      'assets/album.png',
-                                      fit: BoxFit.cover,
-                                      height: 60,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // if (imageUrl != null) Image.network(imageUrl),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.03,
-                      ),
-                      ElevatedButton(
-                          onPressed: () => _submitCard(
-                                context,
-                                ref,
-                              ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: addGreen,
-                          ),
-                          child: Text(
-                            'Add +',
-                            style: GoogleFonts.rubikSprayPaint(
-                                color: kwhite, fontSize: 20, letterSpacing: .5),
-                          )),
-
-                      //skip button
-                      // SizedBox(
-                      //   height: MediaQuery.of(context).size.height * 0.03,
-                      // ),
-                    ],
-                  ),
-                ),
-              )),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 25),
-              child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Positioned(
-                    top: MediaQuery.of(context).size.height * 0.10,
+            // Main content container
+            Positioned.fill(
+              child: Column(
+                children: [
+                  // Top image that doesn't need to block interaction
+                  Padding(
+                    padding: const EdgeInsets.only(top: 25),
                     child: Image.asset(
                       'assets/favoriteBox.png',
                       height: 200,
                     ),
-                  )),
-            )
+                  ),
+
+                  // The main card container - make sure it's interactive
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Center(
+                        child: Container(
+                          alignment: Alignment.bottomCenter,
+                          width: MediaQuery.of(context).size.width * 0.80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(25.0),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 15),
+                                const Text(
+                                  'Add New Objects',
+                                  style: TextStyle(
+                                    color: scoreYellow,
+                                    fontStyle: FontStyle.normal,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: imageUrl == null
+                                      ? Image.asset(
+                                          'assets/add_image_icon.png',
+                                          fit: BoxFit.cover,
+                                          height: 150,
+                                        )
+                                      : Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          height: 150,
+                                        ),
+                                ),
+                                TextField(
+                                  onChanged: (value) {
+                                    ref
+                                        .read(newCardTitleProvider.notifier)
+                                        .state = value;
+                                  },
+                                  decoration: const InputDecoration(
+                                      hintText: "Enter card title"),
+                                ),
+                                const SizedBox(height: 16),
+                                FutureBuilder<List<String>>(
+                                  future: fetchCategories(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<List<String>> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const SizedBox.shrink();
+                                    } else if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData) {
+                                      List<String> categories = snapshot.data!;
+
+                                      return DropdownButtonFormField<String>(
+                                        value: selectedCategory,
+                                        hint: const Text('Select Category'),
+                                        items: categories
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                        onChanged: (newValue) {
+                                          ref
+                                              .read(selectedCategoryProvider
+                                                  .notifier)
+                                              .state = newValue;
+                                        },
+                                      );
+                                    } else {
+                                      return const Text(
+                                          'No categories available');
+                                    }
+                                  },
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: CheckboxListTile(
+                                    title: const Text(
+                                      "Is object student's favorite?",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                    value: isFavorite,
+                                    onChanged: (bool? value) {
+                                      ref
+                                          .read(isFavoriteProvider.notifier)
+                                          .state = value ?? false;
+                                    },
+                                    activeColor: mainpurple,
+                                    checkColor: Colors.white,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, right: 20),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 80,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.30,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Container(
+                                              height: 60,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Colors.blue,
+                                                    Color.fromARGB(
+                                                        137, 24, 51, 186),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned.fill(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  onTap: () => _pickImage(
+                                                      ImageSource.camera, ref),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: const [
+                                                      Icon(
+                                                        Icons
+                                                            .camera_alt_rounded,
+                                                        color: Color.fromARGB(
+                                                            255, 7, 14, 93),
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        'Camera',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    7,
+                                                                    14,
+                                                                    93)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              right: 0,
+                                              top: 0,
+                                              child: Image.asset(
+                                                'assets/camera.png',
+                                                fit: BoxFit.cover,
+                                                height: 60,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      SizedBox(
+                                        height: 80,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.30,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Container(
+                                              height: 60,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Colors.yellow,
+                                                    Colors.orange,
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned.fill(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  onTap: () => _pickImage(
+                                                      ImageSource.gallery, ref),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: const [
+                                                      Icon(
+                                                        Icons.photo_library,
+                                                        color: Color.fromARGB(
+                                                            255, 137, 61, 7),
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        'Gallery',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    137,
+                                                                    61,
+                                                                    7)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              right: 0,
+                                              top: 0,
+                                              child: Image.asset(
+                                                'assets/album.png',
+                                                fit: BoxFit.cover,
+                                                height: 60,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                    onPressed: () => _submitCard(
+                                          context,
+                                          ref,
+                                        ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: addGreen,
+                                    ),
+                                    child: Text(
+                                      'Add +',
+                                      style: GoogleFonts.rubikSprayPaint(
+                                          color: kwhite,
+                                          fontSize: 20,
+                                          letterSpacing: .5),
+                                    )),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ));
   }
@@ -441,7 +463,7 @@ class AddCardPage extends ConsumerWidget {
     }
   }
 
-// Function to update categoryRanking collection
+  // Function to update categoryRanking collection
   Future<void> _updateCategoryRanking(
     String studentID,
     String category,

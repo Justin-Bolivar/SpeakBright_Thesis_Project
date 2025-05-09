@@ -7,9 +7,9 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:speakbright_mobile/Routing/router.dart';
 import 'package:speakbright_mobile/Screens/guardian/card_ranking_menu.dart';
 import 'package:speakbright_mobile/Screens/home/guardian_cardview.dart';
+import 'package:speakbright_mobile/Widgets/cards/card_prediction.dart';
 import 'package:speakbright_mobile/Widgets/constants.dart';
 import 'package:speakbright_mobile/Widgets/services/firestore_service.dart';
-import 'package:speakbright_mobile/Widgets/waiting_dialog.dart';
 import 'package:speakbright_mobile/providers/student_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -261,7 +261,7 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
 
   Widget buildCardContainer(String imageUrl, String label) {
     return Container(
-      width: 180, 
+      width: 180,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -613,7 +613,6 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                       return const Center(
                                           child: CircularProgressIndicator());
                                     }
-
                                     return Expanded(
                                       child: SingleChildScrollView(
                                         padding:
@@ -622,6 +621,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
+                                            PhasePredictions(
+                                                studentID: studentID),
                                             Align(
                                               alignment: Alignment.topLeft,
                                               child: Text(
@@ -669,8 +670,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                             const SizedBox(height: 10),
                                             const Divider(
                                               color: Colors.grey,
-                                              thickness: 1,       
-                                              height: 20,        
+                                              thickness: 1,
+                                              height: 20,
                                             ),
                                             Align(
                                               alignment: Alignment.topLeft,
@@ -720,8 +721,8 @@ class _StudentProfileState extends ConsumerState<StudentProfile> {
                                             const SizedBox(height: 10),
                                             const Divider(
                                               color: Colors.grey,
-                                              thickness: 1,       
-                                              height: 20,        
+                                              thickness: 1,
+                                              height: 20,
                                             ),
                                             Align(
                                               alignment: Alignment.topLeft,

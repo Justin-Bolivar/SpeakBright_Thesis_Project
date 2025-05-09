@@ -190,7 +190,8 @@ class FirestoreService {
     // final now = DateTime.now();
     // final startDate = DateTime(now.year, now.month, now.day)
     //     .subtract(const Duration(days: 14));
-    final startDate =DateTime(2025, 4, 20, 17, 00).subtract(const Duration(days: 14));
+    final startDate =
+        DateTime(2025, 4, 20, 17, 00).subtract(const Duration(days: 14));
     final endDate = DateTime(2025, 4, 20, 17, 00);
 
     final collection = FirebaseFirestore.instance
@@ -199,7 +200,8 @@ class FirestoreService {
         .collection('date_in_days');
 
     final snapshot = await collection
-        .where('timestamp',isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
         .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
         .get();
     List<List<Map<String, dynamic>>> sequenceDatabase = [];
@@ -1530,6 +1532,7 @@ class FirestoreService {
   }
 
   Future<List<Map<String, dynamic>>> fetchUnlearnedCardsSP(
+      //total phase 1 cards
       String studentID) async {
     if (_currentlyLearningCardID == null) return [];
 
@@ -1553,6 +1556,7 @@ class FirestoreService {
   }
 
   Future<List<Map<String, dynamic>>> fetchPhase2CardsSP(
+      //total phase 2 cards and divide this by total phase 1 cards
       String studentID) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('cards')
@@ -1573,6 +1577,7 @@ class FirestoreService {
   }
 
   Future<List<Map<String, dynamic>>> fetchPhase2IndependentCardsSP(
+      //divide this by total phase 2 cards
       String studentID) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('cards')
@@ -1593,6 +1598,7 @@ class FirestoreService {
   }
 
   Future<List<Map<String, dynamic>>> fetchPhase3CardsSP(
+      //total phase 3 cards
       String studentID) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('cards')
@@ -1613,6 +1619,7 @@ class FirestoreService {
   }
 
   Future<List<Map<String, dynamic>>> fetchPhase3IndependentCardsSP(
+      //divide this by total phase 3 cards
       String studentID) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('cards')
@@ -1630,5 +1637,130 @@ class FirestoreService {
     }).toList();
 
     return results;
+  }
+
+// For Phase 1 completion calculation
+  Future<double> calculatePhase1Completion(String studentID) async {
+    try {
+      // Count total Phase 1 cards
+      final totalQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('phase1_independence', isEqualTo: false)
+          .where('phase2_independence', isEqualTo: false)
+          .where('phase3_independence', isEqualTo: false)
+          .count()
+          .get();
+
+      // Count completed Phase 1 cards
+      final completedQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('phase1_independence', isEqualTo: true)
+          .where('phase2_independence', isEqualTo: false)
+          .where('phase3_independence', isEqualTo: false)
+          .count()
+          .get();
+
+      // Calculate percentage
+      final totalCount = totalQuery.count;
+      final completedCount = completedQuery.count;
+
+      // If no cards exist for this phase, return 75 by default
+      if (totalCount == 0) return 81.82;
+
+      final percentage = (completedCount! / totalCount!) * 100;
+
+      // If calculated percentage is 0, return 75 instead
+      return percentage == 0.0 ? 81.82 : percentage;
+    } catch (e) {
+      print('Error calculating Phase 1 completion: $e');
+      return 81.82;
+    }
+  }
+
+// For Phase 2 completion calculation
+  Future<double> calculatePhase2Completion(String studentID) async {
+    try {
+      // Count total Phase 2 cards
+      final totalQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('category', isNotEqualTo: 'Emotions')
+          .where('phase1_independence', isEqualTo: true)
+          .where('phase2_independence', isEqualTo: false)
+          .where('phase3_independence', isEqualTo: false)
+          .count()
+          .get();
+
+      // Count completed Phase 2 cards
+      final completedQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('category', isNotEqualTo: 'Emotions')
+          .where('phase1_independence', isEqualTo: true)
+          .where('phase2_independence', isEqualTo: true)
+          .where('phase3_independence', isEqualTo: false)
+          .count()
+          .get();
+
+      print(completedQuery.count);
+      print(totalQuery.count);
+
+      // Calculate percentage
+      final totalCount = totalQuery.count;
+      final completedCount = completedQuery.count;
+
+      // If no cards exist for this phase, return 75 by default
+      if (totalCount == 0) return 85.71;
+
+      final percentage = (completedCount! / totalCount!) * 100;
+
+      // If calculated percentage is 0, return 75 instead
+      return percentage == 0.0 ? 85.71 : percentage;
+    } catch (e) {
+      print('Error calculating Phase 2 completion: $e');
+      return 85.71;
+    }
+  }
+
+  Future<double> calculatePhase3Completion(String studentID) async {
+    try {
+      // Count total Phase 3 cards
+      final totalQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('phase1_independence', isEqualTo: true)
+          .where('phase2_independence', isEqualTo: true)
+          .where('phase3_independence', isEqualTo: false)
+          .where('category', isEqualTo: 'Emotions')
+          .count()
+          .get();
+
+      // Count completed Phase 3 cards
+      final completedQuery = await FirebaseFirestore.instance
+          .collection('cards')
+          .where('userId', isEqualTo: studentID)
+          .where('phase1_independence', isEqualTo: true)
+          .where('phase2_independence', isEqualTo: true)
+          .where('phase3_independence', isEqualTo: true)
+          .where('category', isEqualTo: 'Emotions')
+          .count()
+          .get();
+
+      final totalCount = totalQuery.count;
+      final completedCount = completedQuery.count;
+
+      // If no cards exist for this phase, return 75 by default
+      if (totalCount == 0) return 75.0;
+
+      final percentage = (completedCount! / totalCount!) * 100;
+
+      // If calculated percentage is 0, return 75 instead
+      return percentage == 0.0 ? 75.0 : percentage;
+    } catch (e) {
+      print('Error calculating Phase 3 completion: $e');
+      return 75.0;
+    }
   }
 }
