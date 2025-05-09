@@ -543,7 +543,7 @@ class _CommunicateState extends ConsumerState<Communicate> {
                             _firestoreService.storeTappedCards(cardTitle, category, cardId);
                             
                             print('cardId before calling update: $cardId');
-                            await ref.read(recommendedCardsProvider.notifier).updateRecommendedCardsWithToCard(cardId);
+                            // await ref.read(recommendedCardsProvider.notifier).updateRecommendedCardsWithToCard(cardId);
 
                           },
                           onCardDelete: (cardId) {

@@ -385,7 +385,7 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                 ),
               ],
               icon: Icon(
-                Icons.more_vert, // Change icon if needed
+                Icons.more_vert,
                 color: kDarkPruple.withOpacity(0.5),
               ),
             ),
@@ -500,12 +500,14 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                   bufferTapEvent(
                       index, cardID, withDistractor, withDistractor2);
                   if (index == 4) {
-                    FlameAudio.play('bell_congrats.mp3');
-                    Confetti.launch(
-                      context,
-                      options: const ConfettiOptions(
-                          particleCount: 400, spread: 70, y: 0.6),
-                    );
+                    if (cardID != null) {
+                      FlameAudio.play('bell_congrats.mp3');
+                      Confetti.launch(
+                        context,
+                        options: const ConfettiOptions(
+                            particleCount: 400, spread: 70, y: 0.6),
+                      );
+                    }
 
                     ref.read(cardActivityProvider).tapPrompt(index);
 
@@ -513,7 +515,9 @@ class _PromptButtonState extends ConsumerState<PromptButton>
                   } else if (index == 5) {
                     //no sound
                   } else {
-                    FlameAudio.play('chime_fast.mp3');
+                    if (cardID != null) {
+                      FlameAudio.play('chime_fast.mp3');
+                    }
                   }
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
